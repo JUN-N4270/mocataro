@@ -23,12 +23,16 @@
                 "Yu Gothic",
                 sans-serif;
 
-            background: #f5f5f5;
-            color: #333;
+            background: #EAF6FC;
+            color: #34505F;
         }
 
+        /* ================================
+           ヘッダー
+           ================================ */
+
         header {
-            background: #222;
+            background: #78B9DD;
             color: white;
             text-align: center;
             padding: 25px 15px;
@@ -44,18 +48,31 @@
             font-size: 14px;
         }
 
+        /* ================================
+           メイン
+           ================================ */
+
         main {
             max-width: 900px;
             margin: auto;
             padding: 25px 15px 50px;
         }
 
+        /* ================================
+           戻る
+           ================================ */
+
         .back {
             display: inline-block;
             margin-bottom: 20px;
             text-decoration: none;
-            color: #555;
+            color: #4D9BC7;
+            font-weight: bold;
         }
+
+        /* ================================
+           ゲーム一覧
+           ================================ */
 
         .games {
             display: grid;
@@ -63,11 +80,17 @@
             gap: 18px;
         }
 
+        /* ================================
+           ゲームカード
+           ================================ */
+
         .game {
             background: white;
             border-radius: 18px;
             padding: 25px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+            box-shadow:
+                0 4px 12px rgba(50,120,160,0.12);
         }
 
         .icon {
@@ -80,20 +103,28 @@
         }
 
         .game p {
-            color: #666;
+            color: #607D8B;
             line-height: 1.6;
             min-height: 48px;
         }
 
+        /* ================================
+           あそぶボタン
+           ================================ */
+
         .play {
             display: block;
             text-align: center;
-            background: #222;
+
+            background: #4D9BC7;
             color: white;
+
             text-decoration: none;
             padding: 12px;
             border-radius: 10px;
+
             margin-top: 18px;
+
             font-weight: bold;
         }
 
@@ -101,13 +132,23 @@
             opacity: 0.8;
         }
 
+        /* ================================
+           フッター
+           ================================ */
+
         footer {
             text-align: center;
-            background: #222;
-            color: #aaa;
+
+            background: #4D9BC7;
+            color: white;
+
             padding: 25px 15px;
             font-size: 13px;
         }
+
+        /* ================================
+           スマホ
+           ================================ */
 
         @media (max-width: 600px) {
 
@@ -144,47 +185,52 @@
 
     <div class="games">
 
-<!-- Horse Puzzle -->
 
-<div class="game">
+        <!-- =========================================
+             Horse Puzzle
+             ========================================= -->
 
-    <div class="icon">🐎</div>
+        <div class="game">
 
-    <h2>Horse Puzzle</h2>
+            <div class="icon">🐎</div>
 
-    <p>
-        馬と騎手のパズルで遊ぼう！
-    </p>
+            <h2>Horse Puzzle</h2>
 
-    <a class="play" href="HorsePazzle/">
-        あそぶ
-    </a>
+            <p>
+                馬と騎手のパズルで遊ぼう！
+            </p>
 
-</div>
+            <a class="play" href="HorsePazzle/">
+                あそぶ
+            </a>
 
-<!-- 丸バツゲーム -->
-
-<div class="game">
-
-    <div class="icon">⭕️❌</div>
-
-    <h2>⭕️❌ ゲームデラックス</h2>
-
-    <p>
-        めざせ！3つそろえ！
-    </p>
-
-    <a class="play" href="marubatu/">
-        あそぶ
-    </a>
-
-</div>
-
-        
+        </div>
 
 
-        
-        <!-- ゲーム2 -->
+        <!-- =========================================
+             丸バツゲーム
+             ========================================= -->
+
+        <div class="game">
+
+            <div class="icon">⭕️❌</div>
+
+            <h2>⭕️❌ ゲームデラックス</h2>
+
+            <p>
+                めざせ！3つそろえ！
+            </p>
+
+            <a class="play" href="marubatu/">
+                あそぶ
+            </a>
+
+        </div>
+
+
+        <!-- =========================================
+             サイコロゲーム
+             ========================================= -->
 
         <div class="game">
 
@@ -203,7 +249,9 @@
         </div>
 
 
-        <!-- ゲーム3 -->
+        <!-- =========================================
+             100マス計算
+             ========================================= -->
 
         <div class="game">
 
