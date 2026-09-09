@@ -153,6 +153,12 @@ h1 {
   left: 0;
   top: 0;
 
+  /*
+   * タッチ判定はboard側で行う
+   */
+
+  pointer-events: none;
+
   user-select: none;
 
   -webkit-user-select: none;
@@ -163,18 +169,10 @@ h1 {
 
   touch-action: none;
 
-  cursor: grab;
-
   transform-origin:
     center center;
 
   will-change: transform;
-}
-
-
-.piece:active {
-
-  cursor: grabbing;
 }
 
 
@@ -215,7 +213,7 @@ h1 {
   <h1>馬パズル</h1>
 
   <button id="shuffleBtn">
-    シャッフル / リセット
+    リセット
   </button>
 
 </header>
@@ -276,9 +274,7 @@ h1 {
 
 
   // =====================================================
-  // ピース幅
-  //
-  // Pythonista版と同じ
+  // ピース定義
   // =====================================================
 
   var PIECE_DEFS = [
@@ -332,7 +328,7 @@ h1 {
 
 
   // =====================================================
-  // ピース配列
+  // ピース
   // =====================================================
 
   var pieces = [];
@@ -341,7 +337,7 @@ h1 {
 
 
   // =====================================================
-  // ピース初期化
+  // 初期化
   // =====================================================
 
   function initPieces() {
@@ -406,9 +402,13 @@ h1 {
     );
 
 
-    layout();
+    /*
+     * 初期配置
+     *
+     * 左馬 → 騎手 → 右馬
+     */
 
-    shuffle();
+    layout();
 
   }
 
@@ -428,7 +428,7 @@ h1 {
 
 
     /*
-     * Pythonista版と同じ考え方
+     * 画面に収まる倍率
      */
 
     var scaleW =
@@ -461,7 +461,7 @@ h1 {
 
 
     /*
-     * 3枚の合計幅
+     * 3枚を横一列に配置
      */
 
     var totalWidth = 0;
@@ -620,144 +620,31 @@ h1 {
 
 
   // =====================================================
-  // ランダム整数
+  // リセット
   // =====================================================
 
-  function randomAngle() {
+  function resetPuzzle() {
 
-    var angles = [
-
-      0,
-      45,
-      90,
-      135,
-      180,
-      225,
-      270,
-      315
-
-    ];
-
-
-    return angles[
-      Math.floor(
-        Math.random() *
-        angles.length
-      )
-    ];
-
-  }
-
-
-  // =====================================================
-  // シャッフル
-  // =====================================================
-
-  function shuffle() {
-
-    var boardW =
-      board.clientWidth;
-
-
-    var boardH =
-      board.clientHeight;
-
+    /*
+     * 全ピースを角度0°に戻す
+     */
 
     pieces.forEach(
       function (piece) {
 
-        /*
-         * 45度単位
-         */
-
-        piece.angle =
-          randomAngle();
-
-
-        /*
-         * ランダム位置
-         */
-
-        var halfW =
-          piece.w / 2;
-
-
-        var halfH =
-          piece.h / 2;
-
-
-        var minX =
-          halfW + 10;
-
-
-        var maxX =
-          Math.max(
-            minX,
-            boardW -
-            halfW -
-            10
-          );
-
-
-        var minY =
-          halfH + 10;
-
-
-        var maxY =
-          Math.max(
-            minY,
-            boardH -
-            halfH -
-            10
-          );
-
-
-        piece.center = {
-
-          x:
-            minX +
-            Math.random() *
-            (
-              maxX -
-              minX
-            ),
-
-          y:
-            minY +
-            Math.random() *
-            (
-              maxY -
-              minY
-            )
-
-        };
-
-
-        bringToFront(piece);
-
-        render(piece);
+        piece.angle = 0;
 
       }
     );
 
+
+    /*
+     * 初期配置へ戻す
+     */
+
+    layout();
+
   }
-
-
-  // =====================================================
-  // タッチ・マウス操作
-  // =====================================================
-
-  var activePiece = null;
-
-  var startX = 0;
-
-  var startY = 0;
-
-  var lastX = 0;
-
-  var lastY = 0;
-
-  var dragging = false;
 
 
   // =====================================================
@@ -786,7 +673,6 @@ h1 {
 
 
   // =====================================================
-  // 回転を考慮した
   // ピース内部判定
   // =====================================================
 
@@ -857,10 +743,8 @@ h1 {
 
 
     /*
-     * 騎手の中央空白部分は
+     * 騎手の画像中央の空白部分は
      * タップ対象外
-     *
-     * Pythonista版と同じ
      */
 
     if (
@@ -903,50 +787,42 @@ h1 {
      * 騎手を最優先
      */
 
-    for (
-      var i = 0;
-      i < pieces.length;
-      i++
-    ) {
+    var rider =
+      pieces.find(
+        function (piece) {
 
-      var piece =
-        pieces[i];
-
-
-      if (
-        piece.type === 'rider'
-      ) {
-
-        if (
-          pointInsidePiece(
-            point,
-            piece
-          )
-        ) {
-
-          return piece;
+          return (
+            piece.type === 'rider'
+          );
 
         }
+      );
 
-      }
+
+    if (
+      rider &&
+      pointInsidePiece(
+        point,
+        rider
+      )
+    ) {
+
+      return rider;
 
     }
 
 
     /*
-     * その他
-     *
-     * z-index順を考慮するため
-     * 後ろから調べる
+     * 馬を調べる
      */
 
     var candidates =
       pieces
         .filter(
-          function (p) {
+          function (piece) {
 
             return (
-              p.type !== 'rider'
+              piece.type !== 'rider'
             );
 
           }
@@ -969,19 +845,19 @@ h1 {
 
 
     for (
-      var j = 0;
-      j < candidates.length;
-      j++
+      var i = 0;
+      i < candidates.length;
+      i++
     ) {
 
       if (
         pointInsidePiece(
           point,
-          candidates[j]
+          candidates[i]
         )
       ) {
 
-        return candidates[j];
+        return candidates[i];
 
       }
 
@@ -997,248 +873,279 @@ h1 {
   // pointerdown
   // =====================================================
 
-  pieces.forEach(
-    function (piece) {
+  board.addEventListener(
+    'pointerdown',
+    function (event) {
 
-      piece.el.addEventListener(
-        'pointerdown',
-        function (event) {
+      event.preventDefault();
 
-          event.preventDefault();
 
+      var point =
+        getBoardPoint(
+          event
+        );
 
-          var point =
-            getBoardPoint(
-              event
-            );
 
+      var piece =
+        hitTestPiece(
+          point
+        );
 
-          var hit =
-            hitTestPiece(
-              point
-            );
 
+      /*
+       * ピース以外
+       */
 
-          if (
-            hit !== piece
-          ) {
+      if (!piece) {
 
-            return;
-
-          }
-
-
-          try {
-
-            piece.el.setPointerCapture(
-              event.pointerId
-            );
-
-          } catch (e) {}
-
-
-          activePiece =
-            piece;
-
-
-          startX =
-            point.x;
-
-
-          startY =
-            point.y;
-
-
-          lastX =
-            point.x;
-
-
-          lastY =
-            point.y;
-
-
-          dragging = false;
-
-
-          bringToFront(piece);
-
-        }
-      );
-
-
-      // =================================================
-      // pointermove
-      // =================================================
-
-      piece.el.addEventListener(
-        'pointermove',
-        function (event) {
-
-          if (
-            activePiece !== piece
-          ) {
-
-            return;
-
-          }
-
-
-          event.preventDefault();
-
-
-          var point =
-            getBoardPoint(
-              event
-            );
-
-
-          var totalDX =
-            point.x -
-            startX;
-
-
-          var totalDY =
-            point.y -
-            startY;
-
-
-          /*
-           * ドラッグ開始
-           */
-
-          if (
-            !dragging &&
-            Math.hypot(
-              totalDX,
-              totalDY
-            )
-            >
-            TAP_MOVE_THRESHOLD
-          ) {
-
-            dragging = true;
-
-          }
-
-
-          /*
-           * ドラッグ中
-           */
-
-          if (dragging) {
-
-            var moveX =
-              point.x -
-              lastX;
-
-
-            var moveY =
-              point.y -
-              lastY;
-
-
-            piece.center.x +=
-              moveX;
-
-
-            piece.center.y +=
-              moveY;
-
-
-            lastX =
-              point.x;
-
-
-            lastY =
-              point.y;
-
-
-            render(piece);
-
-          }
-
-        }
-      );
-
-
-      // =================================================
-      // pointerup
-      // =================================================
-
-      function finish(event) {
-
-        if (
-          activePiece !== piece
-        ) {
-
-          return;
-
-        }
-
-
-        event.preventDefault();
-
-
-        /*
-         * ドラッグでは何もしない
-         */
-
-        if (dragging) {
-
-          // 何もしない
-
-        }
-
-
-        /*
-         * タップなら45度回転
-         */
-
-        else {
-
-          piece.angle =
-            (
-              piece.angle +
-              45
-            ) % 360;
-
-
-          render(piece);
-
-        }
-
-
-        activePiece = null;
-
-        dragging = false;
+        return;
 
       }
 
 
-      piece.el.addEventListener(
-        'pointerup',
-        finish
+      activePiece =
+        piece;
+
+
+      startX =
+        point.x;
+
+
+      startY =
+        point.y;
+
+
+      lastX =
+        point.x;
+
+
+      lastY =
+        point.y;
+
+
+      dragging = false;
+
+
+      /*
+       * 馬を前面へ
+       *
+       * 騎手は常に最前面
+       */
+
+      bringToFront(
+        piece
       );
 
 
-      piece.el.addEventListener(
-        'pointercancel',
-        finish
-      );
+      /*
+       * iPhoneのタッチを
+       * boardで捕まえる
+       */
+
+      try {
+
+        board.setPointerCapture(
+          event.pointerId
+        );
+
+      } catch (e) {}
+
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  // =====================================================
+  // pointermove
+  // =====================================================
+
+  board.addEventListener(
+    'pointermove',
+    function (event) {
+
+      if (!activePiece) {
+
+        return;
+
+      }
+
+
+      event.preventDefault();
+
+
+      var point =
+        getBoardPoint(
+          event
+        );
+
+
+      var totalDX =
+        point.x -
+        startX;
+
+
+      var totalDY =
+        point.y -
+        startY;
+
+
+      /*
+       * 一定以上動いたらドラッグ
+       */
+
+      if (
+        !dragging &&
+        Math.hypot(
+          totalDX,
+          totalDY
+        ) >
+        TAP_MOVE_THRESHOLD
+      ) {
+
+        dragging = true;
+
+      }
+
+
+      /*
+       * ドラッグ中
+       */
+
+      if (dragging) {
+
+        var moveX =
+          point.x -
+          lastX;
+
+
+        var moveY =
+          point.y -
+          lastY;
+
+
+        activePiece.center.x +=
+          moveX;
+
+
+        activePiece.center.y +=
+          moveY;
+
+
+        lastX =
+          point.x;
+
+
+        lastY =
+          point.y;
+
+
+        render(
+          activePiece
+        );
+
+      }
+
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  // =====================================================
+  // pointerup
+  // =====================================================
+
+  board.addEventListener(
+    'pointerup',
+    function (event) {
+
+      if (!activePiece) {
+
+        return;
+
+      }
+
+
+      event.preventDefault();
+
+
+      /*
+       * 動かしていなければタップ
+       */
+
+      if (!dragging) {
+
+        activePiece.angle =
+          (
+            activePiece.angle +
+            45
+          ) % 360;
+
+
+        render(
+          activePiece
+        );
+
+      }
+
+
+      activePiece = null;
+
+      dragging = false;
+
+
+      try {
+
+        board.releasePointerCapture(
+          event.pointerId
+        );
+
+      } catch (e) {}
+
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  // =====================================================
+  // pointercancel
+  // =====================================================
+
+  board.addEventListener(
+    'pointercancel',
+    function (event) {
+
+      activePiece = null;
+
+      dragging = false;
+
+
+      try {
+
+        board.releasePointerCapture(
+          event.pointerId
+        );
+
+      } catch (e) {}
 
     }
   );
 
 
   // =====================================================
-  // シャッフルボタン
+  // リセットボタン
   // =====================================================
 
   shuffleBtn.addEventListener(
     'click',
     function () {
 
-      shuffle();
+      resetPuzzle();
 
     }
   );
@@ -1252,7 +1159,12 @@ h1 {
     'resize',
     function () {
 
-      layout();
+      /*
+       * 画面回転などがあったら
+       * 現在位置を維持したまま再描画
+       */
+
+      renderAll();
 
     }
   );
