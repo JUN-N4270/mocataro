@@ -5,16 +5,13 @@
 
 <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width,
-           initial-scale=1.0,
-           maximum-scale=1.0,
-           user-scalable=no"
->
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
 <title>馬パズル</title>
-
 
 <style>
 
@@ -24,15 +21,9 @@
   --ink: #33302a;
 }
 
-
-/* =====================================================
-   基本
-   ===================================================== */
-
 * {
   box-sizing: border-box;
 }
-
 
 html,
 body {
@@ -58,12 +49,14 @@ body {
   overflow: hidden;
 
   overscroll-behavior: none;
+
+  touch-action: none;
 }
 
 
-/* =====================================================
+/* ================================
    ヘッダー
-   ===================================================== */
+   ================================ */
 
 header {
 
@@ -79,10 +72,8 @@ header {
 
   background: white;
 
-  border-bottom:
-    1px solid #ece6d8;
+  border-bottom: 1px solid #ece6d8;
 }
-
 
 h1 {
 
@@ -93,8 +84,7 @@ h1 {
   font-weight: 700;
 }
 
-
-#shuffleBtn {
+#resetBtn {
 
   background: none;
 
@@ -106,24 +96,15 @@ h1 {
 
   font-weight: 700;
 
-  cursor: pointer;
-
   padding: 8px 12px;
 
-  -webkit-tap-highlight-color:
-    transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 
-#shuffleBtn:active {
-
-  opacity: 0.6;
-}
-
-
-/* =====================================================
+/* ================================
    ボード
-   ===================================================== */
+   ================================ */
 
 #board {
 
@@ -131,8 +112,7 @@ h1 {
 
   width: 100%;
 
-  height:
-    calc(100% - 53px);
+  height: calc(100% - 53px);
 
   overflow: hidden;
 
@@ -142,9 +122,9 @@ h1 {
 }
 
 
-/* =====================================================
+/* ================================
    ピース
-   ===================================================== */
+   ================================ */
 
 .piece {
 
@@ -152,12 +132,6 @@ h1 {
 
   left: 0;
   top: 0;
-
-  /*
-   * タッチ判定はboard側で行う
-   */
-
-  pointer-events: none;
 
   user-select: none;
 
@@ -169,16 +143,17 @@ h1 {
 
   touch-action: none;
 
-  transform-origin:
-    center center;
+  transform-origin: center center;
 
   will-change: transform;
+
+  display: block;
 }
 
 
-/* =====================================================
+/* ================================
    ヒント
-   ===================================================== */
+   ================================ */
 
 #hint {
 
@@ -188,8 +163,7 @@ h1 {
 
   left: 50%;
 
-  transform:
-    translateX(-50%);
+  transform: translateX(-50%);
 
   font-size: 12px;
 
@@ -207,12 +181,11 @@ h1 {
 
 <body>
 
-
 <header>
 
   <h1>馬パズル</h1>
 
-  <button id="shuffleBtn">
+  <button id="resetBtn">
     リセット
   </button>
 
@@ -220,7 +193,6 @@ h1 {
 
 
 <div id="board">
-
 
   <img
     class="piece"
@@ -230,7 +202,6 @@ h1 {
     alt=""
   >
 
-
   <img
     class="piece"
     id="piece-rider"
@@ -238,7 +209,6 @@ h1 {
     draggable="false"
     alt=""
   >
-
 
   <img
     class="piece"
@@ -248,11 +218,9 @@ h1 {
     alt=""
   >
 
-
   <div id="hint">
     ドラッグで移動 ・ タップで45度回転
   </div>
-
 
 </div>
 
@@ -264,18 +232,23 @@ h1 {
   'use strict';
 
 
-  // =====================================================
-  // 元画像サイズ
-  // =====================================================
+  /* =========================================
+     基本設定
+     ========================================= */
 
   var ORIG_W = 1195;
-
   var ORIG_H = 896;
 
+  var MARGIN = 20;
 
-  // =====================================================
-  // ピース定義
-  // =====================================================
+  var TAP_THRESHOLD = 10;
+
+  var RIDER_Z = 9999;
+
+
+  /* =========================================
+     ピース定義
+     ========================================= */
 
   var PIECE_DEFS = [
 
@@ -300,90 +273,239 @@ h1 {
   ];
 
 
-  // =====================================================
-  // 操作設定
-  // =====================================================
-
-  var TAP_MOVE_THRESHOLD = 8;
-
-  var MARGIN = 20;
-
-  var RIDER_Z = 9999;
-
-
-  // =====================================================
-  // DOM
-  // =====================================================
-
   var board =
-    document.getElementById(
-      'board'
-    );
+    document.getElementById('board');
 
+  var resetBtn =
+    document.getElementById('resetBtn');
 
-  var shuffleBtn =
-    document.getElementById(
-      'shuffleBtn'
-    );
-
-
-  // =====================================================
-  // ピース
-  // =====================================================
 
   var pieces = [];
 
-  var zCounter = 1;
+
+  /* =========================================
+     ピース作成
+     ========================================= */
+
+  function createPieces() {
+
+    pieces = PIECE_DEFS.map(function (def) {
+
+      return {
+
+        el:
+          document.getElementById(def.id),
+
+        type:
+          def.type,
+
+        originalWidth:
+          def.width,
+
+        w: 0,
+
+        h: 0,
+
+        x: 0,
+
+        y: 0,
+
+        angle: 0,
+
+        startTouchX: 0,
+
+        startTouchY: 0,
+
+        lastTouchX: 0,
+
+        lastTouchY: 0,
+
+        moved: false,
+
+        touching: false
+
+      };
+
+    });
 
 
-  // =====================================================
-  // 初期化
-  // =====================================================
+    pieces.forEach(function (piece) {
 
-  function initPieces() {
+      if (piece.type === 'rider') {
 
-    pieces =
-      PIECE_DEFS.map(
-        function (def) {
+        piece.el.style.zIndex =
+          RIDER_Z;
 
-          var el =
-            document.getElementById(
-              def.id
-            );
+      } else {
 
+        piece.el.style.zIndex = 1;
 
-          return {
+      }
 
-            el: el,
+      setupTouch(piece);
 
-            type: def.type,
+    });
 
-            originalWidth:
-              def.width,
-
-            w: 0,
-
-            h: 0,
-
-            center: {
-              x: 0,
-              y: 0
-            },
-
-            angle: 0
-
-          };
-
-        }
-      );
+  }
 
 
-    /*
-     * 騎手を常に最前面
-     */
+  /* =========================================
+     初期配置
+     左馬 → 騎手 → 右馬
+     ========================================= */
 
-    pieces.forEach(
-      function (piece) {
+  function resetPuzzle() {
+
+    var boardW =
+      board.clientWidth;
+
+    var boardH =
+      board.clientHeight;
+
+
+    var scaleW =
+      (boardW - MARGIN * 2)
+      / ORIG_W;
+
+
+    var scaleH =
+      (boardH - MARGIN * 2)
+      / ORIG_H;
+
+
+    var scale =
+      Math.min(scaleW, scaleH);
+
+
+    var totalWidth = 0;
+
+
+    pieces.forEach(function (piece) {
+
+      totalWidth +=
+        piece.originalWidth * scale;
+
+    });
+
+
+    var height =
+      ORIG_H * scale;
+
+
+    var startX =
+      (boardW - totalWidth) / 2;
+
+
+    var startY =
+      (boardH - height) / 2;
+
+
+    var currentX =
+      startX;
+
+
+    pieces.forEach(function (piece) {
+
+      piece.w =
+        piece.originalWidth * scale;
+
+      piece.h =
+        height;
+
+
+      piece.x =
+        currentX;
+
+      piece.y =
+        startY;
+
+
+      piece.angle = 0;
+
+
+      piece.el.style.width =
+        piece.w + 'px';
+
+      piece.el.style.height =
+        piece.h + 'px';
+
+
+      currentX += piece.w;
+
+
+      render(piece);
+
+    });
+
+  }
+
+
+  /* =========================================
+     描画
+     ========================================= */
+
+  function render(piece) {
+
+    piece.el.style.transform =
+
+      'translate(' +
+      piece.x +
+      'px,' +
+      piece.y +
+      'px) ' +
+
+      'rotate(' +
+      piece.angle +
+      'deg)';
+
+  }
+
+
+  /* =========================================
+     タッチ処理
+     ========================================= */
+
+  function setupTouch(piece) {
+
+    var el = piece.el;
+
+
+    /* -----------------------------------------
+       タッチ開始
+       ----------------------------------------- */
+
+    el.addEventListener(
+      'touchstart',
+      function (event) {
+
+        event.preventDefault();
+
+        var touch =
+          event.touches[0];
+
+
+        piece.startTouchX =
+          touch.clientX;
+
+        piece.startTouchY =
+          touch.clientY;
+
+
+        piece.lastTouchX =
+          touch.clientX;
+
+        piece.lastTouchY =
+          touch.clientY;
+
+
+        piece.moved = false;
+
+        piece.touching = true;
+
+
+        /*
+         * 騎手は常に最前面
+         */
 
         if (
           piece.type === 'rider'
@@ -394,561 +516,212 @@ h1 {
 
         } else {
 
-          piece.el.style.zIndex = 1;
+          /*
+           * 馬を前面へ
+           */
+
+          var maxZ = 1;
+
+          pieces.forEach(function (p) {
+
+            if (
+              p.type !== 'rider'
+            ) {
+
+              var z =
+                parseInt(
+                  p.el.style.zIndex || 1
+                );
+
+              if (z > maxZ) {
+
+                maxZ = z;
+
+              }
+
+            }
+
+          });
+
+
+          piece.el.style.zIndex =
+            maxZ + 1;
 
         }
 
+      },
+      {
+        passive: false
       }
     );
 
 
-    /*
-     * 初期配置
-     *
-     * 左馬 → 騎手 → 右馬
-     */
+    /* -----------------------------------------
+       タッチ移動
+       ----------------------------------------- */
 
-    layout();
+    el.addEventListener(
+      'touchmove',
+      function (event) {
 
-  }
+        if (!piece.touching) {
 
-
-  // =====================================================
-  // レイアウト
-  // =====================================================
-
-  function layout() {
-
-    var boardW =
-      board.clientWidth;
-
-
-    var boardH =
-      board.clientHeight;
-
-
-    /*
-     * 画面に収まる倍率
-     */
-
-    var scaleW =
-      (
-        boardW -
-        MARGIN * 2
-      )
-      /
-      ORIG_W;
-
-
-    var scaleH =
-      (
-        boardH -
-        MARGIN * 2
-      )
-      /
-      ORIG_H;
-
-
-    var scale =
-      Math.min(
-        scaleW,
-        scaleH
-      );
-
-
-    var scaledH =
-      ORIG_H * scale;
-
-
-    /*
-     * 3枚を横一列に配置
-     */
-
-    var totalWidth = 0;
-
-
-    pieces.forEach(
-      function (piece) {
-
-        totalWidth +=
-          piece.originalWidth *
-          scale;
-
-      }
-    );
-
-
-    /*
-     * 横中央
-     */
-
-    var xStart =
-      (
-        boardW -
-        totalWidth
-      ) / 2;
-
-
-    /*
-     * 縦中央
-     */
-
-    var yStart =
-      (
-        boardH -
-        scaledH
-      ) / 2;
-
-
-    var x =
-      xStart;
-
-
-    pieces.forEach(
-      function (piece) {
-
-        piece.w =
-          piece.originalWidth *
-          scale;
-
-
-        piece.h =
-          scaledH;
-
-
-        piece.center = {
-
-          x:
-            x +
-            piece.w / 2,
-
-          y:
-            yStart +
-            piece.h / 2
-
-        };
-
-
-        piece.el.style.width =
-          piece.w + 'px';
-
-
-        piece.el.style.height =
-          piece.h + 'px';
-
-
-        x += piece.w;
-
-      }
-    );
-
-
-    renderAll();
-
-  }
-
-
-  // =====================================================
-  // 描画
-  // =====================================================
-
-  function render(piece) {
-
-    var x =
-      piece.center.x -
-      piece.w / 2;
-
-
-    var y =
-      piece.center.y -
-      piece.h / 2;
-
-
-    piece.el.style.transform =
-
-      'translate(' +
-      x +
-      'px,' +
-      y +
-      'px) ' +
-
-      'rotate(' +
-      piece.angle +
-      'deg)';
-
-  }
-
-
-  function renderAll() {
-
-    pieces.forEach(
-      function (piece) {
-
-        render(piece);
-
-      }
-    );
-
-  }
-
-
-  // =====================================================
-  // 前面へ
-  // =====================================================
-
-  function bringToFront(piece) {
-
-    /*
-     * 騎手は常に最前面
-     */
-
-    if (
-      piece.type === 'rider'
-    ) {
-
-      return;
-
-    }
-
-
-    zCounter++;
-
-    piece.el.style.zIndex =
-      zCounter;
-
-  }
-
-
-  // =====================================================
-  // リセット
-  // =====================================================
-
-  function resetPuzzle() {
-
-    /*
-     * 全ピースを角度0°に戻す
-     */
-
-    pieces.forEach(
-      function (piece) {
-
-        piece.angle = 0;
-
-      }
-    );
-
-
-    /*
-     * 初期配置へ戻す
-     */
-
-    layout();
-
-  }
-
-
-  // =====================================================
-  // 座標取得
-  // =====================================================
-
-  function getBoardPoint(event) {
-
-    var rect =
-      board.getBoundingClientRect();
-
-
-    return {
-
-      x:
-        event.clientX -
-        rect.left,
-
-      y:
-        event.clientY -
-        rect.top
-
-    };
-
-  }
-
-
-  // =====================================================
-  // ピース内部判定
-  // =====================================================
-
-  function pointInsidePiece(
-    point,
-    piece
-  ) {
-
-    var dx =
-      point.x -
-      piece.center.x;
-
-
-    var dy =
-      point.y -
-      piece.center.y;
-
-
-    /*
-     * 回転を逆に戻す
-     */
-
-    var angle =
-      -piece.angle *
-      Math.PI / 180;
-
-
-    var cosA =
-      Math.cos(angle);
-
-
-    var sinA =
-      Math.sin(angle);
-
-
-    var x =
-      dx * cosA -
-      dy * sinA;
-
-
-    var y =
-      dx * sinA +
-      dy * cosA;
-
-
-    /*
-     * 長方形の中か
-     */
-
-    if (
-      Math.abs(x) >
-      piece.w / 2
-    ) {
-
-      return false;
-
-    }
-
-
-    if (
-      Math.abs(y) >
-      piece.h / 2
-    ) {
-
-      return false;
-
-    }
-
-
-    /*
-     * 騎手の画像中央の空白部分は
-     * タップ対象外
-     */
-
-    if (
-      piece.type === 'rider'
-    ) {
-
-      var ny =
-        (
-          y +
-          piece.h / 2
-        )
-        /
-        piece.h;
-
-
-      if (
-        ny > 0.45 &&
-        ny < 0.55
-      ) {
-
-        return false;
-
-      }
-
-    }
-
-
-    return true;
-
-  }
-
-
-  // =====================================================
-  // 一番上のピースを探す
-  // =====================================================
-
-  function hitTestPiece(point) {
-
-    /*
-     * 騎手を最優先
-     */
-
-    var rider =
-      pieces.find(
-        function (piece) {
-
-          return (
-            piece.type === 'rider'
-          );
+          return;
 
         }
-      );
 
 
-    if (
-      rider &&
-      pointInsidePiece(
-        point,
-        rider
-      )
-    ) {
-
-      return rider;
-
-    }
+        event.preventDefault();
 
 
-    /*
-     * 馬を調べる
-     */
-
-    var candidates =
-      pieces
-        .filter(
-          function (piece) {
-
-            return (
-              piece.type !== 'rider'
-            );
-
-          }
-        )
-        .sort(
-          function (a, b) {
-
-            return (
-              parseInt(
-                b.el.style.zIndex || 0
-              )
-              -
-              parseInt(
-                a.el.style.zIndex || 0
-              )
-            );
-
-          }
-        );
+        var touch =
+          event.touches[0];
 
 
-    for (
-      var i = 0;
-      i < candidates.length;
-      i++
-    ) {
+        var dx =
+          touch.clientX -
+          piece.lastTouchX;
 
-      if (
-        pointInsidePiece(
-          point,
-          candidates[i]
-        )
-      ) {
 
-        return candidates[i];
+        var dy =
+          touch.clientY -
+          piece.lastTouchY;
+
+
+        var totalDX =
+          touch.clientX -
+          piece.startTouchX;
+
+
+        var totalDY =
+          touch.clientY -
+          piece.startTouchY;
+
+
+        /*
+         * 一定距離動いたら
+         * ドラッグ扱い
+         */
+
+        if (
+          Math.sqrt(
+            totalDX * totalDX +
+            totalDY * totalDY
+          )
+          >
+          TAP_THRESHOLD
+        ) {
+
+          piece.moved = true;
+
+        }
+
+
+        /*
+         * ドラッグ中
+         */
+
+        if (piece.moved) {
+
+          piece.x += dx;
+
+          piece.y += dy;
+
+          render(piece);
+
+        }
+
+
+        piece.lastTouchX =
+          touch.clientX;
+
+        piece.lastTouchY =
+          touch.clientY;
+
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    /* -----------------------------------------
+       タッチ終了
+       ----------------------------------------- */
+
+    el.addEventListener(
+      'touchend',
+      function (event) {
+
+        if (!piece.touching) {
+
+          return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        /*
+         * 動かしていない
+         * ↓
+         * タップなので45度回転
+         */
+
+        if (!piece.moved) {
+
+          piece.angle =
+            (
+              piece.angle + 45
+            ) % 360;
+
+
+          render(piece);
+
+        }
+
+
+        piece.touching = false;
+
+        piece.moved = false;
+
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    /* -----------------------------------------
+       タッチキャンセル
+       ----------------------------------------- */
+
+    el.addEventListener(
+      'touchcancel',
+      function () {
+
+        piece.touching = false;
+
+        piece.moved = false;
 
       }
-
-    }
-
-
-    return null;
+    );
 
   }
 
 
-  // =====================================================
-  // pointerdown
-  // =====================================================
+  /* =========================================
+     リセットボタン
+     ========================================= */
 
-  board.addEventListener(
-    'pointerdown',
+  resetBtn.addEventListener(
+    'touchend',
     function (event) {
 
       event.preventDefault();
 
-
-      var point =
-        getBoardPoint(
-          event
-        );
-
-
-      var piece =
-        hitTestPiece(
-          point
-        );
-
-
-      /*
-       * ピース以外
-       */
-
-      if (!piece) {
-
-        return;
-
-      }
-
-
-      activePiece =
-        piece;
-
-
-      startX =
-        point.x;
-
-
-      startY =
-        point.y;
-
-
-      lastX =
-        point.x;
-
-
-      lastY =
-        point.y;
-
-
-      dragging = false;
-
-
-      /*
-       * 馬を前面へ
-       *
-       * 騎手は常に最前面
-       */
-
-      bringToFront(
-        piece
-      );
-
-
-      /*
-       * iPhoneのタッチを
-       * boardで捕まえる
-       */
-
-      try {
-
-        board.setPointerCapture(
-          event.pointerId
-        );
-
-      } catch (e) {}
+      resetPuzzle();
 
     },
     {
@@ -957,191 +730,7 @@ h1 {
   );
 
 
-  // =====================================================
-  // pointermove
-  // =====================================================
-
-  board.addEventListener(
-    'pointermove',
-    function (event) {
-
-      if (!activePiece) {
-
-        return;
-
-      }
-
-
-      event.preventDefault();
-
-
-      var point =
-        getBoardPoint(
-          event
-        );
-
-
-      var totalDX =
-        point.x -
-        startX;
-
-
-      var totalDY =
-        point.y -
-        startY;
-
-
-      /*
-       * 一定以上動いたらドラッグ
-       */
-
-      if (
-        !dragging &&
-        Math.hypot(
-          totalDX,
-          totalDY
-        ) >
-        TAP_MOVE_THRESHOLD
-      ) {
-
-        dragging = true;
-
-      }
-
-
-      /*
-       * ドラッグ中
-       */
-
-      if (dragging) {
-
-        var moveX =
-          point.x -
-          lastX;
-
-
-        var moveY =
-          point.y -
-          lastY;
-
-
-        activePiece.center.x +=
-          moveX;
-
-
-        activePiece.center.y +=
-          moveY;
-
-
-        lastX =
-          point.x;
-
-
-        lastY =
-          point.y;
-
-
-        render(
-          activePiece
-        );
-
-      }
-
-    },
-    {
-      passive: false
-    }
-  );
-
-
-  // =====================================================
-  // pointerup
-  // =====================================================
-
-  board.addEventListener(
-    'pointerup',
-    function (event) {
-
-      if (!activePiece) {
-
-        return;
-
-      }
-
-
-      event.preventDefault();
-
-
-      /*
-       * 動かしていなければタップ
-       */
-
-      if (!dragging) {
-
-        activePiece.angle =
-          (
-            activePiece.angle +
-            45
-          ) % 360;
-
-
-        render(
-          activePiece
-        );
-
-      }
-
-
-      activePiece = null;
-
-      dragging = false;
-
-
-      try {
-
-        board.releasePointerCapture(
-          event.pointerId
-        );
-
-      } catch (e) {}
-
-    },
-    {
-      passive: false
-    }
-  );
-
-
-  // =====================================================
-  // pointercancel
-  // =====================================================
-
-  board.addEventListener(
-    'pointercancel',
-    function (event) {
-
-      activePiece = null;
-
-      dragging = false;
-
-
-      try {
-
-        board.releasePointerCapture(
-          event.pointerId
-        );
-
-      } catch (e) {}
-
-    }
-  );
-
-
-  // =====================================================
-  // リセットボタン
-  // =====================================================
-
-  shuffleBtn.addEventListener(
+  resetBtn.addEventListener(
     'click',
     function () {
 
@@ -1151,30 +740,27 @@ h1 {
   );
 
 
-  // =====================================================
-  // 画面サイズ変更
-  // =====================================================
+  /* =========================================
+     画面サイズ変更
+     ========================================= */
 
   window.addEventListener(
     'resize',
     function () {
 
-      /*
-       * 画面回転などがあったら
-       * 現在位置を維持したまま再描画
-       */
-
-      renderAll();
+      resetPuzzle();
 
     }
   );
 
 
-  // =====================================================
-  // START
-  // =====================================================
+  /* =========================================
+     START
+     ========================================= */
 
-  initPieces();
+  createPieces();
+
+  resetPuzzle();
 
 
 })();
@@ -1182,4 +768,5 @@ h1 {
 </script>
 
 </body>
+
 </html>
