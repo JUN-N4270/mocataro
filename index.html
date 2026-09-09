@@ -1,15 +1,13 @@
 ```html
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ゲームで遊ぶ｜mocataro</title>
+    <title>mocataro｜あそんで、つくって、たのしもう！</title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -23,85 +21,99 @@
                 "Hiragino Kaku Gothic ProN",
                 "Yu Gothic",
                 sans-serif;
-
             background: #f5f5f5;
             color: #333;
         }
 
+        /* ヘッダー */
         header {
             background: #222;
             color: white;
             text-align: center;
-            padding: 25px 15px;
+            padding: 28px 15px;
         }
 
         header h1 {
             margin: 0;
-            font-size: 34px;
+            font-size: 42px;
+            letter-spacing: 3px;
         }
 
         header p {
             margin: 8px 0 0;
-            font-size: 14px;
+            font-size: 15px;
         }
 
+        /* メイン */
         main {
             max-width: 900px;
-            margin: auto;
+            margin: 0 auto;
             padding: 25px 15px 50px;
         }
 
-        .back {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #555;
-        }
-
-        .games {
+        /* メインカード */
+        .menu {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 18px;
         }
 
-        .game {
+        .card {
             background: white;
             border-radius: 18px;
             padding: 25px 20px;
+            text-decoration: none;
+            color: #333;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 18px rgba(0,0,0,0.12);
         }
 
         .icon {
             font-size: 48px;
+            margin-bottom: 8px;
         }
 
-        .game h2 {
-            margin: 10px 0;
-            font-size: 22px;
+        .card h2 {
+            margin: 5px 0 10px;
+            font-size: 23px;
         }
 
-        .game p {
-            color: #666;
+        .card p {
+            margin: 0;
             line-height: 1.6;
-            min-height: 48px;
+            color: #666;
+            font-size: 14px;
         }
 
-        .play {
-            display: block;
-            text-align: center;
-            background: #222;
-            color: white;
-            text-decoration: none;
-            padding: 12px;
-            border-radius: 10px;
-            margin-top: 18px;
-            font-weight: bold;
+        /* お知らせ */
+        .section {
+            margin-top: 35px;
         }
 
-        .play:hover {
-            opacity: 0.8;
+        .section h2 {
+            font-size: 22px;
+            border-left: 5px solid #333;
+            padding-left: 10px;
         }
 
+        .info {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+        }
+
+        .info p {
+            line-height: 1.8;
+            margin: 8px 0;
+        }
+
+        /* フッター */
         footer {
             text-align: center;
             background: #222;
@@ -110,98 +122,94 @@
             font-size: 13px;
         }
 
+        /* スマホ */
         @media (max-width: 600px) {
 
-            .games {
+            header h1 {
+                font-size: 34px;
+            }
+
+            .menu {
                 grid-template-columns: 1fr;
             }
 
+            .card {
+                padding: 22px 18px;
+            }
         }
-
     </style>
-
 </head>
-
 
 <body>
 
 <header>
-
-    <h1>🎮 ゲームで遊ぶ</h1>
-
-    <p>
-        mocataroのゲームセンター
-    </p>
-
+    <h1>mocataro</h1>
+    <p>あそんで、つくって、たのしもう！</p>
 </header>
-
 
 <main>
 
-    <a class="back" href="../index.html">
-        ← mocataroトップへ
-    </a>
+    <div class="menu">
 
-
-    <div class="games">
-
-
-        <!-- ゲーム1 -->
-
-        <div class="game">
-
-            <div class="icon">🧠</div>
-
-            <h2>漢字ゲーム</h2>
-
+        <!-- ゲーム -->
+        <a class="card" href="games/">
+            <div class="icon">🎮</div>
+            <h2>ゲームで遊ぶ</h2>
             <p>
-                楽しく遊びながら漢字に挑戦！
+                Instagramで紹介したゲームを<br>
+                実際に遊んでみよう！
+            </p>
+        </a>
+
+        <!-- 工作 -->
+        <a class="card" href="materials/">
+            <div class="icon">🛠️</div>
+            <h2>工作・遊びの素材</h2>
+            <p>
+                工作の図面や型紙などを<br>
+                ダウンロードできます。
+            </p>
+        </a>
+
+        <!-- Instagram -->
+        <a class="card"
+           href="https://www.instagram.com/"
+           target="_blank"
+           rel="noopener">
+            <div class="icon">📱</div>
+            <h2>Instagram</h2>
+            <p>
+                ゲームや工作を紹介している<br>
+                Instagramをチェック！
+            </p>
+        </a>
+
+        <!-- About -->
+        <a class="card" href="about.html">
+            <div class="icon">ℹ️</div>
+            <h2>mocataroについて</h2>
+            <p>
+                mocataroって何？<br>
+                このサイトについて紹介します。
+            </p>
+        </a>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>🆕 お知らせ</h2>
+
+        <div class="info">
+            <p>
+                🎮 新しいゲームを準備中！
             </p>
 
-            <a class="play" href="#">
-                あそぶ
-            </a>
-
-        </div>
-
-
-        <!-- ゲーム2 -->
-
-        <div class="game">
-
-            <div class="icon">🎲</div>
-
-            <h2>サイコロゲーム</h2>
-
             <p>
-                自分だけのサイコロで遊ぼう！
+                🛠️ 工作素材も順次追加していきます。
             </p>
-
-            <a class="play" href="#">
-                あそぶ
-            </a>
-
         </div>
-
-
-        <!-- ゲーム3 -->
-
-        <div class="game">
-
-            <div class="icon">🔢</div>
-
-            <h2>100マス計算</h2>
-
-            <p>
-                目指せ全問正解！
-            </p>
-
-            <a class="play" href="#">
-                あそぶ
-            </a>
-
-        </div>
-
 
     </div>
 
@@ -209,13 +217,9 @@
 
 
 <footer>
-
     © mocataro
-
 </footer>
 
-
 </body>
-
 </html>
 ```
