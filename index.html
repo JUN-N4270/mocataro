@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>馬パズル</title>
+<style>
+  :root {
+    --cream: #f7f2e3;
+    --pink: #ff5fa2;
+    --green: #3ddc55;
+    --ink: #33302a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: #ffffff;
+    border-bottom: 1px solid #ece6d8;
+  }
+  h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 700;
+  }
+  #shuffleBtn {
+    background: none;
+    border: none;
+    color: var(--pink);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 12px;
+  }
+  #shuffleBtn:active {
+    opacity: 0.6;
+  }
+  #board {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 53px);
+    overflow: hidden;
+    background: var(--cream);
+    touch-action: none;
+  }
+  .piece {
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    touch-action: none;
+    will-change: transform;
+  }
+  .piece.placed {
+    cursor: default;
+    outline: 4px solid var(--green);
+    outline-offset: -2px;
+    border-radius: 2px;
+  }
+  #clearMsg {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--pink);
+    font-size: 30px;
+    font-weight: 800;
+    padding: 10px 26px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    display: none;
+    pointer-events: none;
+  }
+  #hint {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #9a9484;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>馬パズル</h1>
+  <button id="shuffleBtn">シャッフル / リセット</button>
+</header>
+
+<div id="board">
+  <img class="piece" id="piece-left"  src="left_horse.png"  draggable="false" alt="">
+  <img class="piece" id="piece-rider" src="rider.png"       draggable="false" alt="">
+  <img class="piece" id="piece-right" src="right_horse.png" draggable="false" alt="">
+  <div id="clearMsg">クリア! 🎉</div>
+  <div id="hint">ドラッグで移動 ・ タップで90度回転</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------------- 設定 ----------------
+  // 元画像 (1195 x 896) におけるピース幅の比率
+  var ORIG_W = 1195;
+  var ORIG_H = 896;
+  var PIECE_DEFS = [
+    { id: 'piece-left',  w: 520, alwaysFront: false },
+    { id: 'piece-rider', w: 163, alwaysFront: true  },
+    { id: 'piece-right', w: 512, alwaysFront: false }
+  ];
+  var SNAP_DIST = 40;       // スナップ判定距離(px)
+  var TAP_THRESHOLD = 8;    // これ未満の移動量なら「タップ」とみなす(px)
+  var MARGIN = 20;          // 盤面の余白
+  var FRONT_Z = 9999;       // 騎手(常に最前面)のz-index
+
+  var board = document.getElementById('board');
+  var clearMsg = document.getElementById('clearMsg');
+  var shuffleBtn = document.getElementById('shuffleBtn');
+
+  var pieces = [];
+  var zCounter = 1;
+
+  // ---- 初期化 ----
+  function initPieces() {
+    pieces = PIECE_DEFS.map(function (def) {
+      var el = document.getElementById(def.id);
+      return {
+        def: def,
+        el: el,
+        w: 0,
+        h: 0,
+        center: { x: 0, y: 0 },
+        targetCenter: { x: 0, y: 0 },
+        angle: 0,
+        placed: false
+      };
+    });
+
+    pieces.forEach(function (p) {
+      p.el.style.zIndex = p.def.alwaysFront ? FRONT_Z : 1;
+    });
+
+    layout();
+    shuffle();
+  }
+
+  // ---- 画面サイズに合わせてピースサイズ・正解位置を計算 ----
+  function layout() {
+    var boardW = board.clientWidth;
+    var boardH = board.clientHeight;
+
+    var scaleW = (boardW - MARGIN * 2) / ORIG_W;
+    var scaleH = (boardH - MARGIN * 2) / ORIG_H;
+    var scale = Math.min(scaleW, scaleH);
+
+    var scaledH = ORIG_H * scale;
+    var totalW = 0;
+    pieces.forEach(function (p) { totalW += p.def.w * scale; });
+
+    var xCursor = (boardW - totalW) / 2;
+    var y0 = (boardH - scaledH) / 2;
+
+    pieces.forEach(function (p) {
+      var pw = p.def.w * scale;
+      var ph = scaledH;
+      p.w = pw;
+      p.h = ph;
+      p.el.style.width = pw + 'px';
+      p.el.style.height = ph + 'px';
+      p.targetCenter = { x: xCursor + pw / 2, y: y0 + ph / 2 };
+      xCursor += pw;
+    });
+  }
+
+  // ---- 描画(位置・角度をCSSに反映) ----
+  function render(p) {
+    var x = p.center.x - p.w / 2;
+    var y = p.center.y - p.h / 2;
+    p.el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + p.angle + 'deg)';
+    p.el.classList.toggle('placed', p.placed);
+  }
+
+  function renderAll() {
+    pieces.forEach(render);
+  }
+
+  function bringToFront(p) {
+    if (p.def.alwaysFront) return; // 騎手は常に最前面(z-indexは固定済み)
+    zCounter += 1;
+    p.el.style.zIndex = zCounter;
+  }
+
+  // ---- シャッフル ----
+  function shuffle() {
+    clearMsg.style.display = 'none';
+    var boardW = board.clientWidth;
+    var boardH = board.clientHeight;
+
+    pieces.forEach(function (p) {
+      p.placed = false;
+      var halfW = p.w / 2;
+      var halfH = p.h / 2;
+      var minX = halfW + MARGIN;
+      var minY = halfH + MARGIN;
+      var maxX = Math.max(minX, boardW - halfW - MARGIN);
+      var maxY = Math.max(minY, boardH - halfH - MARGIN);
+
+      p.center = {
+        x: minX + Math.random() * (maxX - minX),
+        y: minY + Math.random() * (maxY - minY)
+      };
+      p.angle = [0, 90, 180, 270][Math.floor(Math.random() * 4)];
+      bringToFront(p);
+      render(p);
+    });
+  }
+
+  // ---- スナップ判定 ----
+  function checkSnap(p) {
+    var dx = p.center.x - p.targetCenter.x;
+    var dy = p.center.y - p.targetCenter.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var angleOk = (((p.angle % 360) + 360) % 360) === 0;
+
+    if (dist < SNAP_DIST && angleOk) {
+      p.center = { x: p.targetCenter.x, y: p.targetCenter.y };
+      p.angle = 0;
+      p.placed = true;
+      if (pieces.every(function (pp) { return pp.placed; })) {
+        clearMsg.style.display = 'block';
+      }
+    }
+    render(p);
+  }
+
+  // ---- ドラッグ / タップ操作(pointer eventsでマウス・タッチ両対応) ----
+  var active = null;
+  var startLoc = null;
+  var lastLoc = null;
+  var dragging = false;
+
+  function getBoardPoint(evt) {
+    var rect = board.getBoundingClientRect();
+    return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+  }
+
+  function bindEvents() {
+    pieces.forEach(function (p) {
+      p.el.addEventListener('pointerdown', function (evt) {
+        if (p.placed) return;
+        evt.preventDefault();
+        try { p.el.setPointerCapture(evt.pointerId); } catch (e) {}
+        active = p;
+        startLoc = getBoardPoint(evt);
+        lastLoc = startLoc;
+        dragging = false;
+        bringToFront(p);
+      });
+
+      p.el.addEventListener('pointermove', function (evt) {
+        if (active !== p) return;
+        var loc = getBoardPoint(evt);
+        var totalDx = loc.x - startLoc.x;
+        var totalDy = loc.y - startLoc.y;
+
+        if (!dragging && Math.sqrt(totalDx * totalDx + totalDy * totalDy) > TAP_THRESHOLD) {
+          dragging = true;
+        }
+        if (dragging) {
+          var dx = loc.x - lastLoc.x;
+          var dy = loc.y - lastLoc.y;
+          p.center.x += dx;
+          p.center.y += dy;
+          lastLoc = loc;
+          render(p);
+        }
+      });
+
+      function finish(evt) {
+        if (active !== p) return;
+        if (dragging) {
+          checkSnap(p);
+        } else {
+          p.angle = (p.angle + 90) % 360;
+          checkSnap(p);
+        }
+        active = null;
+        dragging = false;
+      }
+
+      p.el.addEventListener('pointerup', finish);
+      p.el.addEventListener('pointercancel', finish);
+    });
+  }
+
+  shuffleBtn.addEventListener('click', shuffle);
+  window.addEventListener('resize', function () {
+    layout();
+    renderAll();
+  });
+
+  initPieces();
+  bindEvents();
+})();
+</script>
+
+</body>
+</html>
