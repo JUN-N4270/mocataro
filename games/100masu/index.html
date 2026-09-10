@@ -1,1 +1,1703 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RK30GTRWMF"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
 
+    gtag('config', 'G-RK30GTRWMF');
+</script>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
+<title>🧮 100マス計算|mocataro</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RK30GTRWMF"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+
+function gtag(){
+    dataLayer.push(arguments);
+}
+
+gtag('js', new Date());
+gtag('config', 'G-RK30GTRWMF');
+</script>
+
+
+<style>
+
+/* ==================================================
+   mocataro カラー
+   ================================================== */
+
+:root {
+    --main-blue: #78B9DD;
+    --dark-blue: #4D9BC7;
+    --light-blue: #EAF6FC;
+
+    --ink: #34505F;
+    --sub: #607D8B;
+
+    --selected: #FFF176;
+    --correct: #CCFFCC;
+    --wrong: #FFCCCC;
+}
+
+
+/* ==================================================
+   基本
+   ================================================== */
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+
+    background: var(--light-blue);
+
+    color: var(--ink);
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+
+    user-select: none;
+
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100vh;
+}
+
+
+/* ==================================================
+   ヘッダー
+   ================================================== */
+
+header {
+    width: 100%;
+
+    background: var(--main-blue);
+
+    color: white;
+
+    text-align: center;
+
+    padding: 6px 8px 5px;
+
+    box-shadow:
+        0 2px 7px rgba(0,0,0,0.08);
+}
+
+header h1 {
+    margin: 0;
+
+    font-size: 19px;
+
+    line-height: 1.15;
+
+    font-weight: 800;
+}
+
+header p {
+    margin: 2px 0 0;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+/* ==================================================
+   メイン
+   ================================================== */
+
+main {
+    width: 100%;
+
+    max-width: 500px;
+
+    margin: 0 auto;
+
+    padding: 5px 6px 6px;
+}
+
+
+/* ==================================================
+   +-× パネル
+   ================================================== */
+
+.top-panel {
+    background: white;
+
+    border-radius: 11px;
+
+    padding: 5px;
+
+    margin-bottom: 5px;
+
+    box-shadow:
+        0 2px 7px rgba(0,0,0,0.07);
+}
+
+.mode-buttons {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 5px;
+}
+
+.mode-btn {
+    flex: 1;
+
+    max-width: 95px;
+
+    height: 32px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: var(--main-blue);
+
+    color: white;
+
+    font-size: 19px;
+
+    font-weight: 800;
+
+    padding: 0;
+
+    box-shadow:
+        0 2px 0 rgba(0,0,0,0.10);
+}
+
+.mode-btn.active {
+    background: var(--dark-blue);
+}
+
+.mode-btn:active {
+    transform: scale(0.96);
+}
+
+.info {
+    height: 15px;
+
+    margin-top: 2px;
+
+    text-align: center;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: var(--sub);
+}
+
+
+/* ==================================================
+   100マス
+   ================================================== */
+
+.board-wrap {
+    width: 88%;
+
+    max-width: 400px;
+
+    margin: 0 auto;
+
+    background: white;
+
+    border-radius: 11px;
+
+    padding: 3px;
+
+    box-shadow:
+        0 2px 7px rgba(0,0,0,0.07);
+
+    overflow: hidden;
+}
+
+.board {
+    display: grid;
+
+    grid-template-columns:
+        21px repeat(10, 1fr);
+
+    grid-template-rows:
+        21px repeat(10, 1fr);
+
+    width: 100%;
+
+    aspect-ratio: 11 / 11;
+}
+
+.cell {
+    border: 1px solid #D7E5EB;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+
+/* 左上 */
+
+.corner {
+    background: var(--main-blue);
+
+    border-radius: 4px 0 0 0;
+}
+
+
+/* 行・列番号 */
+
+.header-cell {
+    background: #F1F8FB;
+
+    color: var(--ink);
+
+    font-size:
+        clamp(9px, 2.7vw, 14px);
+
+    font-weight: 800;
+}
+
+
+/* 計算マス */
+
+.answer-cell {
+    background: white;
+
+    color: var(--ink);
+
+    cursor: pointer;
+
+    font-size:
+        clamp(10px, 3.6vw, 20px);
+
+    font-weight: 800;
+
+    transition:
+        background 0.1s,
+        transform 0.08s;
+}
+
+.answer-cell:active {
+    transform: scale(0.93);
+}
+
+.answer-cell.selected {
+    background: var(--selected);
+}
+
+.answer-cell.correct {
+    background: var(--correct);
+}
+
+.answer-cell.wrong {
+    background: var(--wrong);
+}
+
+
+/* ==================================================
+   操作パネル
+   ================================================== */
+
+.control-panel {
+    width: 100%;
+
+    background: white;
+
+    border-radius: 11px;
+
+    padding: 5px;
+
+    margin-top: 5px;
+
+    box-shadow:
+        0 2px 7px rgba(0,0,0,0.07);
+}
+
+
+/* ==================================================
+   十字キー+テンキー
+   ================================================== */
+
+.control-area {
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+}
+
+
+/* ==================================================
+   十字キー
+   ================================================== */
+
+.direction-pad {
+    position: relative;
+
+    width: 125px;
+
+    height: 110px;
+
+    flex-shrink: 0;
+}
+
+.dir {
+    position: absolute;
+
+    width: 42px;
+
+    height: 34px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: var(--main-blue);
+
+    color: white;
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    padding: 0;
+
+    box-shadow:
+        0 2px 0 rgba(0,0,0,0.10);
+}
+
+.dir:active {
+    transform: scale(0.94);
+}
+
+
+/* 上 */
+
+.dir.up {
+    top: 0;
+
+    left: 41px;
+}
+
+
+/* 左 */
+
+.dir.left {
+    top: 38px;
+
+    left: 0;
+}
+
+
+/* 右 */
+
+.dir.right {
+    top: 38px;
+
+    right: 0;
+}
+
+
+/* 下 */
+
+.dir.down {
+    bottom: 0;
+
+    left: 41px;
+}
+
+
+/* ==================================================
+   テンキー
+   ================================================== */
+
+.keypad {
+    width: 190px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 4px;
+
+    flex-shrink: 0;
+}
+
+.key {
+    width: 100%;
+
+    height: 34px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #F1F8FB;
+
+    color: var(--ink);
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+    padding: 0;
+
+    box-shadow:
+        0 2px 0 #D5E5EB;
+}
+
+.key:active {
+    transform: scale(0.95);
+}
+
+.key.special {
+    background: var(--main-blue);
+
+    color: white;
+
+    font-size: 13px;
+}
+
+
+/* ==================================================
+   チェック・新しいゲーム
+   ================================================== */
+
+.action-buttons {
+    display: flex;
+
+    gap: 5px;
+
+    margin-top: 5px;
+}
+
+.action-btn {
+    flex: 1;
+
+    height: 31px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: var(--dark-blue);
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    padding: 0;
+
+    box-shadow:
+        0 2px 0 rgba(0,0,0,0.10);
+}
+
+.action-btn:active {
+    transform: translateY(1px);
+}
+
+
+/* ==================================================
+   結果
+   ================================================== */
+
+.result {
+    min-height: 17px;
+
+    margin-top: 3px;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    font-weight: 800;
+}
+
+.result.good {
+    color: #32965A;
+}
+
+.result.bad {
+    color: #D9534F;
+}
+
+
+/* ==================================================
+   フッター
+   ================================================== */
+
+footer {
+    text-align: center;
+
+    color: var(--sub);
+
+    font-size: 9px;
+
+    padding: 1px 0 3px;
+}
+
+
+/* ==================================================
+   iPhone
+   ================================================== */
+
+@media (max-width: 430px) {
+
+    .board-wrap {
+        width: 88%;
+    }
+
+    .control-area {
+        gap: 5px;
+    }
+
+    .direction-pad {
+        width: 112px;
+        height: 106px;
+    }
+
+    .dir {
+        width: 38px;
+        height: 33px;
+    }
+
+    .dir.up,
+    .dir.down {
+        left: 37px;
+    }
+
+    .dir.left,
+    .dir.right {
+        top: 36px;
+    }
+
+    .keypad {
+        width: 178px;
+        gap: 4px;
+    }
+
+    .key {
+        height: 33px;
+    }
+}
+
+
+/* ==================================================
+   縦が短いiPhone
+   ================================================== */
+
+@media (max-height: 700px) {
+
+    header {
+        padding: 4px 6px;
+    }
+
+    header h1 {
+        font-size: 17px;
+    }
+
+    header p {
+        display: none;
+    }
+
+    main {
+        padding-top: 3px;
+    }
+
+    .top-panel {
+        padding: 3px;
+
+        margin-bottom: 3px;
+    }
+
+    .mode-btn {
+        height: 29px;
+    }
+
+    .info {
+        height: 12px;
+
+        font-size: 10px;
+    }
+
+    .board-wrap {
+        width: 82%;
+
+        padding: 2px;
+    }
+
+    .board {
+        grid-template-columns:
+            20px repeat(10, 1fr);
+
+        grid-template-rows:
+            20px repeat(10, 1fr);
+    }
+
+    .control-panel {
+        margin-top: 3px;
+
+        padding: 4px;
+    }
+
+    .direction-pad {
+        width: 100px;
+
+        height: 94px;
+    }
+
+    .dir {
+        width: 34px;
+
+        height: 30px;
+    }
+
+    .dir.up,
+    .dir.down {
+        left: 33px;
+    }
+
+    .dir.left,
+    .dir.right {
+        top: 32px;
+    }
+
+    .keypad {
+        width: 165px;
+    }
+
+    .key {
+        height: 29px;
+
+        font-size: 16px;
+    }
+
+    .action-btn {
+        height: 28px;
+    }
+
+    .result {
+        min-height: 13px;
+
+        font-size: 11px;
+    }
+
+    footer {
+        display: none;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     ヘッダー
+     ================================================== -->
+
+<header>
+
+    <h1>🧮 100マス計算</h1>
+
+    <p>めざせ!パーフェクト!</p>
+
+</header>
+
+
+<main>
+
+
+<!-- ==================================================
+     モード
+     ================================================== -->
+
+<section class="top-panel">
+
+    <div class="mode-buttons">
+
+        <button
+            class="mode-btn active"
+            onclick="setMode('+')">
+            +
+        </button>
+
+        <button
+            class="mode-btn"
+            onclick="setMode('-')">
+            -
+        </button>
+
+        <button
+            class="mode-btn"
+            onclick="setMode('*')">
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="info">
+
+        <span id="modeText">
+            たし算
+        </span>
+
+        
+
+        <span id="timer">
+            0.0秒
+        </span>
+
+    </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     100マス
+     ================================================== -->
+
+<section class="board-wrap">
+
+    <div
+        id="board"
+        class="board">
+    </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     操作
+     ================================================== -->
+
+<section class="control-panel">
+
+
+    <!-- 十字キー+テンキー -->
+
+    <div class="control-area">
+
+
+        <!-- 十字キー -->
+
+        <div class="direction-pad">
+
+            <button
+                class="dir up"
+                onclick="moveSelection(0,-1)">
+                ▲
+            </button>
+
+            <button
+                class="dir left"
+                onclick="moveSelection(-1,0)">
+                ◀
+            </button>
+
+            <button
+                class="dir right"
+                onclick="moveSelection(1,0)">
+                ▶
+            </button>
+
+            <button
+                class="dir down"
+                onclick="moveSelection(0,1)">
+                ▼
+            </button>
+
+        </div>
+
+
+
+        <!-- テンキー -->
+
+        <div class="keypad">
+
+            <button
+                class="key"
+                onclick="inputNumber(1)">
+                1
+            </button>
+
+            <button
+                class="key"
+                onclick="inputNumber(2)">
+                2
+            </button>
+
+            <button
+                class="key"
+                onclick="inputNumber(3)">
+                3
+            </button>
+
+
+            <button
+                class="key"
+                onclick="inputNumber(4)">
+                4
+            </button>
+
+            <button
+                class="key"
+                onclick="inputNumber(5)">
+                5
+            </button>
+
+            <button
+                class="key"
+                onclick="inputNumber(6)">
+                6
+            </button>
+
+
+            <button
+                class="key"
+                onclick="inputNumber(7)">
+                7
+            </button>
+
+            <button
+                class="key"
+                onclick="inputNumber(8)">
+                8
+            </button>
+
+            <button
+                class="key"
+                onclick="inputNumber(9)">
+                9
+            </button>
+
+
+            <button
+                class="key special"
+                onclick="deleteLast()">
+                ⌫
+            </button>
+
+            <button
+                class="key"
+                onclick="inputNumber(0)">
+                0
+            </button>
+
+            <button
+                class="key special"
+                onclick="clearCell()">
+                消去
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- チェック・新しいゲーム -->
+
+    <div class="action-buttons">
+
+        <button
+            class="action-btn"
+            onclick="checkAnswers()">
+            ✓ チェック
+        </button>
+
+        <button
+            class="action-btn"
+            onclick="newGame()">
+            🔄 新しいゲーム
+        </button>
+
+    </div>
+
+
+
+    <!-- 結果 -->
+
+    <div
+        id="result"
+        class="result">
+    </div>
+
+
+</section>
+
+</main>
+
+
+
+<footer>
+    mocataro 🐎 🧮 ⭕️❌
+</footer>
+
+
+
+<script>
+
+/* ==================================================
+   変数
+   ================================================== */
+
+let mode = "+";
+
+let rowNumbers = [];
+let colNumbers = [];
+
+let answers = [];
+let userAnswers = [];
+
+let selectedRow = 0;
+let selectedCol = 0;
+
+let startTime = 0;
+
+let timerInterval = null;
+
+
+/* ==================================================
+   ランダム数字
+   ================================================== */
+
+function randomNumber() {
+
+    return Math.floor(
+        Math.random() * 9
+    ) + 1;
+
+}
+
+
+/* ==================================================
+   新しいゲーム
+   ================================================== */
+
+function newGame() {
+
+    clearInterval(timerInterval);
+
+
+    rowNumbers = [];
+    colNumbers = [];
+
+    answers = [];
+    userAnswers = [];
+
+
+    selectedRow = 0;
+    selectedCol = 0;
+
+
+    /* 行 */
+
+    for (let i = 0; i < 10; i++) {
+
+        rowNumbers.push(
+            randomNumber()
+        );
+
+    }
+
+
+    /* 列 */
+
+    for (let i = 0; i < 10; i++) {
+
+        colNumbers.push(
+            randomNumber()
+        );
+
+    }
+
+
+    /* 答え */
+
+    for (let r = 0; r < 10; r++) {
+
+        answers[r] = [];
+        userAnswers[r] = [];
+
+
+        for (let c = 0; c < 10; c++) {
+
+            const a =
+                rowNumbers[r];
+
+            const b =
+                colNumbers[c];
+
+
+            if (mode === "+") {
+
+                answers[r][c] =
+                    a + b;
+
+            }
+
+            else if (mode === "-") {
+
+                answers[r][c] =
+                    a - b;
+
+            }
+
+            else {
+
+                answers[r][c] =
+                    a * b;
+
+            }
+
+
+            userAnswers[r][c] = "";
+
+        }
+
+    }
+
+
+    createBoard();
+
+    startTimer();
+
+    showResult("");
+
+}
+
+
+/* ==================================================
+   盤面
+   ================================================== */
+
+function createBoard() {
+
+    const board =
+        document.getElementById("board");
+
+
+    board.innerHTML = "";
+
+
+    /* 左上 */
+
+    const corner =
+        document.createElement("div");
+
+    corner.className =
+        "cell corner";
+
+    board.appendChild(corner);
+
+
+    /* 上 */
+
+    for (let c = 0; c < 10; c++) {
+
+        const cell =
+            document.createElement("div");
+
+        cell.className =
+            "cell header-cell";
+
+        cell.textContent =
+            colNumbers[c];
+
+        board.appendChild(cell);
+
+    }
+
+
+    /* 本体 */
+
+    for (let r = 0; r < 10; r++) {
+
+
+        /* 左 */
+
+        const rowHeader =
+            document.createElement("div");
+
+        rowHeader.className =
+            "cell header-cell";
+
+        rowHeader.textContent =
+            rowNumbers[r];
+
+        board.appendChild(rowHeader);
+
+
+        /* 100マス */
+
+        for (let c = 0; c < 10; c++) {
+
+            const cell =
+                document.createElement("div");
+
+
+            cell.className =
+                "cell answer-cell";
+
+
+            cell.dataset.row = r;
+
+            cell.dataset.col = c;
+
+
+            cell.textContent =
+                userAnswers[r][c];
+
+
+            cell.addEventListener(
+                "click",
+                function() {
+
+                    selectedRow = r;
+
+                    selectedCol = c;
+
+                    updateSelection();
+
+                }
+            );
+
+
+            board.appendChild(cell);
+
+        }
+
+    }
+
+
+    updateSelection();
+
+}
+
+
+/* ==================================================
+   選択
+   ================================================== */
+
+function updateSelection() {
+
+    document
+        .querySelectorAll(".answer-cell")
+        .forEach(cell => {
+
+            cell.classList.remove(
+                "selected"
+            );
+
+
+            const r =
+                Number(cell.dataset.row);
+
+            const c =
+                Number(cell.dataset.col);
+
+
+            if (
+                r === selectedRow &&
+                c === selectedCol
+            ) {
+
+                cell.classList.add(
+                    "selected"
+                );
+
+            }
+
+        });
+
+}
+
+
+/* ==================================================
+   選択セル
+   ================================================== */
+
+function getSelectedCell() {
+
+    return document.querySelector(
+        `.answer-cell[data-row="${selectedRow}"][data-col="${selectedCol}"]`
+    );
+
+}
+
+
+/* ==================================================
+   セル更新
+   ================================================== */
+
+function updateCell() {
+
+    const cell =
+        getSelectedCell();
+
+
+    if (!cell) {
+        return;
+    }
+
+
+    cell.textContent =
+        userAnswers[selectedRow][selectedCol];
+
+}
+
+
+/* ==================================================
+   数字入力
+   ================================================== */
+
+function inputNumber(num) {
+
+    let current =
+        userAnswers[selectedRow][selectedCol];
+
+
+    if (current === "") {
+
+        userAnswers[selectedRow][selectedCol] =
+            String(num);
+
+    }
+
+    else if (current.length === 1) {
+
+        userAnswers[selectedRow][selectedCol] +=
+            String(num);
+
+    }
+
+    else {
+
+        userAnswers[selectedRow][selectedCol] =
+            String(num);
+
+    }
+
+
+    updateCell();
+
+}
+
+
+/* ==================================================
+   1文字削除
+   ================================================== */
+
+function deleteLast() {
+
+    const current =
+        userAnswers[selectedRow][selectedCol];
+
+
+    if (current.length > 0) {
+
+        userAnswers[selectedRow][selectedCol] =
+            current.slice(0, -1);
+
+    }
+
+
+    updateCell();
+
+}
+
+
+/* ==================================================
+   消去
+   ================================================== */
+
+function clearCell() {
+
+    userAnswers[selectedRow][selectedCol] =
+        "";
+
+    updateCell();
+
+}
+
+
+/* ==================================================
+   十字キー移動
+   ================================================== */
+
+function moveSelection(dx, dy) {
+
+    selectedCol += dx;
+
+    selectedRow += dy;
+
+
+    if (selectedCol < 0) {
+
+        selectedCol = 9;
+
+    }
+
+    if (selectedCol > 9) {
+
+        selectedCol = 0;
+
+    }
+
+    if (selectedRow < 0) {
+
+        selectedRow = 9;
+
+    }
+
+    if (selectedRow > 9) {
+
+        selectedRow = 0;
+
+    }
+
+
+    updateSelection();
+
+}
+
+
+/* ==================================================
+   キーボード
+   ================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+
+        if (event.key === "ArrowUp") {
+
+            moveSelection(0, -1);
+
+        }
+
+        else if (event.key === "ArrowDown") {
+
+            moveSelection(0, 1);
+
+        }
+
+        else if (event.key === "ArrowLeft") {
+
+            moveSelection(-1, 0);
+
+        }
+
+        else if (event.key === "ArrowRight") {
+
+            moveSelection(1, 0);
+
+        }
+
+        else if (
+            /^[0-9]$/.test(event.key)
+        ) {
+
+            inputNumber(
+                Number(event.key)
+            );
+
+        }
+
+        else if (
+            event.key === "Backspace"
+        ) {
+
+            deleteLast();
+
+        }
+
+    }
+);
+
+
+/* ==================================================
+   モード変更
+   ================================================== */
+
+function setMode(newMode) {
+
+    mode = newMode;
+
+
+    const buttons =
+        document.querySelectorAll(
+            ".mode-btn"
+        );
+
+
+    buttons.forEach(button => {
+
+        button.classList.remove(
+            "active"
+        );
+
+    });
+
+
+    if (newMode === "+") {
+
+        buttons[0].classList.add(
+            "active"
+        );
+
+        document.getElementById(
+            "modeText"
+        ).textContent =
+            "たし算";
+
+    }
+
+    else if (newMode === "-") {
+
+        buttons[1].classList.add(
+            "active"
+        );
+
+        document.getElementById(
+            "modeText"
+        ).textContent =
+            "ひき算";
+
+    }
+
+    else {
+
+        buttons[2].classList.add(
+            "active"
+        );
+
+        document.getElementById(
+            "modeText"
+        ).textContent =
+            "かけ算";
+
+    }
+
+
+    newGame();
+
+}
+
+
+/* ==================================================
+   チェック
+   ================================================== */
+
+function checkAnswers() {
+
+    let correct = 0;
+
+    let empty = 0;
+
+
+    document
+        .querySelectorAll(".answer-cell")
+        .forEach(cell => {
+
+
+            const r =
+                Number(cell.dataset.row);
+
+            const c =
+                Number(cell.dataset.col);
+
+
+            cell.classList.remove(
+                "correct",
+                "wrong"
+            );
+
+
+            const input =
+                userAnswers[r][c];
+
+
+            if (input === "") {
+
+                empty++;
+
+            }
+
+            else if (
+                Number(input) === answers[r][c]
+            ) {
+
+                correct++;
+
+                cell.classList.add(
+                    "correct"
+                );
+
+            }
+
+            else {
+
+                cell.classList.add(
+                    "wrong"
+                );
+
+            }
+
+        });
+
+
+    const elapsed =
+        (
+            (Date.now() - startTime)
+            / 1000
+        ).toFixed(1);
+
+
+    if (correct === 100) {
+
+        clearInterval(
+            timerInterval
+        );
+
+
+        showResult(
+            `🎉 パーフェクト! ${elapsed}秒!`,
+            true
+        );
+
+    }
+
+    else {
+
+        showResult(
+            `正解 ${correct} / 100 未入力 ${empty}`,
+            false
+        );
+
+    }
+
+}
+
+
+/* ==================================================
+   結果表示
+   ================================================== */
+
+function showResult(
+    text,
+    good = false
+) {
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+
+    result.textContent =
+        text;
+
+
+    result.className =
+        "result" +
+        (good ? " good" : "");
+
+}
+
+
+/* ==================================================
+   タイマー
+   ================================================== */
+
+function startTimer() {
+
+    startTime =
+        Date.now();
+
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    timerInterval =
+        setInterval(
+            function() {
+
+                const elapsed =
+                    (
+                        Date.now()
+                        - startTime
+                    ) / 1000;
+
+
+                document.getElementById(
+                    "timer"
+                ).textContent =
+                    elapsed.toFixed(1)
+                    + "秒";
+
+            },
+            100
+        );
+
+}
+
+
+/* ==================================================
+   起動
+   ================================================== */
+
+newGame();
+
+</script>
+
+</body>
+</html>
