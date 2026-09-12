@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
+<title>長方形パズル</title>
+
+<style>
+
+/* =================================
+   全体
+   ================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+}
+
+body {
+  background: #EAF6FC;
+  color: #34505F;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+
+/* =================================
+   タイトル
+   ================================= */
+
+h1 {
+  text-align: center;
+
+  margin: 14px 0 8px;
+
+  font-size: 22px;
+}
+
+
+/* =================================
+   メッセージ
+   ================================= */
+
+#message {
+  text-align: center;
+
+  font-size: 14px;
+
+  margin-bottom: 8px;
+}
+
+#hint {
+  text-align: center;
+  margin-top: -2px;
+  font-size: 12px;
+  color: #AFC1C9;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+
+/* =================================
+   ゲームエリア
+   ================================= */
+
+#game {
+
+  position: relative;
+
+  width: min(92vw, 600px);
+
+  aspect-ratio: 6 / 4;
+
+  margin: 0 auto;
+
+  overflow: visible;
+
+  user-select: none;
+  -webkit-user-select: none;
+
+  touch-action: none;
+}
+
+
+/* =================================
+   完成位置
+   ================================= */
+
+#board {
+
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: 100%;
+  height: 100%;
+
+  transform:
+    translate(-50%, -50%);
+
+  background: white;
+
+  border: 2px solid #9CCFE8;
+}
+
+
+/* =================================
+   完成位置の色は完全に消す
+   ================================= */
+
+.target {
+  fill: transparent;
+  opacity: 0;
+}
+
+
+/* =================================
+   ピース
+   ================================= */
+
+.piece {
+
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  touch-action: none;
+
+  user-select: none;
+  -webkit-user-select: none;
+
+  will-change: transform;
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  transform-origin: center center;
+
+  z-index: 10;
+
+  /* 薄い影 */
+
+  filter:
+    drop-shadow(
+      2px 3px 2px
+      rgba(0,0,0,0.15)
+    );
+}
+
+
+/* =================================
+   選択中
+   ================================= */
+
+.piece.selected {
+  z-index: 200;
+}
+
+
+/* =================================
+   選択中のピース
+   濃い色の縁取り
+   ================================= */
+
+.piece.red.selected polygon {
+  stroke: #FF0000;
+  stroke-width: 5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+
+.piece.blue.selected polygon {
+  stroke: #0000FF;
+  stroke-width: 5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+
+.piece.green.selected polygon {
+  stroke: #00AA00;
+  stroke-width: 5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+
+.piece.yellow.selected polygon {
+  stroke: #FFD700;
+  stroke-width: 5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+
+/* =================================
+   SVG
+   ================================= */
+
+.piece svg {
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+
+  overflow: visible;
+
+  shape-rendering:
+    geometricPrecision;
+}
+
+
+/* =================================
+   ピースの色
+   ================================= */
+
+.piece.red polygon {
+  fill: #E57373;
+}
+
+.piece.blue polygon {
+  fill: #64B5F6;
+}
+
+.piece.green polygon {
+  fill: #81C784;
+}
+
+.piece.yellow polygon {
+  fill: #FFF2A6;
+}
+
+
+/* =================================
+   リセット
+   ================================= */
+
+#reset {
+
+  display: block;
+
+  margin: 18px auto 0;
+
+  padding: 10px 24px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #4D9BC7;
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  touch-action: manipulation;
+}
+
+#reset:active {
+  transform: scale(0.96);
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<h1>長方形パズル</h1>
+
+
+<div id="message">
+  4つのピースを組み合わせて、長方形を作ろう!
+</div>
+
+<div id="hint">
+  タップで回転、ダブルタップで左右反転
+</div>
+
+
+<div id="game">
+
+
+  <!-- =================================
+       完成位置
+       ================================= -->
+
+  <svg id="board"
+       viewBox="0 0 600 400"
+       preserveAspectRatio="none">
+
+
+    <!-- 赤 -->
+
+    <polygon
+      class="target"
+      points="
+        0,0
+        270,0
+        0,270
+      "
+    />
+
+
+    <!-- 青 -->
+
+    <polygon
+      class="target"
+      points="
+        270,0
+        600,0
+        600,130
+        415,315
+        185,85
+      "
+    />
+
+
+    <!-- 緑 -->
+
+    <polygon
+      class="target"
+      points="
+        0,270
+        185,85
+        415,315
+        330,400
+        0,400
+      "
+    />
+
+
+    <!-- 黄 -->
+
+    <polygon
+      class="target"
+      points="
+        330,400
+        600,400
+        600,130
+      "
+    />
+
+  </svg>
+
+
+
+  <!-- =================================
+       赤ピース
+       51%
+       ================================= -->
+
+  <div
+    class="piece red"
+    id="piece-red"
+    style="
+      width:138px;
+      height:138px;
+    "
+  >
+
+    <svg
+      viewBox="0 0 270 270"
+      preserveAspectRatio="none"
+    >
+
+      <polygon
+        points="
+          0,0
+          270,0
+          0,270
+        "
+      />
+
+    </svg>
+
+  </div>
+
+
+
+  <!-- =================================
+       黄ピース
+       51%
+       ================================= -->
+
+  <div
+    class="piece yellow"
+    id="piece-yellow"
+    style="
+      width:138px;
+      height:138px;
+    "
+  >
+
+    <svg
+      viewBox="0 0 270 270"
+      preserveAspectRatio="none"
+    >
+
+      <polygon
+        points="
+          0,270
+          270,270
+          270,0
+        "
+      />
+
+    </svg>
+
+  </div>
+
+
+
+  <!-- =================================
+       青ピース
+       51%
+       ================================= -->
+
+  <div
+    class="piece blue"
+    id="piece-blue"
+    style="
+      width:212px;
+      height:161px;
+    "
+  >
+
+    <svg
+      viewBox="0 0 415 315"
+      preserveAspectRatio="none"
+    >
+
+      <polygon
+        points="
+          85,0
+          415,0
+          415,130
+          230,315
+          0,85
+        "
+      />
+
+    </svg>
+
+  </div>
+
+
+
+  <!-- =================================
+       緑ピース
+       51%
+       ================================= -->
+
+  <div
+    class="piece green"
+    id="piece-green"
+    style="
+      width:212px;
+      height:161px;
+    "
+  >
+
+    <svg
+      viewBox="0 0 415 315"
+      preserveAspectRatio="none"
+    >
+
+      <polygon
+        points="
+          0,185
+          185,0
+          415,230
+          330,315
+          0,315
+        "
+      />
+
+    </svg>
+
+  </div>
+
+
+</div>
+
+
+
+<button id="reset">
+  リセット
+</button>
+
+
+
+<script>
+
+/* =================================
+   設定
+   ================================= */
+
+const DOUBLE_TAP_TIME = 280;
+
+
+/* =================================
+   初期配置・初期回転・初期反転
+   ================================= */
+
+const PIECE_DATA = {
+
+  /* -------------------------------
+     赤
+     ------------------------------- */
+
+  red: {
+
+    x: 3,
+    y: 326,
+
+    rotation: 0,
+
+    flipped: false
+
+  },
+
+
+  /* -------------------------------
+     黄
+     ------------------------------- */
+
+  yellow: {
+
+    x: 239,
+    y: 324,
+
+    rotation: 270,
+
+    flipped: false
+
+  },
+
+
+  /* -------------------------------
+     青
+     ------------------------------- */
+
+  blue: {
+
+    x: 10,
+    y: 400,
+
+    rotation: 315,
+
+    flipped: false
+
+  },
+
+
+  /* -------------------------------
+     緑
+     ------------------------------- */
+
+  green: {
+
+    x: 160,
+    y: 400,
+
+    rotation: 135,
+
+    flipped: true
+
+  }
+
+};
+
+
+/* =================================
+   ゲーム
+   ================================= */
+
+const game =
+  document.getElementById("game");
+
+
+const pieces = [];
+
+
+/* =================================
+   現在選択中
+   ================================= */
+
+let selectedPiece = null;
+
+
+/* =================================
+   ピース描画
+   ================================= */
+
+function drawPiece(piece) {
+
+  /*
+   通常状態
+  */
+
+  if (!piece.flipped) {
+
+    piece.element.style.transform =
+      `translate3d(
+        ${piece.x}px,
+        ${piece.y}px,
+        0
+      )
+      rotate(${piece.rotation}deg)`;
+
+    return;
+
+  }
+
+
+  /*
+   反転状態
+
+   左右反転した見た目を作るため、
+   回転角を逆向きにしてから
+   scaleX(-1) を適用する。
+  */
+
+  piece.element.style.transform =
+    `translate3d(
+      ${piece.x}px,
+      ${piece.y}px,
+      0
+    )
+    rotate(${-piece.rotation}deg)
+    scaleX(-1)`;
+
+}
+
+
+/* =================================
+   ピースを選択
+   ================================= */
+
+function selectPiece(piece) {
+
+  /*
+   前のピースの選択を解除
+  */
+
+  if (
+    selectedPiece &&
+    selectedPiece !== piece
+  ) {
+
+    selectedPiece
+      .element
+      .classList
+      .remove("selected");
+
+  }
+
+
+  /*
+   今のピースを選択
+  */
+
+  piece.element
+    .classList
+    .add("selected");
+
+
+  selectedPiece = piece;
+
+}
+
+
+/* =================================
+   初期化
+   ================================= */
+
+Object.keys(PIECE_DATA).forEach(
+  id => {
+
+    const element =
+      document.getElementById(
+        "piece-" + id
+      );
+
+
+    const data =
+      PIECE_DATA[id];
+
+
+    const piece = {
+
+      id: id,
+
+      element: element,
+
+
+      /* ---------------------------
+         現在位置
+         --------------------------- */
+
+      x: data.x,
+      y: data.y,
+
+
+      /* ---------------------------
+         初期位置
+         --------------------------- */
+
+      startX: data.x,
+      startY: data.y,
+
+
+      /* ---------------------------
+         現在の回転
+         --------------------------- */
+
+      rotation:
+        data.rotation,
+
+
+      /* ---------------------------
+         初期回転
+         --------------------------- */
+
+      startRotation:
+        data.rotation,
+
+
+      /* ---------------------------
+         現在の反転
+         --------------------------- */
+
+      flipped:
+        data.flipped,
+
+
+      /* ---------------------------
+         初期反転
+         --------------------------- */
+
+      startFlipped:
+        data.flipped,
+
+
+      /* ---------------------------
+         ドラッグ
+         --------------------------- */
+
+      dragging: false,
+
+      touchId: null,
+
+
+      /* ---------------------------
+         指とピースの差
+         --------------------------- */
+
+      grabX: 0,
+      grabY: 0,
+
+
+      /* ---------------------------
+         タップ判定
+         --------------------------- */
+
+      startTouchX: 0,
+      startTouchY: 0,
+
+      moved: false,
+
+      lastTap: 0,
+
+      tapTimer: null,
+
+
+      /* ---------------------------
+         描画
+         --------------------------- */
+
+      frameRequested: false,
+
+      nextX: data.x,
+      nextY: data.y
+
+    };
+
+
+    pieces.push(piece);
+
+
+    drawPiece(piece);
+
+
+    setupTouch(piece);
+
+  }
+);
+
+
+/* =================================
+   滑らかな移動
+   ================================= */
+
+function movePiece(
+  piece,
+  x,
+  y
+) {
+
+  piece.nextX = x;
+  piece.nextY = y;
+
+
+  /*
+   すでに描画待ちなら
+   追加しない
+  */
+
+  if (
+    piece.frameRequested
+  ) {
+
+    return;
+
+  }
+
+
+  piece.frameRequested = true;
+
+
+  requestAnimationFrame(
+    () => {
+
+      piece.frameRequested =
+        false;
+
+
+      piece.x =
+        piece.nextX;
+
+      piece.y =
+        piece.nextY;
+
+
+      drawPiece(piece);
+
+    }
+  );
+
+}
+
+
+/* =================================
+   タッチ処理
+   ================================= */
+
+function setupTouch(piece) {
+
+  const element =
+    piece.element;
+
+
+  /* =================================
+     touchstart
+     ================================= */
+
+  element.addEventListener(
+    "touchstart",
+    event => {
+
+      /*
+       複数指は無視
+      */
+
+      if (
+        piece.touchId !== null
+      ) {
+
+        return;
+
+      }
+
+
+      const touch =
+        event.changedTouches[0];
+
+
+      piece.touchId =
+        touch.identifier;
+
+
+      /*
+       選択
+      */
+
+      selectPiece(piece);
+
+
+      /*
+       指とピースの位置の差
+      */
+
+      piece.grabX =
+        touch.clientX -
+        piece.x;
+
+      piece.grabY =
+        touch.clientY -
+        piece.y;
+
+
+      /*
+       タップ判定用
+      */
+
+      piece.startTouchX =
+        touch.clientX;
+
+      piece.startTouchY =
+        touch.clientY;
+
+
+      piece.moved = false;
+
+
+      piece.dragging = true;
+
+
+      event.preventDefault();
+
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  /* =================================
+     touchmove
+     ================================= */
+
+  element.addEventListener(
+    "touchmove",
+    event => {
+
+      if (
+        piece.touchId === null
+      ) {
+
+        return;
+
+      }
+
+
+      let touch = null;
+
+
+      /*
+       自分の指を探す
+      */
+
+      for (
+        let i = 0;
+        i < event.changedTouches.length;
+        i++
+      ) {
+
+        const t =
+          event.changedTouches[i];
+
+
+        if (
+          t.identifier ===
+          piece.touchId
+        ) {
+
+          touch = t;
+
+          break;
+
+        }
+
+      }
+
+
+      if (!touch) {
+
+        return;
+
+      }
+
+
+      /*
+       移動制限なし
+
+       指の位置に追従
+      */
+
+      const x =
+        touch.clientX -
+        piece.grabX;
+
+      const y =
+        touch.clientY -
+        piece.grabY;
+
+
+      /*
+       タップかドラッグか
+      */
+
+      const dx =
+        touch.clientX -
+        piece.startTouchX;
+
+      const dy =
+        touch.clientY -
+        piece.startTouchY;
+
+
+      if (
+        Math.abs(dx) > 8 ||
+        Math.abs(dy) > 8
+      ) {
+
+        piece.moved = true;
+
+      }
+
+
+      movePiece(
+        piece,
+        x,
+        y
+      );
+
+
+      event.preventDefault();
+
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  /* =================================
+     touchend
+     ================================= */
+
+  element.addEventListener(
+    "touchend",
+    event => {
+
+      if (
+        piece.touchId === null
+      ) {
+
+        return;
+
+      }
+
+
+      let found = false;
+
+
+      for (
+        let i = 0;
+        i < event.changedTouches.length;
+        i++
+      ) {
+
+        if (
+          event.changedTouches[i]
+            .identifier ===
+          piece.touchId
+        ) {
+
+          found = true;
+
+          break;
+
+        }
+
+      }
+
+
+      if (!found) {
+
+        return;
+
+      }
+
+
+      piece.dragging = false;
+
+      piece.touchId = null;
+
+
+      /*
+       動かしていなければ
+       タップ
+      */
+
+      if (!piece.moved) {
+
+        handleTap(piece);
+
+      }
+
+
+      event.preventDefault();
+
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  /* =================================
+     touchcancel
+     ================================= */
+
+  element.addEventListener(
+    "touchcancel",
+    () => {
+
+      piece.dragging = false;
+
+      piece.touchId = null;
+
+    }
+  );
+
+}
+
+
+/* =================================
+   タップ処理
+   ================================= */
+
+function handleTap(piece) {
+
+  const now =
+    Date.now();
+
+
+  /*
+   ダブルタップ
+   ↓
+   左右反転
+  */
+
+  if (
+    now - piece.lastTap <
+    DOUBLE_TAP_TIME
+  ) {
+
+    if (piece.tapTimer) {
+
+      clearTimeout(
+        piece.tapTimer
+      );
+
+      piece.tapTimer = null;
+
+    }
+
+
+    /*
+     左右反転
+    */
+
+    piece.flipped =
+      !piece.flipped;
+
+
+    drawPiece(piece);
+
+
+    piece.lastTap = 0;
+
+
+    return;
+
+  }
+
+
+  /*
+   シングルタップ候補
+  */
+
+  piece.lastTap = now;
+
+
+  piece.tapTimer =
+    setTimeout(
+      () => {
+
+        /*
+         反転している場合は、
+         画面上で同じ方向に回転して
+         見えるように逆方向へ45度。
+        */
+
+        if (piece.flipped) {
+
+          piece.rotation -= 45;
+
+        } else {
+
+          piece.rotation += 45;
+
+        }
+
+
+        /*
+         360度を超えたら戻す
+        */
+
+        if (
+          piece.rotation >= 360
+        ) {
+
+          piece.rotation -= 360;
+
+        }
+
+
+        /*
+         0度未満なら360度側へ
+        */
+
+        if (
+          piece.rotation < 0
+        ) {
+
+          piece.rotation += 360;
+
+        }
+
+
+        drawPiece(piece);
+
+
+        piece.tapTimer = null;
+
+      },
+      DOUBLE_TAP_TIME
+    );
+
+}
+
+
+/* =================================
+   リセット
+   ================================= */
+
+document
+  .getElementById("reset")
+  .addEventListener(
+    "click",
+    () => {
+
+      pieces.forEach(piece => {
+
+        /*
+         タップ待ち解除
+        */
+
+        if (piece.tapTimer) {
+
+          clearTimeout(
+            piece.tapTimer
+          );
+
+          piece.tapTimer = null;
+
+        }
+
+
+        /*
+         ---------------------------
+         初期位置へ
+         ---------------------------
+         */
+
+        piece.x =
+          piece.startX;
+
+        piece.y =
+          piece.startY;
+
+
+        piece.nextX =
+          piece.startX;
+
+        piece.nextY =
+          piece.startY;
+
+
+        /*
+         ---------------------------
+         初期回転へ
+         ---------------------------
+         */
+
+        piece.rotation =
+          piece.startRotation;
+
+
+        /*
+         ---------------------------
+         初期反転へ
+         ---------------------------
+         */
+
+        piece.flipped =
+          piece.startFlipped;
+
+
+        /*
+         ---------------------------
+         状態リセット
+         ---------------------------
+         */
+
+        piece.dragging = false;
+
+        piece.touchId = null;
+
+
+        /*
+         ---------------------------
+         選択解除
+         ---------------------------
+         */
+
+        piece.element
+          .classList
+          .remove("selected");
+
+
+        /*
+         ---------------------------
+         描画
+         ---------------------------
+         */
+
+        drawPiece(piece);
+
+      });
+
+
+      selectedPiece = null;
+
+    }
+  );
+
+</script>
+
+</body>
+</html>
