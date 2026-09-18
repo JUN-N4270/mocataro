@@ -200,7 +200,7 @@ h1 {
 
   position: absolute;
 
-  bottom: 48px;
+  bottom: 112px;
 
   left: 50%;
 
@@ -232,18 +232,63 @@ h1 {
 
   display: flex;
 
-  gap: 6px;
-
   flex-direction: column;
 
   align-items: center;
 
+  gap: 4px;
+
   white-space: nowrap;
 
   z-index: 10000;
+
+  pointer-events: auto;
+
+  touch-action: auto;
 }
 
-#links a {
+
+/* ================================
+   TAP HERE アイコン
+   ================================ */
+
+#tapIconLink {
+
+  display: block;
+
+  width: 125px;
+
+  line-height: 0;
+
+  -webkit-tap-highlight-color: transparent;
+
+  touch-action: manipulation;
+}
+
+#tapIcon {
+
+  display: block;
+
+  width: 100%;
+
+  height: auto;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+
+  -webkit-user-drag: none;
+
+  -webkit-touch-callout: none;
+
+}
+
+
+/* ================================
+   リンク
+   ================================ */
+
+#links a.textLink {
 
   color: var(--pink);
 
@@ -254,20 +299,20 @@ h1 {
   text-decoration: none;
 
   -webkit-tap-highlight-color: transparent;
+
+  touch-action: manipulation;
 }
 
-.link-guide {
 
-  font-size: 13px;
+/* ================================
+   タップ時
+   ================================ */
 
-  font-weight: 700;
+#links a:active {
 
-  color: var(--pink);
-
-  margin-bottom: 2px;
-
+  opacity: 0.65;
 }
-    
+
 </style>
 
 </head>
@@ -329,27 +374,44 @@ h1 {
        紙素材・Instagram
        ================================ -->
 
- <div id="links">
+  <div id="links">
 
-  <div class="link-guide">
-    👆 ここをタップ！
+    <!-- TAP HEREをタップしても紙素材へ -->
+    <a
+      id="tapIconLink"
+      href="../materials/roba-puzzle.pdf"
+      target="_blank"
+      aria-label="紙で遊ぶ"
+    >
+      <img
+        id="tapIcon"
+        src="taphere.png"
+        draggable="false"
+        alt="TAP HERE"
+      >
+    </a>
+
+
+    <!-- 紙素材 -->
+    <a
+      class="textLink"
+      href="../materials/roba-puzzle.pdf"
+      target="_blank"
+    >
+      📄 紙で遊ぶ人はこちら
+    </a>
+
+
+    <!-- Instagram -->
+    <a
+      class="textLink"
+      href="https://www.instagram.com/あなたのアカウント/"
+      target="_blank"
+    >
+      📷 モカタロのインスタはこちら
+    </a>
+
   </div>
-
-  <a
-    href="../materials/roba-puzzle.pdf"
-    target="_blank"
-  >
-    📄 紙で遊ぶ人はこちら
-  </a>
-
-  <a
-    href="https://www.instagram.com/あなたのアカウント/"
-    target="_blank"
-  >
-    📷 モカタロのインスタはこちら
-  </a>
-
-</div>
 
 </div>
 
