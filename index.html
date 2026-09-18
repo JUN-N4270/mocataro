@@ -1,267 +1,377 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-RK30GTRWMF"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tパズル</title>
+<style>
+/* User-added header */
+h1{text-align:center;margin:14px 0 8px;font-size:22px;}
+#message{text-align:center;font-size:14px;margin-bottom:8px;}
+#hint{text-align:center;margin-top:-2px;font-size:12px;color:#AFC1C9;font-weight:400;white-space:nowrap;}
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #EAF6FC;
+    touch-action: none;
+    user-select: none;
+  }
+  #wrap {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  svg {
+    width: min(96vw, 900px);
+    height: min(96vh, 1100px);
+    overflow: visible;
+    touch-action: none;
+  }
+  .piece {
+    cursor: grab;
+  }
+  .piece:active { cursor: grabbing; }
+  .shape {
+    stroke: #34505F;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    paint-order: stroke fill;
+    filter:
+      drop-shadow(2px 3px 2px rgba(0,0,0,0.15));
+  }
+  #target {
+    fill: none;
+    stroke: #777;
+    stroke-width: 4;
+    stroke-dasharray: 12 8;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+    display: none;
+  }
+  /* =================================
+     選択中のピース
+     長方形パズルと同じ縁取り色
+     ================================= */
+
+  .piece.selected .shape {
+    stroke-width: 5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .piece.selected#red .shape {
+    stroke: #FF0000;
+  }
+
+  .piece.selected#blue .shape {
+    stroke: #0000FF;
+  }
+
+  .piece.selected#green .shape {
+    stroke: #00AA00;
+  }
+
+  .piece.selected#yellow .shape {
+    stroke: #FFD700;
+  }
+
+</style>
+</head>
+<body>
+<h1>Tパズル</h1>
+<div id="message">4つのピースを組み合わせて、Tの形を作ろう!</div>
+<div id="hint">タップで回転、ダブルタップで左右反転</div>
+<div id="wrap">
+<svg id="board" viewBox="0 0 750 1050">
+
+  <!-- 完成位置のT字枠：ピースよりほんの少し大きくして余裕を持たせる。吸着なし -->
+  <path id="target"
+    d="M55 330 H685 V537 H484 V920 H264 V537 H55 Z"/>
+
+  <!--
+    各ピースは
+      外側の <g> = 位置
+      内側の <g> = 回転・反転
+    と完全に分離。
+    これにより回転しても位置がズレない。
+  -->
+
+  <g id="blue" class="piece">
+    <g class="flip">
+      <g class="rotate">
+        <path class="shape"
+          d="M0 0 H280 L97 183 H0 Z"
+          fill="#64B5F6"/>
+      </g>
+    </g>
+  </g>
+
+  <g id="green" class="piece">
+    <g class="flip">
+      <g class="rotate">
+        <path class="shape"
+          d="M183 0 V183 H0 Z"
+          fill="#81C784"/>
+      </g>
+    </g>
+  </g>
+
+  <g id="yellow" class="piece">
+    <g class="flip">
+      <g class="rotate">
+        <path class="shape"
+          d="M0 183 L183 0 H464 L281 183 L98 366 H98 V183 Z"
+          fill="#FFF2A6"/>
+      </g>
+    </g>
+  </g>
+
+  <g id="red" class="piece">
+    <g class="flip">
+      <g class="rotate">
+        <path class="shape"
+          d="M183 0 V366 H0 V183 Z"
+          fill="#E57373"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- 操作ボタン -->
+  <g id="controls" font-family="sans-serif">
+    <g id="hintButton" style="cursor:pointer">
+      <rect x="250" y="10" width="250" height="58" rx="14"
+            fill="#ffffff" stroke="#9CCFE8" stroke-width="3"/>
+      <text x="375" y="47" text-anchor="middle"
+            font-size="24" font-weight="700" fill="#333">ヒントを表示する</text>
+    </g>
+
+    <g id="resetButton" style="cursor:pointer">
+      <rect x="585" y="10" width="110" height="58" rx="14"
+            fill="#ffffff" stroke="#9CCFE8" stroke-width="3"/>
+      <text x="640" y="47" text-anchor="middle"
+            font-size="22" font-weight="700" fill="#333">リセット</text>
+    </g>
+  </g>
+
+</svg>
+</div>
 
 <script>
-    window.dataLayer = window.dataLayer || [];
+const svg = document.getElementById("board");
 
-    function gtag(){
-        dataLayer.push(arguments);
+const pieces = {
+  // 初期配置：黄色を上、青を左、緑を右、赤を下へ。
+  // 互いに重ならないよう十分に間隔を取る。
+  blue:   { x: 5,   y: 650, cx: 140,  cy: 91.5, angle: 45,  flip: 1 },
+  green:  { x: 600, y: 650, cx: 91.5, cy: 91.5, angle: 135, flip: 1 },
+  yellow: { x: 205, y: 200, cx: 232,  cy: 183, angle: 225, flip: -1 },
+  red:    { x: 285, y: 735, cx: 91.5, cy: 183, angle: 90, flip: -1 }
+};
+
+let selected = null;
+let drag = null;
+
+const DOUBLE_TAP_MS = 280;
+const MOVE_LIMIT = 8;
+
+function updatePiece(id) {
+  const el = document.getElementById(id);
+  const flipGroup = el.querySelector(".flip");
+  const rotateGroup = el.querySelector(".rotate");
+  const p = pieces[id];
+
+  // 外側：現在の位置
+  el.setAttribute("transform", `translate(${p.x} ${p.y})`);
+
+  // まずピース自身を回転。
+  rotateGroup.setAttribute(
+    "transform",
+    `translate(${p.cx} ${p.cy}) rotate(${p.angle}) translate(${-p.cx} ${-p.cy})`
+  );
+
+  // その「現在の向き」のまま、中心を軸に左右反転する。
+  // これにより、反転は現在地・現在の向きでその場反転になる。
+  flipGroup.setAttribute(
+    "transform",
+    `translate(${p.cx} ${p.cy}) scale(${p.flip} 1) translate(${-p.cx} ${-p.cy})`
+  );
+}
+
+Object.keys(pieces).forEach(updatePiece);
+
+function bringToFront(el) {
+  svg.appendChild(el);
+}
+
+function clientToSvg(e) {
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+  const m = svg.getScreenCTM().inverse();
+  return pt.matrixTransform(m);
+}
+
+function pointerDown(e) {
+  const el = e.currentTarget;
+  const id = el.id;
+  const p = pieces[id];
+
+  // 「選択が変わったか」を記録。
+  // 別のピースを触った最初のタップでは回転させない。
+  const changedSelection = (selected !== id);
+
+  if (selected && selected !== id) {
+    document.getElementById(selected).classList.remove("selected");
+  }
+
+  el.classList.add("selected");
+
+  bringToFront(el);
+  selected = id;
+
+  const pt = clientToSvg(e);
+
+  // この操作が「選択変更」かどうかをpointerUpまで保持
+  el._changedSelectionOnThisTouch = changedSelection;
+
+  drag = {
+    pointerId: e.pointerId,
+    startX: pt.x,
+    startY: pt.y,
+    originalX: p.x,
+    originalY: p.y,
+    moved: false,
+    downTime: performance.now()
+  };
+
+  el.setPointerCapture(e.pointerId);
+}
+
+function pointerMove(e) {
+  if (!drag || drag.pointerId !== e.pointerId || !selected) return;
+
+  const pt = clientToSvg(e);
+  const dx = pt.x - drag.startX;
+  const dy = pt.y - drag.startY;
+
+  if (Math.hypot(dx, dy) > MOVE_LIMIT) {
+    drag.moved = true;
+  }
+
+  if (drag.moved) {
+    const p = pieces[selected];
+    p.x = drag.originalX + dx;
+    p.y = drag.originalY + dy;
+    updatePiece(selected);
+  }
+}
+
+function pointerUp(e) {
+  if (!drag || drag.pointerId !== e.pointerId || !selected) return;
+
+  const el = document.getElementById(selected);
+  const wasMoved = drag.moved;
+  const now = performance.now();
+
+  try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+
+  const id = selected;
+  const p = pieces[id];
+
+  if (!wasMoved) {
+    // 別のピースへ選択を切り替えた最初のタップは、
+    // 「選択するだけ」。回転・反転はしない。
+    if (el._changedSelectionOnThisTouch) {
+      el._changedSelectionOnThisTouch = false;
+      drag = null;
+      return;
     }
 
-    gtag('js', new Date());
+    // タップ処理
+    if (el._tapTimer && now - el._lastTap < DOUBLE_TAP_MS) {
+      clearTimeout(el._tapTimer);
+      el._tapTimer = null;
 
-    gtag('config', 'G-RK30GTRWMF');
+      // ダブルタップ：左右反転
+      p.flip *= -1;
+      updatePiece(id);
+      el._lastTap = 0;
+    } else {
+      el._lastTap = now;
+
+      // シングルタップはダブルタップ判定待ち
+      el._tapTimer = setTimeout(() => {
+        el._tapTimer = null;
+
+        // 見た目として常に時計回り45°。
+        // 左右反転すると座標系の回転方向が逆に見えるため、
+        // 反転中だけ内部角度を45°戻して、画面上では時計回りにする。
+        p.angle = (p.angle + (p.flip === -1 ? -45 : 45) + 360) % 360;
+        updatePiece(id);
+      }, DOUBLE_TAP_MS);
+    }
+  }
+
+  drag = null;
+}
+
+Object.keys(pieces).forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener("pointerdown", pointerDown);
+  el.addEventListener("pointermove", pointerMove);
+  el.addEventListener("pointerup", pointerUp);
+  el.addEventListener("pointercancel", pointerUp);
+});
+
+// ================================
+// ヒント
+// ================================
+const target = document.getElementById("target");
+const hintButton = document.getElementById("hintButton");
+let hintTimer = null;
+
+hintButton.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+
+  target.style.display = "block";
+
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => {
+    target.style.display = "none";
+  }, 5000);
+});
+
+// ================================
+// リセット
+// ================================
+const resetButton = document.getElementById("resetButton");
+
+const initialPieces = JSON.parse(JSON.stringify(pieces));
+
+resetButton.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+
+  clearTimeout(hintTimer);
+  target.style.display = "none";
+
+  if (selected) {
+    document.getElementById(selected).classList.remove("selected");
+  }
+  selected = null;
+
+  Object.keys(initialPieces).forEach(id => {
+    pieces[id] = JSON.parse(JSON.stringify(initialPieces[id]));
+    document.getElementById(id)._changedSelectionOnThisTouch = false;
+    updatePiece(id);
+  });
+});
 </script>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RK30GTRWMF"></script>
-
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag(){
-            dataLayer.push(arguments);
-        }
-
-        gtag('js', new Date());
-
-        gtag('config', 'G-RK30GTRWMF');
-    </script>
-
-    <meta charset="UTF-8">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>mocataro｜賢い子は遊んでる！</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Helvetica Neue",
-                "Hiragino Kaku Gothic ProN",
-                "Yu Gothic",
-                sans-serif;
-
-            background: #EAF6FC;
-            color: #34505F;
-        }
-
-        /* ヘッダー */
-        header {
-            background: #78B9DD;
-            color: white;
-            text-align: center;
-            padding: 28px 15px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 42px;
-            letter-spacing: 3px;
-        }
-
-        header p {
-            margin: 8px 0 0;
-            font-size: 15px;
-        }
-
-        /* メイン */
-        main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 25px 15px 50px;
-        }
-
-        /* メインカード */
-        .menu {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 18px;
-            padding: 25px 20px;
-
-            text-decoration: none;
-            color: #34505F;
-
-            box-shadow: 0 4px 12px rgba(50,120,160,0.12);
-
-            transition:
-                transform 0.15s,
-                box-shadow 0.15s;
-        }
-
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 18px rgba(50,120,160,0.18);
-        }
-
-        .icon {
-            font-size: 48px;
-            margin-bottom: 8px;
-        }
-
-        .card h2 {
-            margin: 5px 0 10px;
-            font-size: 23px;
-        }
-
-        .card p {
-            margin: 0;
-            line-height: 1.6;
-            color: #607D8B;
-            font-size: 14px;
-        }
-
-        /* お知らせ */
-        .section {
-            margin-top: 35px;
-        }
-
-        .section h2 {
-            font-size: 22px;
-
-            border-left: 5px solid #78B9DD;
-            padding-left: 10px;
-        }
-
-        .info {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-
-            box-shadow: 0 3px 10px rgba(50,120,160,0.10);
-        }
-
-        .info p {
-            line-height: 1.8;
-            margin: 8px 0;
-        }
-
-        /* フッター */
-        footer {
-            text-align: center;
-
-            background: #4D9BC7;
-            color: white;
-
-            padding: 25px 15px;
-            font-size: 13px;
-        }
-
-        /* スマホ */
-        @media (max-width: 600px) {
-
-            header h1 {
-                font-size: 34px;
-            }
-
-            .menu {
-                grid-template-columns: 1fr;
-            }
-
-            .card {
-                padding: 22px 18px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-    <h1>mocataro</h1>
-    <p>賢い子は遊んでる！</p>
-</header>
-
-<main>
-
-    <div class="menu">
-
-        <!-- ゲーム -->
-        <a class="card" href="games/">
-            <div class="icon">🎮</div>
-            <h2>ゲームで遊ぶ</h2>
-            <p>
-                Instagramで紹介したゲームを<br>
-                実際に遊んでみよう！
-            </p>
-        </a>
-
-        <!-- 工作 -->
-        <a class="card" href="materials/">
-            <div class="icon">🛠️</div>
-            <h2>工作・遊びの素材</h2>
-            <p>
-                工作の図面や型紙などを<br>
-                ダウンロードできます。(準備中)
-            </p>
-        </a>
-
-        <!-- Instagram -->
-        <a class="card"
-   href="https://www.instagram.com/mocataro_asobo/"
-   target="_blank"
-   rel="noopener"
-   onclick="gtag('event', 'instagram_click');" >
-            <div class="icon">📱</div>
-            <h2>Instagram</h2>
-            <p>
-                ゲームや工作を紹介している<br>
-                Instagramをチェック！
-            </p>
-        </a>
-
-        <!-- About -->
-        <a class="card" href="about.html">
-            <div class="icon">ℹ️</div>
-            <h2>mocataroについて</h2>
-            <p>
-                mocataroって何？<br>
-                このサイトについて紹介します。
-            </p>
-        </a>
-
-    </div>
-
-
-    <div class="section">
-
-        <h2>🆕 お知らせ</h2>
-
-        <div class="info">
-
-            <p>
-                🎮 新しいゲームを準備中！
-            </p>
-
-            <p>
-                🛠️ 工作素材も順次追加していきます。
-            </p>
-
-        </div>
-
-    </div>
-
-</main>
-
-
-<footer>
-    © mocataro
-</footer>
-
 </body>
 </html>
