@@ -2,6 +2,7 @@
 <html lang="ja">
 
 <head>
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RK30GTRWMF"></script>
 
@@ -16,6 +17,7 @@
 
     gtag('config', 'G-RK30GTRWMF');
 </script>
+
 <meta charset="UTF-8">
 
 <meta name="viewport"
@@ -164,8 +166,7 @@ h1 {
 }
 
 
-
-  /* ================================
+/* ================================
    メッセージ
    ================================ */
 
@@ -188,7 +189,9 @@ h1 {
   white-space: nowrap;
 
   pointer-events: none;
-}    
+}
+
+
 /* ================================
    ヒント
    ================================ */
@@ -197,7 +200,7 @@ h1 {
 
   position: absolute;
 
-  bottom: 14px;
+  bottom: 48px;
 
   left: 50%;
 
@@ -210,6 +213,47 @@ h1 {
   pointer-events: none;
 
   white-space: nowrap;
+}
+
+
+/* ================================
+   外部リンク
+   ================================ */
+
+#links {
+
+  position: absolute;
+
+  bottom: 8px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  display: flex;
+
+  gap: 6px;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  white-space: nowrap;
+
+  z-index: 10000;
+}
+
+#links a {
+
+  color: var(--pink);
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  text-decoration: none;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
 </style>
@@ -231,9 +275,12 @@ h1 {
 
 
 <div id="board">
-<div id="message">
- ロバに騎手を乗せて
-</div>
+
+  <div id="message">
+    ロバに騎手を乗せて
+  </div>
+
+
   <img
     class="piece"
     id="piece-left"
@@ -241,6 +288,7 @@ h1 {
     draggable="false"
     alt=""
   >
+
 
   <img
     class="piece"
@@ -250,6 +298,7 @@ h1 {
     alt=""
   >
 
+
   <img
     class="piece"
     id="piece-right"
@@ -258,8 +307,32 @@ h1 {
     alt=""
   >
 
+
   <div id="hint">
     ドラッグで移動 ・ タップで45度回転
+  </div>
+
+
+  <!-- ================================
+       紙素材・Instagram
+       ================================ -->
+
+  <div id="links">
+
+    <a
+      href="../materials/roba-puzzle.pdf"
+      target="_blank"
+    >
+      📄 紙で遊ぶ人はこちら
+    </a>
+
+    <a
+      href="https://www.instagram.com/あなたのアカウント/"
+      target="_blank"
+    >
+      📷 モカタロのインスタはこちら
+    </a>
+
   </div>
 
 </div>
