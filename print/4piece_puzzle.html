@@ -13,6 +13,15 @@
 
 <title>長方形パズル｜印刷用</title>
 
+
+<!-- PDF.js -->
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs"
+  type="module">
+</script>
+
+
 <style>
 
 /* =================================
@@ -137,31 +146,94 @@ h1 {
 
 
 /* =================================
-   PDF表示
+   プレビュー
    ================================= */
 
-#pdfFrame {
-
-  display: block;
+#preview {
 
   width: 100%;
 
-  max-width: 800px;
-
-  height: 70vh;
+  max-width: 700px;
 
   margin:
     25px
     auto
     0;
 
+}
+
+
+/* =================================
+   PDF 1ページ
+   ================================= */
+
+.pdfPage {
+
+  width: 100%;
+
+  margin:
+    0
+    auto
+    24px;
+
+  padding: 0;
+
+  background: white;
+
   border:
     2px solid
     #9CCFE8;
 
-  border-radius: 10px;
+  border-radius: 8px;
 
-  background: white;
+  overflow: hidden;
+
+  box-shadow:
+    0 2px 6px
+    rgba(0,0,0,0.10);
+}
+
+
+.pdfPage canvas {
+
+  display: block;
+
+  width: 100%;
+
+  height: auto;
+
+}
+
+
+/* =================================
+   ページ番号
+   ================================= */
+
+.pageLabel {
+
+  font-size: 12px;
+
+  color: #718994;
+
+  margin:
+    -16px
+    0
+    20px;
+
+}
+
+
+/* =================================
+   読み込み中
+   ================================= */
+
+#loading {
+
+  margin-top: 25px;
+
+  font-size: 14px;
+
+  color: #718994;
 
 }
 
@@ -320,40 +392,6 @@ h1 {
 
 }
 
-
-/* =================================
-   印刷
-   ================================= */
-
-@media print {
-
-  html,
-  body {
-
-    margin: 0;
-
-    padding: 0;
-
-    background: white;
-
-  }
-
-
-  #screen {
-
-    display: none;
-
-  }
-
-
-  #rotateWarning {
-
-    display: none;
-
-  }
-
-}
-
 </style>
 
 </head>
@@ -398,13 +436,21 @@ h1 {
 
 
   <!-- =================================
+       読み込み表示
+       ================================= -->
+
+  <div id="loading">
+
+    プレビューを読み込んでいます…
+
+  </div>
+
+
+  <!-- =================================
        PDFプレビュー
        ================================= -->
 
-  <iframe
-    id="pdfFrame"
-    src="https://jun-n4270.github.io/mocataro/materials/4piece_puzzle.pdf">
-  </iframe>
+  <div id="preview"></div>
 
 
   <!-- =================================
@@ -463,6 +509,240 @@ h1 {
 </div>
 
 
-</body>
+<!-- =================================
+     PDF.js
+     ================================= -->
 
+<script type="module">
+
+import {
+  getDocument,
+  GlobalWorkerOptions
+}
+from
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+
+
+/* =================================
+   PDF
+   ================================= */
+
+const PDF_URL =
+  "https://jun-n4270.github.io/mocataro/materials/4piece_puzzle.pdf";
+
+
+/* =================================
+   PDF.js Worker
+   ================================= */
+
+GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+
+
+/* =================================
+   要素
+   ================================= */
+
+const preview =
+  document.getElementById("preview");
+
+
+const loading =
+  document.getElementById("loading");
+
+
+/* =================================
+   PDF読み込み
+   ================================= */
+
+async function loadPDF() {
+
+  try {
+
+    const pdf =
+      await getDocument(PDF_URL).promise;
+
+
+    /*
+     全ページ処理
+    */
+
+    for (
+      let pageNumber = 1;
+      pageNumber <= pdf.numPages;
+      pageNumber++
+    ) {
+
+      await renderPage(
+        pdf,
+        pageNumber
+      );
+
+    }
+
+
+    loading.style.display =
+      "none";
+
+  }
+  catch (error) {
+
+    console.error(error);
+
+    loading.textContent =
+      "プレビューを読み込めませんでした。";
+
+  }
+
+}
+
+
+/* =================================
+   1ページ描画
+   ================================= */
+
+async function renderPage(
+  pdf,
+  pageNumber
+) {
+
+  const page =
+    await pdf.getPage(pageNumber);
+
+
+  /*
+   元PDFのページサイズ
+  */
+
+  const originalViewport =
+    page.getViewport({
+      scale: 1
+    });
+
+
+  /*
+   画面幅に合わせる
+
+   最大700px
+  */
+
+  const maxWidth =
+    Math.min(
+      window.innerWidth - 32,
+      700
+    );
+
+
+  /*
+   PDF全体が横幅に収まる
+   ように縮小
+  */
+
+  const scale =
+    maxWidth /
+    originalViewport.width;
+
+
+  const viewport =
+    page.getViewport({
+      scale: scale
+    });
+
+
+  /*
+   ページ枠
+  */
+
+  const pageBox =
+    document.createElement("div");
+
+  pageBox.className =
+    "pdfPage";
+
+
+  /*
+   Canvas
+  */
+
+  const canvas =
+    document.createElement("canvas");
+
+
+  const context =
+    canvas.getContext("2d");
+
+
+  /*
+   実際のCanvasサイズ
+  */
+
+  canvas.width =
+    Math.floor(viewport.width);
+
+  canvas.height =
+    Math.floor(viewport.height);
+
+
+  /*
+   表示サイズ
+  */
+
+  canvas.style.width =
+    "100%";
+
+  canvas.style.height =
+    "auto";
+
+
+  /*
+   Canvasを追加
+  */
+
+  pageBox.appendChild(canvas);
+
+
+  preview.appendChild(pageBox);
+
+
+  /*
+   描画
+  */
+
+  await page.render({
+
+    canvasContext: context,
+
+    viewport: viewport
+
+  }).promise;
+
+
+  /*
+   ページ番号
+  */
+
+  const label =
+    document.createElement("div");
+
+  label.className =
+    "pageLabel";
+
+  label.textContent =
+    `${pageNumber} / ${pdf.numPages} ページ`;
+
+  preview.appendChild(label);
+
+}
+
+
+/* =================================
+   実行
+   ================================= */
+
+loadPDF();
+
+</script>
+
+
+</body>
 </html>
