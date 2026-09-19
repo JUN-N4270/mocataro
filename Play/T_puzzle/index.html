@@ -79,7 +79,7 @@ h1 {
 
   font-size: 12px;
 
-  color: #AFC1C9;
+  color: #718994;
 
   font-weight: 400;
 
@@ -412,8 +412,7 @@ svg {
   <g id="controls" font-family="sans-serif">
 
 
-    <!-- ヒントボタン
-         少し下へ移動 -->
+    <!-- ヒント -->
 
     <g
       id="hintButton"
@@ -454,7 +453,7 @@ svg {
 
       <rect
         x="585"
-        y="10"
+        y="80"
         width="110"
         height="58"
         rx="14"
@@ -465,7 +464,7 @@ svg {
 
       <text
         x="640"
-        y="47"
+        y="117"
         text-anchor="middle"
         font-size="22"
         font-weight="700"
@@ -486,8 +485,7 @@ svg {
 
 
 <!-- ================================
-     Instagram
-     TAP HEREをタップしてInstagramへ
+     Instagramリンク
      ================================ -->
 
 <a
@@ -498,7 +496,7 @@ svg {
 >
 
   <div id="instagramText">
-    📱mocataroのInstagramはこちら
+    📷 mocataroのInstagramはこちら
   </div>
 
   <img
@@ -519,7 +517,6 @@ const svg =
 
 const pieces = {
 
-  // 初期配置
   blue: {
     x: 5,
     y: 650,
@@ -569,10 +566,6 @@ const DOUBLE_TAP_MS = 280;
 const MOVE_LIMIT = 8;
 
 
-/* ================================
-   ピース更新
-   ================================ */
-
 function updatePiece(id) {
 
   const el =
@@ -588,37 +581,25 @@ function updatePiece(id) {
     pieces[id];
 
 
-  /* 現在位置 */
-
   el.setAttribute(
     "transform",
     `translate(${p.x} ${p.y})`
   );
 
 
-  /* 回転 */
-
   rotateGroup.setAttribute(
-
     "transform",
-
     `translate(${p.cx} ${p.cy})
      rotate(${p.angle})
      translate(${-p.cx} ${-p.cy})`
-
   );
 
 
-  /* 左右反転 */
-
   flipGroup.setAttribute(
-
     "transform",
-
     `translate(${p.cx} ${p.cy})
      scale(${p.flip} 1)
      translate(${-p.cx} ${-p.cy})`
-
   );
 
 }
@@ -628,20 +609,12 @@ Object.keys(pieces)
   .forEach(updatePiece);
 
 
-/* ================================
-   最前面へ
-   ================================ */
-
 function bringToFront(el) {
 
   svg.appendChild(el);
 
 }
 
-
-/* ================================
-   座標変換
-   ================================ */
 
 function clientToSvg(e) {
 
@@ -661,10 +634,6 @@ function clientToSvg(e) {
 
 }
 
-
-/* ================================
-   タッチ開始
-   ================================ */
 
 function pointerDown(e) {
 
@@ -746,10 +715,6 @@ function pointerDown(e) {
 }
 
 
-/* ================================
-   移動
-   ================================ */
-
 function pointerMove(e) {
 
   if (
@@ -806,10 +771,6 @@ function pointerMove(e) {
 }
 
 
-/* ================================
-   タッチ終了
-   ================================ */
-
 function pointerUp(e) {
 
   if (
@@ -854,8 +815,6 @@ function pointerUp(e) {
   if (!wasMoved) {
 
 
-    /* 選択変更だけ */
-
     if (
       el._changedSelectionOnThisTouch
     ) {
@@ -870,10 +829,6 @@ function pointerUp(e) {
 
     }
 
-
-    /* ================================
-       タップ処理
-       ================================ */
 
     if (
       el._tapTimer &&
@@ -892,9 +847,6 @@ function pointerUp(e) {
         null;
 
 
-      /* ダブルタップ
-         → 左右反転 */
-
       p.flip *= -1;
 
 
@@ -912,8 +864,6 @@ function pointerUp(e) {
         now;
 
 
-      /* シングルタップ */
-
       el._tapTimer =
         setTimeout(() => {
 
@@ -921,8 +871,6 @@ function pointerUp(e) {
           el._tapTimer =
             null;
 
-
-          /* 時計回り45度 */
 
           p.angle =
             (
@@ -953,10 +901,6 @@ function pointerUp(e) {
 
 }
 
-
-/* ================================
-   ピースイベント
-   ================================ */
 
 Object.keys(pieces)
   .forEach(id => {
