@@ -277,12 +277,108 @@ svg {
   opacity: 0.65;
 }
 
+
+/* ================================
+   横向き警告
+   ================================ */
+
+#rotateWarning {
+
+  display: none;
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 999999;
+
+  background: #EAF6FC;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 30px;
+
+  color: #34505F;
+}
+
+
+/* 横向き時だけ表示 */
+
+@media (orientation: landscape) {
+
+  #rotateWarning {
+
+    display: flex;
+
+  }
+
+  #gameContent {
+
+    display: none;
+
+  }
+
+}
+
+
+#rotateWarningInner {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+
+#rotateIcon {
+
+  font-size: 64px;
+
+  line-height: 1;
+
+  margin-bottom: 18px;
+}
+
+
+#rotateTitle {
+
+  font-size: 24px;
+
+  font-weight: 700;
+
+  margin-bottom: 10px;
+}
+
+
+#rotateText {
+
+  font-size: 15px;
+
+  line-height: 1.7;
+
+  color: #718994;
+}
+
 </style>
 
 </head>
 
 
 <body>
+
+
+<!-- ================================
+     ゲーム本体
+     ================================ -->
+
+<div id="gameContent">
 
 
 <h1>Tパズル</h1>
@@ -509,6 +605,36 @@ svg {
 </a>
 
 
+</div>
+<!-- /gameContent -->
+
+
+<!-- ================================
+     横向き警告画面
+     ================================ -->
+
+<div id="rotateWarning">
+
+  <div id="rotateWarningInner">
+
+    <div id="rotateIcon">
+      📱↪️
+    </div>
+
+    <div id="rotateTitle">
+      縦向きにして遊んでね！
+    </div>
+
+    <div id="rotateText">
+      スマートフォンを縦向きに戻すと<br>
+      Tパズルが遊べます。
+    </div>
+
+  </div>
+
+</div>
+
+
 <script>
 
 const svg =
@@ -566,6 +692,10 @@ const DOUBLE_TAP_MS = 280;
 const MOVE_LIMIT = 8;
 
 
+/* ================================
+   ピース更新
+   ================================ */
+
 function updatePiece(id) {
 
   const el =
@@ -609,12 +739,20 @@ Object.keys(pieces)
   .forEach(updatePiece);
 
 
+/* ================================
+   最前面へ
+   ================================ */
+
 function bringToFront(el) {
 
   svg.appendChild(el);
 
 }
 
+
+/* ================================
+   座標変換
+   ================================ */
 
 function clientToSvg(e) {
 
@@ -634,6 +772,10 @@ function clientToSvg(e) {
 
 }
 
+
+/* ================================
+   タッチ開始
+   ================================ */
 
 function pointerDown(e) {
 
@@ -715,6 +857,10 @@ function pointerDown(e) {
 }
 
 
+/* ================================
+   移動
+   ================================ */
+
 function pointerMove(e) {
 
   if (
@@ -771,6 +917,10 @@ function pointerMove(e) {
 }
 
 
+/* ================================
+   タッチ終了
+   ================================ */
+
 function pointerUp(e) {
 
   if (
@@ -815,6 +965,8 @@ function pointerUp(e) {
   if (!wasMoved) {
 
 
+    /* 選択変更だけ */
+
     if (
       el._changedSelectionOnThisTouch
     ) {
@@ -829,6 +981,10 @@ function pointerUp(e) {
 
     }
 
+
+    /* ================================
+       タップ処理
+       ================================ */
 
     if (
       el._tapTimer &&
@@ -847,6 +1003,9 @@ function pointerUp(e) {
         null;
 
 
+      /* ダブルタップ
+         → 左右反転 */
+
       p.flip *= -1;
 
 
@@ -864,6 +1023,8 @@ function pointerUp(e) {
         now;
 
 
+      /* シングルタップ */
+
       el._tapTimer =
         setTimeout(() => {
 
@@ -871,6 +1032,8 @@ function pointerUp(e) {
           el._tapTimer =
             null;
 
+
+          /* 時計回り45度 */
 
           p.angle =
             (
@@ -901,6 +1064,10 @@ function pointerUp(e) {
 
 }
 
+
+/* ================================
+   ピースイベント
+   ================================ */
 
 Object.keys(pieces)
   .forEach(id => {
