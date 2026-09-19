@@ -1,1 +1,468 @@
+<!DOCTYPE html>
+<html lang="ja">
 
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
+<title>長方形パズル｜印刷用</title>
+
+<style>
+
+/* =================================
+   全体
+   ================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  min-height: 100%;
+
+  background: #EAF6FC;
+
+  color: #34505F;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+
+/* =================================
+   画面
+   ================================= */
+
+#screen {
+
+  min-height: 100vh;
+
+  padding:
+    20px
+    16px
+    30px;
+
+  text-align: center;
+}
+
+
+/* =================================
+   タイトル
+   ================================= */
+
+h1 {
+
+  margin:
+    5px
+    0
+    8px;
+
+  font-size: 22px;
+
+}
+
+
+/* =================================
+   説明
+   ================================= */
+
+#message {
+
+  font-size: 14px;
+
+  margin-bottom: 18px;
+
+  line-height: 1.6;
+
+}
+
+
+/* =================================
+   印刷ボタン
+   ================================= */
+
+#printButton {
+
+  display: inline-block;
+
+  padding:
+    13px
+    28px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #4D9BC7;
+
+  color: white;
+
+  font-size: 17px;
+
+  font-weight: 700;
+
+  text-decoration: none;
+
+  box-shadow:
+    0 3px 6px
+    rgba(0,0,0,0.15);
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+}
+
+
+#printButton:active {
+
+  transform: scale(0.96);
+
+}
+
+
+/* =================================
+   PDF表示
+   ================================= */
+
+#pdfFrame {
+
+  display: block;
+
+  width: 100%;
+
+  max-width: 800px;
+
+  height: 70vh;
+
+  margin:
+    25px
+    auto
+    0;
+
+  border:
+    2px solid
+    #9CCFE8;
+
+  border-radius: 10px;
+
+  background: white;
+
+}
+
+
+/* =================================
+   Instagram
+   ================================= */
+
+#instagramLink {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin:
+    24px
+    auto
+    0;
+
+  text-decoration: none;
+
+}
+
+
+#instagramText {
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: #4D9BC7;
+
+  margin-bottom: 2px;
+
+  white-space: nowrap;
+
+}
+
+
+#tapHere {
+
+  width: 105px;
+
+  height: auto;
+
+  display: block;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+
+  -webkit-touch-callout: none;
+
+}
+
+
+#instagramLink:active #tapHere {
+
+  transform: scale(0.94);
+
+}
+
+
+/* =================================
+   横向き警告
+   ================================= */
+
+#rotateWarning {
+
+  display: none;
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 999999;
+
+  background: #EAF6FC;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 30px;
+
+  color: #34505F;
+
+}
+
+
+#rotateWarningInner {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+}
+
+
+#rotateIcon {
+
+  font-size: 64px;
+
+  line-height: 1;
+
+  margin-bottom: 18px;
+
+}
+
+
+#rotateTitle {
+
+  font-size: 24px;
+
+  font-weight: 700;
+
+  margin-bottom: 10px;
+
+}
+
+
+#rotateText {
+
+  font-size: 15px;
+
+  line-height: 1.7;
+
+  color: #718994;
+
+}
+
+
+@media (orientation: landscape) {
+
+  #rotateWarning {
+
+    display: flex;
+
+  }
+
+  #screen {
+
+    display: none;
+
+  }
+
+}
+
+
+/* =================================
+   印刷
+   ================================= */
+
+@media print {
+
+  html,
+  body {
+
+    margin: 0;
+
+    padding: 0;
+
+    background: white;
+
+  }
+
+
+  #screen {
+
+    display: none;
+
+  }
+
+
+  #rotateWarning {
+
+    display: none;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =================================
+     画面
+     ================================= -->
+
+<div id="screen">
+
+
+  <h1>
+    長方形パズル
+  </h1>
+
+
+  <div id="message">
+
+    4ピースのパズルを
+    印刷して遊べます。
+
+  </div>
+
+
+  <!-- =================================
+       印刷ボタン
+       ================================= -->
+
+  <a
+    id="printButton"
+    href="https://jun-n4270.github.io/mocataro/materials/4piece_puzzle.pdf"
+    target="_blank"
+    rel="noopener noreferrer">
+
+    🖨 印刷する
+
+  </a>
+
+
+  <!-- =================================
+       PDFプレビュー
+       ================================= -->
+
+  <iframe
+    id="pdfFrame"
+    src="https://jun-n4270.github.io/mocataro/materials/4piece_puzzle.pdf">
+  </iframe>
+
+
+  <!-- =================================
+       Instagram
+       ================================= -->
+
+  <a
+    id="instagramLink"
+    href="https://www.instagram.com/mocataro_asobo/"
+    target="_blank"
+    rel="noopener noreferrer">
+
+    <div id="instagramText">
+      📱 mocataroのInstagramはこちら↓↓
+    </div>
+
+    <img
+      id="tapHere"
+      src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
+      alt="TAP HERE"
+      draggable="false">
+
+  </a>
+
+
+</div>
+
+
+<!-- =================================
+     横向き警告
+     ================================= -->
+
+<div id="rotateWarning">
+
+  <div id="rotateWarningInner">
+
+    <div id="rotateIcon">
+      📱↪️
+    </div>
+
+
+    <div id="rotateTitle">
+      縦向きにしてね！
+    </div>
+
+
+    <div id="rotateText">
+
+      スマートフォンを縦向きに戻すと<br>
+      印刷ページが表示されます。
+
+    </div>
+
+  </div>
+
+</div>
+
+
+</body>
+
+</html>
