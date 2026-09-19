@@ -10,7 +10,7 @@
                maximum-scale=1.0,
                user-scalable=no">
 
-<title>長方形パズル</title>
+<title>長方形パズル</title>
 
 <style>
 
@@ -47,6 +47,16 @@ body {
 
 
 /* =================================
+   ゲーム本体
+   ================================= */
+
+#gameContent {
+  width: 100%;
+  height: 100%;
+}
+
+
+/* =================================
    タイトル
    ================================= */
 
@@ -60,7 +70,7 @@ h1 {
 
 
 /* =================================
-   メッセージ
+   メッセージ
    ================================= */
 
 #message {
@@ -73,16 +83,21 @@ h1 {
 
 #hint {
   text-align: center;
+
   margin-top: -2px;
+
   font-size: 12px;
+
   color: #4f5b65;
+
   font-weight: 400;
+
   white-space: nowrap;
 }
 
 
 /* =================================
-   ゲームエリア
+   ゲームエリア
    ================================= */
 
 #game {
@@ -138,7 +153,7 @@ h1 {
 
 
 /* =================================
-   ピース
+   ピース
    ================================= */
 
 .piece {
@@ -162,8 +177,6 @@ h1 {
 
   z-index: 10;
 
-  /* 薄い影 */
-
   filter:
     drop-shadow(
       2px 3px 2px
@@ -182,38 +195,50 @@ h1 {
 
 
 /* =================================
-   選択中のピース
+   選択中のピース
    濃い色の縁取り
    ================================= */
 
 .piece.red.selected polygon {
   stroke: #FF0000;
+
   stroke-width: 5;
+
   stroke-linejoin: round;
+
   vector-effect: non-scaling-stroke;
 }
 
 
 .piece.blue.selected polygon {
   stroke: #0000FF;
+
   stroke-width: 5;
+
   stroke-linejoin: round;
+
   vector-effect: non-scaling-stroke;
 }
 
 
 .piece.green.selected polygon {
   stroke: #00AA00;
+
   stroke-width: 5;
+
   stroke-linejoin: round;
+
   vector-effect: non-scaling-stroke;
 }
 
 
 .piece.yellow.selected polygon {
   stroke: #FFD700;
+
   stroke-width: 5;
+
   stroke-linejoin: round;
+
   vector-effect: non-scaling-stroke;
 }
 
@@ -239,7 +264,7 @@ h1 {
 
 
 /* =================================
-   ピースの色
+   ピースの色
    ================================= */
 
 .piece.red polygon {
@@ -290,6 +315,161 @@ h1 {
   transform: scale(0.96);
 }
 
+
+/* =================================
+   Instagram
+   ================================= */
+
+#instagramLink {
+
+  position: fixed;
+
+  left: 50%;
+
+  bottom: 8px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-decoration: none;
+
+  z-index: 9999;
+}
+
+
+#instagramText {
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: #4D9BC7;
+
+  margin-bottom: 2px;
+
+  white-space: nowrap;
+}
+
+
+#tapHere {
+
+  width: 105px;
+
+  height: auto;
+
+  display: block;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+
+  -webkit-touch-callout: none;
+}
+
+
+/* =================================
+   Instagram タップ時
+   ================================= */
+
+#instagramLink:active #tapHere {
+
+  transform: scale(0.94);
+
+}
+
+
+/* =================================
+   横向き警告
+   ================================= */
+
+#rotateWarning {
+
+  display: none;
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 999999;
+
+  background: #EAF6FC;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 30px;
+
+  color: #34505F;
+}
+
+
+@media (orientation: landscape) {
+
+  #rotateWarning {
+
+    display: flex;
+
+  }
+
+
+  #gameContent {
+
+    display: none;
+
+  }
+
+}
+
+
+#rotateWarningInner {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+
+#rotateIcon {
+
+  font-size: 64px;
+
+  line-height: 1;
+
+  margin-bottom: 18px;
+}
+
+
+#rotateTitle {
+
+  font-size: 24px;
+
+  font-weight: 700;
+
+  margin-bottom: 10px;
+}
+
+
+#rotateText {
+
+  font-size: 15px;
+
+  line-height: 1.7;
+
+  color: #718994;
+}
+
 </style>
 </head>
 
@@ -297,15 +477,23 @@ h1 {
 <body>
 
 
-<h1>長方形パズル</h1>
+<!-- =================================
+     ゲーム本体
+     ================================= -->
+
+<div id="gameContent">
+
+
+<h1>長方形パズル</h1>
 
 
 <div id="message">
-  4つのピースを組み合わせて、長方形を作ろう!
+  4つのピースを組み合わせて、長方形を作ろう!
 </div>
 
+
 <div id="hint">
-  タップで回転、ダブルタップで左右反転
+  タップで回転、ダブルタップで左右反転
 </div>
 
 
@@ -377,8 +565,7 @@ h1 {
 
 
   <!-- =================================
-       赤ピース
-       51%
+       赤ピース
        ================================= -->
 
   <div
@@ -410,8 +597,7 @@ h1 {
 
 
   <!-- =================================
-       黄ピース
-       51%
+       黄ピース
        ================================= -->
 
   <div
@@ -443,8 +629,7 @@ h1 {
 
 
   <!-- =================================
-       青ピース
-       51%
+       青ピース
        ================================= -->
 
   <div
@@ -478,8 +663,7 @@ h1 {
 
 
   <!-- =================================
-       緑ピース
-       51%
+       緑ピース
        ================================= -->
 
   <div
@@ -518,6 +702,59 @@ h1 {
 <button id="reset">
   リセット
 </button>
+
+
+
+<!-- =================================
+     Instagram
+     ================================= -->
+
+<a id="instagramLink"
+   href="https://www.instagram.com/mocataro_asobo/"
+   target="_blank"
+   rel="noopener noreferrer">
+
+  <div id="instagramText">
+    📱 mocataroのInstagramはこちら↓↓
+  </div>
+
+  <img
+    id="tapHere"
+    src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
+    alt="TAP HERE"
+    draggable="false"
+  >
+
+</a>
+
+
+</div>
+
+
+<!-- =================================
+     横向き警告
+     ================================= -->
+
+<div id="rotateWarning">
+
+  <div id="rotateWarningInner">
+
+    <div id="rotateIcon">
+      📱↪️
+    </div>
+
+    <div id="rotateTitle">
+      縦向きにして遊んでね！
+    </div>
+
+    <div id="rotateText">
+      スマートフォンを縦向きに戻すと<br>
+      長方形パズルが遊べます。
+    </div>
+
+  </div>
+
+</div>
 
 
 
@@ -603,7 +840,7 @@ const PIECE_DATA = {
 
 
 /* =================================
-   ゲーム
+   ゲーム
    ================================= */
 
 const game =
@@ -621,7 +858,7 @@ let selectedPiece = null;
 
 
 /* =================================
-   ピース描画
+   ピース描画
    ================================= */
 
 function drawPiece(piece) {
@@ -666,13 +903,13 @@ function drawPiece(piece) {
 
 
 /* =================================
-   ピースを選択
+   ピースを選択
    ================================= */
 
 function selectPiece(piece) {
 
   /*
-   前のピースの選択を解除
+   前のピースの選択を解除
   */
 
   if (
@@ -689,7 +926,7 @@ function selectPiece(piece) {
 
 
   /*
-   今のピースを選択
+   今のピースを選択
   */
 
   piece.element
@@ -775,7 +1012,7 @@ Object.keys(PIECE_DATA).forEach(
 
 
       /* ---------------------------
-         ドラッグ
+         ドラッグ
          --------------------------- */
 
       dragging: false,
@@ -784,7 +1021,7 @@ Object.keys(PIECE_DATA).forEach(
 
 
       /* ---------------------------
-         指とピースの差
+         指とピースの差
          --------------------------- */
 
       grabX: 0,
@@ -792,7 +1029,7 @@ Object.keys(PIECE_DATA).forEach(
 
 
       /* ---------------------------
-         タップ判定
+         タップ判定
          --------------------------- */
 
       startTouchX: 0,
@@ -844,7 +1081,7 @@ function movePiece(
 
 
   /*
-   すでに描画待ちなら
+   すでに描画待ちなら
    追加しない
   */
 
@@ -929,7 +1166,7 @@ function setupTouch(piece) {
 
 
       /*
-       指とピースの位置の差
+       指とピースの位置の差
       */
 
       piece.grabX =
@@ -942,7 +1179,7 @@ function setupTouch(piece) {
 
 
       /*
-       タップ判定用
+       タップ判定用
       */
 
       piece.startTouchX =
@@ -1023,8 +1260,6 @@ function setupTouch(piece) {
 
 
       /*
-       移動制限なし
-
        指の位置に追従
       */
 
@@ -1038,7 +1273,7 @@ function setupTouch(piece) {
 
 
       /*
-       タップかドラッグか
+       タップかドラッグか
       */
 
       const dx =
@@ -1130,8 +1365,8 @@ function setupTouch(piece) {
 
 
       /*
-       動かしていなければ
-       タップ
+       動かしていなければ
+       タップ
       */
 
       if (!piece.moved) {
@@ -1169,7 +1404,7 @@ function setupTouch(piece) {
 
 
 /* =================================
-   タップ処理
+   タップ処理
    ================================= */
 
 function handleTap(piece) {
@@ -1179,7 +1414,7 @@ function handleTap(piece) {
 
 
   /*
-   ダブルタップ
+   ダブルタップ
    ↓
    左右反転
   */
@@ -1220,7 +1455,7 @@ function handleTap(piece) {
 
 
   /*
-   シングルタップ候補
+   シングルタップ候補
   */
 
   piece.lastTap = now;
@@ -1232,7 +1467,7 @@ function handleTap(piece) {
 
         /*
          反転している場合は、
-         画面上で同じ方向に回転して
+         画面上で同じ方向に回転して
          見えるように逆方向へ45度。
         */
 
@@ -1298,7 +1533,7 @@ document
       pieces.forEach(piece => {
 
         /*
-         タップ待ち解除
+         タップ待ち解除
         */
 
         if (piece.tapTimer) {
