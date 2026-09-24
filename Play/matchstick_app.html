@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>マッチ棒を動かしてみよう!</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;background:#eee}
+#app{width:100%;height:100%;display:flex;flex-direction:column}
+header{text-align:center;padding:10px 10px 2px;flex:0 0 auto}
+h1{margin:0;font-size:22px;line-height:40px}
+.controls{padding:4px 30px 0;flex:0 0 auto}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.row label{font-size:17px;white-space:nowrap}
+#numberField{width:80px;height:40px;border:1px solid #999;border-radius:4px;background:#fff;text-align:center;font-size:17px}
+button{height:40px;border:0;border-radius:8px;color:#fff;font-size:16px;font-weight:700;touch-action:manipulation}
+#makeButton{background:#4A90E2;width:150px}
+#addButton{background:#3FA65C;width:100px}
+#removeButton{background:#D9534F;width:100px}
+#rotateButton{background:#666;width:150px}
+#ballButton{background:#333;width:180px}
+.info{height:30px;line-height:30px;flex:0 0 auto;text-align:center;font-size:14px}
+#matchArea{position:relative;flex:1 1 auto;margin:0 10px;overflow:hidden;background:#fff;touch-action:none}
+#canvas{display:block;width:100%;height:100%;touch-action:none}
+.match-body{stroke:#B87945;stroke-width:12;stroke-linecap:round;fill:none}
+.selected-outline{stroke:#FFD700;stroke-width:22;stroke-linecap:round;fill:none}
+.match-head{fill:#D92B2B}
+.connection{fill:#FFD700}
+.ball{fill:#222}
+.ball-inner{fill:#fff}
+.ball-center{fill:#222}
+.ball-selection{fill:#FFD700}
+@media(max-width:430px){
+ .controls{padding-left:15px;padding-right:15px}
+ .row{gap:6px}
+ #makeButton,#rotateButton{width:125px;padding:0 6px}
+ #numberField{width:65px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<header><h1>マッチ棒を動かしてみよう!</h1></header>
+
+<div class="controls">
+  <div class="row">
+    <label for="numberField">マッチ棒の本数</label>
+    <input id="numberField" type="number" inputmode="numeric" min="0" max="100" value="10">
+    <button id="makeButton">作り直す</button>
+  </div>
+  <div class="row">
+    <button id="addButton">+ 1本</button>
+    <button id="removeButton">− 1本</button>
+    <button id="rotateButton">↻ 45°回転</button>
+  </div>
+  <div class="row">
+    <button id="ballButton">⚽ ボール追加</button>
+  </div>
+</div>
+
+<div class="info">マッチ棒やボールを指でつかんで動かせます</div>
+<div id="matchArea"><svg id="canvas"></svg></div>
+</div>
+
+<script>
+class Matchstick{
+  constructor(x,y,length=90,angle=0){
+    this.x=x;this.y=y;this.length=length;this.angle=angle;
+  }
+  connectionPoints(){
+    const r=this.angle*Math.PI/180;
+    const dx=Math.cos(r)*this.length/2;
+    const dy=Math.sin(r)*this.length/2;
+    return [[this.x-dx,this.y-dy],[this.x,this.y],[this.x+dx,this.y+dy]];
+  }
+  points(){
+    const p=this.connectionPoints();
+    return [p[0][0],p[0][1],p[2][0],p[2][1]];
+  }
+}
+
+class Ball{
+  constructor(x,y,radius=20){
+    this.x=x;this.y=y;this.radius=radius;
+  }
+}
+
+function svgEl(name){
+  return document.createElementNS("http://www.w3.org/2000/svg",name);
+}
+
+class MatchstickView{
+  constructor(svg){
+    this.svg=svg;
+    this.matchsticks=[];
+    this.balls=[];
+    this.selected=null;
+    this.selectedType=null;
+    this.dragStart=null;
+    this.original=null;
+    this.snapDistance=25;
+    this.dragging=false;
+    this.bindEvents();
+  }
+
+  getPoint(e){
+    const r=this.svg.getBoundingClientRect();
+    return {x:e.clientX-r.left,y:e.clientY-r.top};
+  }
+
+  render(){
+    this.svg.replaceChildren();
+
+    this.matchsticks.forEach((m,i)=>{
+      const g=svgEl("g");
+      const [x1,y1,x2,y2]=m.points();
+
+      if(this.selectedType==="match"&&i===this.selected){
+        const s=svgEl("line");
+        s.setAttribute("x1",x1);s.setAttribute("y1",y1);
+        s.setAttribute("x2",x2);s.setAttribute("y2",y2);
+        s.setAttribute("class","selected-outline");
+        g.appendChild(s);
+      }
+
+      const line=svgEl("line");
+      line.setAttribute("x1",x1);line.setAttribute("y1",y1);
+      line.setAttribute("x2",x2);line.setAttribute("y2",y2);
+      line.setAttribute("class","match-body");
+      g.appendChild(line);
+
+      for(const [cx,cy] of [[x1,y1],[x2,y2]]){
+        const c=svgEl("circle");
+        c.setAttribute("cx",cx);c.setAttribute("cy",cy);
+        c.setAttribute("r",8);c.setAttribute("class","match-head");
+        g.appendChild(c);
+      }
+
+      for(const [cx,cy] of m.connectionPoints()){
+        const c=svgEl("circle");
+        c.setAttribute("cx",cx);c.setAttribute("cy",cy);
+        c.setAttribute("r",4);c.setAttribute("class","connection");
+        g.appendChild(c);
+      }
+
+      g.dataset.type="match";
+      g.dataset.index=i;
+      this.svg.appendChild(g);
+    });
+
+    this.balls.forEach((b,i)=>{
+      const g=svgEl("g");
+      g.dataset.type="ball";g.dataset.index=i;
+
+      if(this.selectedType==="ball"&&i===this.selected){
+        const s=svgEl("circle");
+        s.setAttribute("cx",b.x);s.setAttribute("cy",b.y);
+        s.setAttribute("r",b.radius+5);s.setAttribute("class","ball-selection");
+        g.appendChild(s);
+      }
+
+      const body=svgEl("circle");
+      body.setAttribute("cx",b.x);body.setAttribute("cy",b.y);
+      body.setAttribute("r",b.radius);body.setAttribute("class","ball");
+      g.appendChild(body);
+
+      const inner=svgEl("circle");
+      inner.setAttribute("cx",b.x);inner.setAttribute("cy",b.y);
+      inner.setAttribute("r",b.radius-4);inner.setAttribute("class","ball-inner");
+      g.appendChild(inner);
+
+      const center=svgEl("circle");
+      center.setAttribute("cx",b.x);center.setAttribute("cy",b.y);
+      center.setAttribute("r",5);center.setAttribute("class","ball-center");
+      g.appendChild(center);
+
+      this.svg.appendChild(g);
+    });
+  }
+
+  hitMatchstick(x,y){
+    let best=null,bestDist=35;
+    this.matchsticks.forEach((m,i)=>{
+      const [x1,y1,x2,y2]=m.points();
+      const dx=x2-x1,dy=y2-y1;
+      let dist;
+      if(dx===0&&dy===0){
+        dist=Math.hypot(x-x1,y-y1);
+      }else{
+        let t=((x-x1)*dx+(y-y1)*dy)/(dx*dx+dy*dy);
+        t=Math.max(0,Math.min(1,t));
+        const px=x1+t*dx,py=y1+t*dy;
+        dist=Math.hypot(x-px,y-py);
+      }
+      if(dist<bestDist){bestDist=dist;best=i;}
+    });
+    return best;
+  }
+
+  hitBall(x,y){
+    for(let i=this.balls.length-1;i>=0;i--){
+      const b=this.balls[i];
+      if(Math.hypot(x-b.x,y-b.y)<=b.radius+10)return i;
+    }
+    return null;
+  }
+
+  pointerDown(e){
+    e.preventDefault();
+    const {x,y}=this.getPoint(e);
+
+    const ball=this.hitBall(x,y);
+    if(ball!==null){
+      this.selected=ball;this.selectedType="ball";
+      const b=this.balls[ball];
+      this.dragStart=[x,y];this.original=[b.x,b.y];
+      this.dragging=true;
+      this.svg.setPointerCapture?.(e.pointerId);
+      this.render();
+      return;
+    }
+
+    const match=this.hitMatchstick(x,y);
+    this.selected=match;
+
+    if(match!==null){
+      this.selectedType="match";
+      const m=this.matchsticks[match];
+      this.dragStart=[x,y];this.original=[m.x,m.y];
+      this.dragging=true;
+      this.svg.setPointerCapture?.(e.pointerId);
+    }else{
+      this.selectedType=null;
+      this.dragging=false;
+    }
+    this.render();
+  }
+
+  pointerMove(e){
+    if(!this.dragging||this.selected===null)return;
+    e.preventDefault();
+    const {x,y}=this.getPoint(e);
+    const [sx,sy]=this.dragStart;
+
+    if(this.selectedType==="ball"){
+      const b=this.balls[this.selected];
+      b.x=this.original[0]+x-sx;
+      b.y=this.original[1]+y-sy;
+    }else{
+      const m=this.matchsticks[this.selected];
+      m.x=this.original[0]+x-sx;
+      m.y=this.original[1]+y-sy;
+      this.snapConnection(this.selected);
+    }
+    this.render();
+  }
+
+  pointerUp(e){
+    if(this.selectedType==="match"&&this.selected!==null){
+      this.snapConnection(this.selected);
+    }
+    this.dragging=false;
+    try{this.svg.releasePointerCapture?.(e.pointerId)}catch(_){}
+    this.render();
+  }
+
+  snapConnection(index){
+    if(index===null||index===undefined)return;
+
+    const target=this.matchsticks[index];
+    let targetPoints=target.connectionPoints();
+    let bestDistance=this.snapDistance;
+    let bestTarget=null,bestSource=null;
+
+    for(let j=0;j<this.matchsticks.length;j++){
+      if(j===index)continue;
+      const otherPoints=this.matchsticks[j].connectionPoints();
+
+      for(let si=0;si<targetPoints.length;si++){
+        const [sx,sy]=targetPoints[si];
+
+        for(const [tx,ty] of otherPoints){
+          const d=Math.hypot(sx-tx,sy-ty);
+          if(d<bestDistance){
+            bestDistance=d;
+            bestSource=si;
+            bestTarget=[tx,ty];
+          }
+        }
+      }
+    }
+
+    if(bestTarget!==null){
+      let [sx,sy]=targetPoints[bestSource];
+      const [tx,ty]=bestTarget;
+
+      target.x+=tx-sx;
+      target.y+=ty-sy;
+
+      target.angle=Math.round(target.angle/45)*45;
+      target.angle%=360;
+
+      targetPoints=target.connectionPoints();
+      [sx,sy]=targetPoints[bestSource];
+
+      target.x+=tx-sx;
+      target.y+=ty-sy;
+    }
+  }
+
+  rotateSelected(){
+    if(this.selectedType!=="match"||this.selected===null)return;
+    const m=this.matchsticks[this.selected];
+    m.angle=(m.angle+45)%360;
+    this.snapConnection(this.selected);
+    this.render();
+  }
+
+  addMatchstick(){
+    const i=this.matchsticks.length;
+    const col=i%5,row=Math.floor(i/5);
+    const x=55+col*90,y=60+row*70;
+    const angle=i%2===0?0:90;
+    this.matchsticks.push(new Matchstick(x,y,75,angle));
+    this.selected=i;this.selectedType="match";
+    this.render();
+  }
+
+  removeMatchstick(){
+    if(this.matchsticks.length===0)return;
+
+    if(this.selectedType==="match"&&this.selected!==null){
+      this.matchsticks.splice(this.selected,1);
+    }else{
+      this.matchsticks.pop();
+    }
+
+    this.selected=null;this.selectedType=null;
+    this.render();
+  }
+
+  addBall(){
+    const i=this.balls.length;
+    const x=80+(i%5)*80;
+    const y=60+Math.floor(i/5)*70;
+    this.balls.push(new Ball(x,y,20));
+    this.selected=i;this.selectedType="ball";
+    this.render();
+  }
+
+  makeMatchsticks(count){
+    count=Math.max(0,Math.min(Number(count)||10,100));
+    this.matchsticks=[];
+
+    for(let i=0;i<count;i++){
+      const col=i%5,row=Math.floor(i/5);
+      const x=55+col*90,y=60+row*70;
+      const angle=i%2===0?0:90;
+      this.matchsticks.push(new Matchstick(x,y,75,angle));
+    }
+
+    this.selected=null;this.selectedType=null;
+    this.render();
+  }
+
+  bindEvents(){
+    this.svg.addEventListener("pointerdown",e=>this.pointerDown(e));
+    window.addEventListener("pointermove",e=>this.pointerMove(e),{passive:false});
+    window.addEventListener("pointerup",e=>this.pointerUp(e));
+
+    document.getElementById("makeButton").onclick=()=>{
+      let n=parseInt(document.getElementById("numberField").value,10);
+      if(Number.isNaN(n))n=10;
+      this.makeMatchsticks(n);
+    };
+
+    document.getElementById("addButton").onclick=()=>{
+      this.addMatchstick();
+      document.getElementById("numberField").value=this.matchsticks.length;
+    };
+
+    document.getElementById("removeButton").onclick=()=>{
+      this.removeMatchstick();
+      document.getElementById("numberField").value=this.matchsticks.length;
+    };
+
+    document.getElementById("rotateButton").onclick=()=>{
+      this.rotateSelected();
+    };
+
+    document.getElementById("ballButton").onclick=()=>{
+      this.addBall();
+    };
+  }
+}
+
+const matchView=new MatchstickView(document.getElementById("canvas"));
+matchView.makeMatchsticks(10);
+</script>
+</body>
+</html>
