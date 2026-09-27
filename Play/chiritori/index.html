@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ちりとりパズル</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;background:#ECF6FB;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+  text-align:center;padding:12px 12px 0;
+}
+h1{
+  margin:0;color:#111;
+  font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+  font-size:28px;font-weight:700;line-height:46px;
+}
+#app{height:100%;display:flex;flex-direction:column}
+.controls{flex:0 0 auto;padding:7px 12px 0}
+.row{
+  display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:7px;
+}
+#resetButton{
+  height:42px;width:140px;border:2px solid #A9D3E9;border-radius:13px;
+  background:#fff;color:#222;font-size:16px;font-weight:700;
+  touch-action:manipulation;
+}
+#resetButton:active{background:#F3FAFD;transform:scale(.98)}
+#problem{
+  flex:0 0 auto;text-align:center;margin:1px 10px 2px;
+  color:#34505F;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+  font-size:18px;font-weight:700;line-height:1.45;
+}
+#info{
+  flex:0 0 auto;text-align:center;margin:0 10px 2px;
+  color:#6F9BB0;font-size:15px;line-height:1.4;white-space:nowrap;
+}
+#status{
+  flex:0 0 auto;text-align:center;height:25px;margin:0 10px;
+  color:#34505F;font-size:15px;font-weight:700;
+}
+#matchArea{
+  position:relative;flex:1 1 auto;margin:0;overflow:hidden;
+  background:transparent;touch-action:none;z-index:1;
+}
+#canvas{display:block;width:100%;height:100%;touch-action:none;overflow:visible}
+.match-body{
+  stroke:#34505F;stroke-width:19;stroke-linecap:round;fill:none;
+}
+.match-color{stroke-linecap:round;fill:none}
+.selected-outline{
+  stroke:#fff;stroke-width:25;stroke-linecap:round;fill:none;opacity:.95;
+}
+.connection{fill:#34505F;opacity:.18}
+.medal-selection{fill:none;stroke:#FFD84D;stroke-width:3}
+.medal-emoji{pointer-events:none;user-select:none}
+#success{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:none;z-index:20;width:min(88%,420px);padding:20px 18px;
+  background:rgba(255,255,255,.97);border:3px solid #A9D3E9;
+  border-radius:22px;box-shadow:0 8px 30px rgba(52,80,95,.16);
+}
+.success-title{
+  color:#34505F;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+  font-size:27px;font-weight:700;margin-bottom:7px;
+}
+.success-text{color:#6F9BB0;font-size:15px;line-height:1.5}
+#footer{flex:0 0 auto;text-align:center;padding:4px 0 9px}
+#instagramText{
+  margin:0 0 4px;color:#34505F;
+  font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+  font-size:16px;font-weight:700;
+}
+#tapHereLink{display:block;width:max-content;margin:0 auto;line-height:0}
+#tapHere{display:block;width:118px;height:auto;cursor:pointer;user-select:none}
+
+/* 横向き警告 */
+#orientationWarning{display:none}
+@media (orientation:landscape){
+  #orientationWarning{
+    position:fixed;inset:0;z-index:99999;display:flex;
+    align-items:center;justify-content:center;background:#ECF6FB;
+    padding:24px;text-align:center;
+  }
+  .orientation-card{
+    width:min(88vw,520px);padding:28px 22px;background:#fff;
+    border:3px solid #A9D3E9;border-radius:24px;
+    box-shadow:0 8px 30px rgba(52,80,95,.15);
+  }
+  .orientation-icon{font-size:58px;line-height:1;margin-bottom:14px}
+  .orientation-title{
+    color:#34505F;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    font-size:26px;font-weight:700;margin-bottom:10px;
+  }
+  .orientation-text{color:#6F9BB0;font-size:16px;line-height:1.6}
+}
+
+/* 小さい縦画面でも収まるように */
+@media(max-width:430px){
+  h1{font-size:25px}
+  #problem{font-size:17px}
+  #info{font-size:14px}
+  #tapHere{width:112px}
+}
+</style>
+</head>
+<body>
+
+<div id="orientationWarning">
+  <div class="orientation-card">
+    <div class="orientation-icon">📱</div>
+    <div class="orientation-title">縦画面にして遊んでね！</div>
+    <div class="orientation-text">このゲームは縦向きで遊んでください。</div>
+  </div>
+</div>
+
+<div id="app">
+  <header><h1>ちりとりパズル</h1></header>
+
+  <div class="controls">
+    <div class="row">
+      <button id="resetButton">やり直す</button>
+    </div>
+  </div>
+
+  <div id="problem">棒を<strong>2本</strong>動かして、<br>🪙ゴミをちりとりの外に出そう！</div>
+  <div id="info">棒をつかんで動かせます。タップすると45°回転します。</div>
+  <div id="status">あと 2本</div>
+
+  <div id="matchArea">
+    <svg id="canvas"></svg>
+    <div id="success">
+      <div class="success-title">🎉 クリア！</div>
+      <div class="success-text">ゴミをちりとりの外に出せたね！</div>
+    </div>
+  </div>
+
+  <div id="footer">
+    <p id="instagramText">📱 mocataroのInstagramはこちら↓↓</p>
+    <a id="tapHereLink" href="https://www.instagram.com/mocataro_asobo/">
+      <img id="tapHere" src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG" alt="Tap here">
+    </a>
+  </div>
+</div>
+
+<script>
+const STICK_COLORS=["#FF5A5F","#4A90E2","#FFD23F","#3FA65C"];
+
+class Matchstick{
+  constructor(id,x,y,length=130,angle=0,color="#4A90E2"){
+    this.id=id;this.x=x;this.y=y;this.length=length;this.angle=angle;this.color=color;
+    this.initial={x,y,angle};
+  }
+  points(){
+    const r=this.angle*Math.PI/180;
+    const dx=Math.cos(r)*this.length/2;
+    const dy=Math.sin(r)*this.length/2;
+    return [this.x-dx,this.y-dy,this.x+dx,this.y+dy];
+  }
+}
+
+class Puzzle{
+  constructor(svg){
+    this.svg=svg;
+    this.sticks=[];
+    this.selected=null;
+    this.dragging=false;
+    this.dragStart=null;
+    this.original=null;
+    this.movedIds=new Set();
+    this.activeMoveId=null;
+    this.length=130;
+    this.trash={x:0,y:0};
+    this.trashR=23;
+    this.locked=false;
+    this.bind();
+    this.reset();
+  }
+
+  getPoint(e){
+    const r=this.svg.getBoundingClientRect();
+    return {x:e.clientX-r.left,y:e.clientY-r.top};
+  }
+
+  reset(){
+    this.locked=false;
+    this.selected=null;
+    this.dragging=false;
+    this.movedIds.clear();
+    this.activeMoveId=null;
+
+    const w=this.svg.clientWidth || 390;
+    const h=this.svg.clientHeight || 600;
+    const L=Math.min(130, Math.max(100, w*.30));
+    this.length=L;
+
+    // 初期配置：画像の「ちりとり」
+    // ① 柄、② 上辺、③ 左辺、④ 右辺
+    const cx=w/2, cy=Math.min(210,h*.34);
+    const left=cx-L/2, right=cx+L/2;
+
+    this.sticks=[
+      new Matchstick(1,cx,cy-L/2,L,90,STICK_COLORS[0]),
+      new Matchstick(2,cx,cy,L,0,STICK_COLORS[1]),
+      new Matchstick(3,left,cy+L/2,L,90,STICK_COLORS[2]),
+      new Matchstick(4,right,cy+L/2,L,90,STICK_COLORS[3])
+    ];
+
+    this.trash={x:cx,y:cy+L*.48};
+    document.getElementById("success").style.display="none";
+    this.updateStatus();
+    this.render();
+  }
+
+  hitStick(x,y){
+    let best=null,bestD=28;
+    for(let i=0;i<this.sticks.length;i++){
+      const [x1,y1,x2,y2]=this.sticks[i].points();
+      const dx=x2-x1,dy=y2-y1;
+      let t=((x-x1)*dx+(y-y1)*dy)/(dx*dx+dy*dy);
+      t=Math.max(0,Math.min(1,t));
+      const px=x1+t*dx,py=y1+t*dy;
+      const d=Math.hypot(x-px,y-py);
+      if(d<bestD){bestD=d;best=i}
+    }
+    return best;
+  }
+
+  beginMove(id){
+    if(this.activeMoveId===id)return;
+
+    if(this.activeMoveId!==null){
+      this.movedIds.add(this.activeMoveId);
+    }
+
+    this.activeMoveId=id;
+  }
+
+  getMovedCount(){
+    const ids=new Set(this.movedIds);
+    if(this.activeMoveId!==null){
+      ids.add(this.activeMoveId);
+    }
+    return ids.size;
+  }
+
+  pointerDown(e){
+    if(this.locked)return;
+    e.preventDefault();
+    const {x,y}=this.getPoint(e);
+    const i=this.hitStick(x,y);
+    if(i===null)return;
+
+    this.selected=i;
+    const s=this.sticks[i];
+    this.dragStart=[x,y];
+    this.original=[s.x,s.y];
+    this.dragging=true;
+    this.svg.setPointerCapture?.(e.pointerId);
+    this.render();
+  }
+
+  pointerMove(e){
+    if(!this.dragging||this.selected===null||this.locked)return;
+    e.preventDefault();
+    const {x,y}=this.getPoint(e);
+    const s=this.sticks[this.selected];
+    const dx=x-this.dragStart[0];
+    const dy=y-this.dragStart[1];
+
+    if(Math.hypot(dx,dy)>6){
+      this.beginMove(s.id);
+    }
+
+    s.x=this.original[0]+dx;
+    s.y=this.original[1]+dy;
+    this.updateStatus();
+    this.render();
+  }
+
+  pointerUp(e){
+    if(!this.dragging)return;
+    const i=this.selected;
+    this.dragging=false;
+    try{this.svg.releasePointerCapture?.(e.pointerId)}catch(_){}
+
+    // 指を離しても、ここでは確定しない。
+    // 同じ棒をもう一度つかんで位置を微調整できるようにする。
+    this.updateStatus();
+    this.checkSolved();
+    this.render();
+  }
+
+  rotateSelected(){
+    if(this.locked||this.selected===null)return;
+    const s=this.sticks[this.selected];
+    this.beginMove(s.id);
+    s.angle=(s.angle+45)%360;
+    this.updateStatus();
+    this.checkSolved();
+    this.render();
+  }
+
+  // 正解判定：棒の「色」や番号ではなく、4本の接続関係そのものを見る。
+  // 正解は「逆さのちりとり」＝
+  //  ・横棒が1本
+  //  ・横棒の左右の端に縦棒が1本ずつ接続
+  //  ・横棒の中央付近に、反対側へ縦棒が1本接続
+  //  ・3本とも横棒と実際に接続している
+  //  ・ゴミがその3本で囲まれる側ではなく外側
+  //  左右反転・上下反転・棒の色はすべて関係なし。
+  checkSolved(){
+    if(this.locked || this.getMovedCount()!==2)return;
+
+    const L=this.length;
+    const connectTol=Math.max(18,L*0.18);
+    const xTol=Math.max(24,L*0.24);
+    const angleTol=18*Math.PI/180;
+
+    const segs=this.sticks.map(s=>{
+      const [x1,y1,x2,y2]=s.points();
+      const dx=x2-x1, dy=y2-y1;
+      const len=Math.hypot(dx,dy);
+      let a=Math.atan2(dy,dx);
+      // 棒は180度反転しても同じなので、横/縦を無向線として扱う。
+      let aa=((a%Math.PI)+Math.PI)%Math.PI;
+      return {
+        s,x1,y1,x2,y2,len,
+        horizontal: Math.min(aa,Math.PI-aa) < angleTol,
+        vertical: Math.abs(aa-Math.PI/2) < angleTol,
+        cx:(x1+x2)/2, cy:(y1+y2)/2
+      };
+    });
+
+    const hs=segs.filter(q=>q.horizontal);
+    const vs=segs.filter(q=>q.vertical);
+    if(hs.length!==1 || vs.length!==3)return;
+
+    const h=hs[0];
+    if(Math.abs(h.len-L)>L*0.28)return;
+
+    const hx1=Math.min(h.x1,h.x2);
+    const hx2=Math.max(h.x1,h.x2);
+    const hy=(h.y1+h.y2)/2;
+    const mid=(hx1+hx2)/2;
+
+    // 各縦棒について、横棒の端/中央に「本当に接続」しているか調べる。
+    const info=vs.map(v=>{
+      const top=Math.min(v.y1,v.y2);
+      const bottom=Math.max(v.y1,v.y2);
+      const topDist=Math.abs(top-hy);
+      const bottomDist=Math.abs(bottom-hy);
+      const touchTop=topDist<=connectTol;
+      const touchBottom=bottomDist<=connectTol;
+      const touch=touchTop||touchBottom;
+      const touchY=touchTop?top:bottom;
+      const extendsAbove=top < hy-connectTol*0.45;
+      const extendsBelow=bottom > hy+connectTol*0.45;
+      return {...v,top,bottom,touch,touchY,extendsAbove,extendsBelow};
+    });
+
+    // 3本すべてが横棒に接続していなければ、絶対に正解にしない。
+    if(info.filter(v=>v.touch).length!==3)return;
+
+    // 左端・右端・中央の3位置を判定。
+    // 少しズレてもよいが、中央が端と同じ位置になるのは不可。
+    const left=info.find(v=>Math.abs(v.cx-hx1)<=xTol);
+    const right=info.find(v=>Math.abs(v.cx-hx2)<=xTol);
+    const centerCandidates=info.filter(v=>
+      Math.abs(v.cx-mid)<=xTol && v!==left && v!==right
+    );
+
+    if(!left || !right || left===right || centerCandidates.length!==1)return;
+    const center=centerCandidates[0];
+
+    // 左右の縦棒は同じ側、中央の縦棒は反対側。
+    // 「黄色は上でも下でもいい」のように色は一切見ない。
+    const sideSigns=[];
+    for(const v of [left,right]){
+      if(v.extendsAbove && !v.extendsBelow) sideSigns.push(-1);
+      else if(v.extendsBelow && !v.extendsAbove) sideSigns.push(1);
+      else return;
+    }
+    if(sideSigns[0]!==sideSigns[1])return;
+
+    const centerSign = center.extendsAbove && !center.extendsBelow ? -1 :
+                       center.extendsBelow && !center.extendsAbove ? 1 : 0;
+    if(centerSign===0 || centerSign===sideSigns[0])return;
+
+    // 縦棒の長さも大きく違わないこと。
+    for(const v of [left,right,center]){
+      if(Math.abs(v.len-L)>L*0.30)return;
+    }
+
+    // ゴミが「ちりとりの内側」に残っていないこと。
+    // 完成形では、左右の端棒と中央棒で作られる側が内側。
+    // 3本の縦棒のうち中央棒から外側へ出ていればOK。
+    const tx=this.trash.x, ty=this.trash.y;
+    const side=sideSigns[0]; // -1=上側が内側、+1=下側が内側
+
+    // ゴミの位置が横棒の内側領域にあるかを、中央棒を境に判定。
+    const insideVerticalBand =
+      tx > hx1-connectTol && tx < hx2+connectTol;
+    if(insideVerticalBand){
+      if(side===-1 && ty < hy+L*0.15)return;
+      if(side===1  && ty > hy-L*0.15)return;
+    }
+
+    // ここまで全条件を満たしたものだけクリア。
+    this.locked=true;
+    document.getElementById("success").style.display="block";
+    document.getElementById("status").textContent="🎉 クリア！";
+  }
+  updateStatus(){
+    const n=Math.min(this.getMovedCount(),2);
+    if(this.locked)return;
+    document.getElementById("status").textContent=
+      n>=2 ? "2本動かしました。位置を調整してね" : `あと ${2-n}本`;
+  }
+
+  render(){
+    this.svg.replaceChildren();
+
+    this.sticks.forEach((s,i)=>{
+      const g=svgEl("g");
+      const [x1,y1,x2,y2]=s.points();
+
+      if(this.selected===i){
+        const o=svgEl("line");
+        o.setAttribute("x1",x1);o.setAttribute("y1",y1);
+        o.setAttribute("x2",x2);o.setAttribute("y2",y2);
+        o.setAttribute("class","selected-outline");
+        g.appendChild(o);
+      }
+
+      const body=svgEl("line");
+      body.setAttribute("x1",x1);body.setAttribute("y1",y1);
+      body.setAttribute("x2",x2);body.setAttribute("y2",y2);
+      body.setAttribute("class","match-body");
+      g.appendChild(body);
+
+      const color=svgEl("line");
+      color.setAttribute("x1",x1);color.setAttribute("y1",y1);
+      color.setAttribute("x2",x2);color.setAttribute("y2",y2);
+      color.setAttribute("class","match-color");
+      color.setAttribute("stroke",s.color);
+      color.setAttribute("stroke-width","14");
+      g.appendChild(color);
+
+      for(const [cx,cy] of [[x1,y1],[x2,y2]]){
+        const c=svgEl("circle");
+        c.setAttribute("cx",cx);c.setAttribute("cy",cy);
+        c.setAttribute("r",7);c.setAttribute("fill",s.color);
+        g.appendChild(c);
+      }
+
+      g.dataset.index=i;
+      this.svg.appendChild(g);
+    });
+
+    // ゴミ（メダル）
+    const tg=svgEl("g");
+    const medal=svgEl("text");
+    medal.setAttribute("x",this.trash.x);
+    medal.setAttribute("y",this.trash.y);
+    medal.setAttribute("text-anchor","middle");
+    medal.setAttribute("dominant-baseline","central");
+    medal.setAttribute("font-size","48");
+    medal.setAttribute("font-family","Apple Color Emoji, Segoe UI Emoji, sans-serif");
+    medal.setAttribute("class","medal-emoji");
+    medal.textContent="🪙";
+    tg.appendChild(medal);
+    this.svg.appendChild(tg);
+  }
+
+  bind(){
+    let tapTime=0,tapX=0,tapY=0;
+    this.svg.addEventListener("pointerdown",e=>{
+      tapTime=Date.now();tapX=e.clientX;tapY=e.clientY;this.pointerDown(e);
+    });
+    window.addEventListener("pointermove",e=>this.pointerMove(e),{passive:false});
+    window.addEventListener("pointerup",e=>{
+      const dt=Date.now()-tapTime;
+      const moved=Math.hypot(e.clientX-tapX,e.clientY-tapY);
+      this.pointerUp(e);
+      if(dt<250&&moved<8&&this.selected!==null)this.rotateSelected();
+    });
+    document.getElementById("resetButton").addEventListener("click",()=>this.reset());
+  }
+}
+
+function svgEl(name){return document.createElementNS("http://www.w3.org/2000/svg",name)}
+const puzzle=new Puzzle(document.getElementById("canvas"));
+</script>
+</body>
+</html>
