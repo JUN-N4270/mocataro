@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>mocataro 素材置き場</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f8fc;
+  color: #333;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    "Yu Gothic",
+    sans-serif;
+}
+
+/* =========================
+   ヘッダー
+========================= */
+
+header {
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  color: white;
+  text-align: center;
+  padding: 28px 15px 24px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.15);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 1px;
+}
+
+header p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  opacity: .95;
+}
+
+/* =========================
+   カテゴリ
+========================= */
+
+.category-area {
+  padding: 18px 12px 8px;
+  text-align: center;
+}
+
+.category-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.category-btn {
+  border: none;
+  background: white;
+  color: #1976d2;
+  border: 2px solid #90caf9;
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.category-btn.active {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
+/* =========================
+   素材一覧
+========================= */
+
+.materials {
+  width: min(1100px, 94%);
+  margin: 15px auto 50px;
+
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(160px, 1fr));
+
+  gap: 16px;
+}
+
+/* =========================
+   素材カード
+========================= */
+
+.card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0,0,0,.10);
+
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.card:active {
+  transform: scale(.97);
+}
+
+.image-box {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  background:
+    linear-gradient(45deg,#eee 25%,transparent 25%),
+    linear-gradient(-45deg,#eee 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#eee 75%),
+    linear-gradient(-45deg,transparent 75%,#eee 75%);
+
+  background-size: 20px 20px;
+  background-position: 0 0,0 10px,10px -10px,-10px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.card-info {
+  padding: 11px 12px 13px;
+}
+
+.card-title {
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.card-description {
+  font-size: 12px;
+  color: #777;
+  min-height: 30px;
+}
+
+.download-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #1976d2;
+  color: white;
+
+  padding: 9px 5px;
+
+  font-size: 13px;
+  font-weight: bold;
+
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+
+.download-btn:active {
+  transform: scale(.97);
+}
+
+/* =========================
+   モーダル
+========================= */
+
+.modal {
+  display: none;
+
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0,0,0,.78);
+
+  z-index: 1000;
+
+  padding: 20px;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  width: min(700px, 100%);
+  max-height: 95vh;
+
+  background: white;
+  border-radius: 18px;
+
+  overflow: hidden;
+
+  position: relative;
+}
+
+.modal-image-area {
+  background: #f3f3f3;
+
+  padding: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: 65vh;
+
+  object-fit: contain;
+}
+
+.modal-info {
+  padding: 15px;
+}
+
+.modal-title {
+  font-size: 19px;
+  font-weight: bold;
+}
+
+.modal-description {
+  font-size: 13px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.modal-download {
+  display: block;
+
+  margin-top: 12px;
+
+  background: #1976d2;
+  color: white;
+
+  text-align: center;
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  text-decoration: none;
+
+  font-weight: bold;
+}
+
+.close-btn {
+  position: absolute;
+
+  right: 10px;
+  top: 10px;
+
+  width: 38px;
+  height: 38px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(0,0,0,.65);
+  color: white;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  z-index: 10;
+}
+
+/* =========================
+   フッター
+========================= */
+
+footer {
+  text-align: center;
+  padding: 25px 10px 35px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* =========================
+   PC
+========================= */
+
+@media (min-width: 700px) {
+
+  .materials {
+    grid-template-columns:
+      repeat(auto-fill, minmax(190px, 1fr));
+  }
+
+  header h1 {
+    font-size: 34px;
+  }
+}
+</style>
+</head>
+
+
+<body>
+
+<header>
+  <h1>📦 mocataro 素材置き場</h1>
+  <p>ゲームや印刷に使える素材をまとめています</p>
+</header>
+
+
+<!-- =========================
+     カテゴリ
+========================= -->
+
+<div class="category-area">
+
+  <div class="category-buttons">
+
+    <button
+      class="category-btn active"
+      data-category="all">
+      すべて
+    </button>
+
+    <button
+      class="category-btn"
+      data-category="puzzle">
+      🧩 パズル
+    </button>
+
+    <button
+      class="category-btn"
+      data-category="print">
+      🖨️ 印刷素材
+    </button>
+
+    <button
+      class="category-btn"
+      data-category="other">
+      🎨 その他
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     素材一覧
+========================= -->
+
+<div
+  id="materials"
+  class="materials">
+</div>
+
+
+<footer>
+  © mocataro
+</footer>
+
+
+<!-- =========================
+     拡大表示
+========================= -->
+
+<div
+  id="modal"
+  class="modal">
+
+  <div class="modal-content">
+
+    <button
+      id="closeBtn"
+      class="close-btn">
+      ×
+    </button>
+
+    <div class="modal-image-area">
+
+      <img
+        id="modalImage"
+        class="modal-image"
+        src=""
+        alt="">
+
+    </div>
+
+    <div class="modal-info">
+
+      <div
+        id="modalTitle"
+        class="modal-title">
+      </div>
+
+      <div
+        id="modalDescription"
+        class="modal-description">
+      </div>
+
+      <a
+        id="modalDownload"
+        class="modal-download"
+        href=""
+        download>
+        📥 この素材をダウンロード
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   素材データ
+
+   新しい素材を追加するときは、
+   ↓ここに1個追加するだけ
+===================================================== */
+
+const materials = [
+
+  {
+    title: "馬パズル",
+    description: "パズル用素材",
+    category: "puzzle",
+    image: "images/materials/puzzle/horse.png"
+  },
+
+  {
+    title: "A4数字カード",
+    description: "印刷して使える数字カード",
+    category: "print",
+    image: "images/materials/print/numbers.png"
+  },
+
+  {
+    title: "∞ 上下矢印",
+    description: "ゲーム素材",
+    category: "other",
+    image: "images/materials/other/infinity-arrow.png"
+  }
+
+];
+
+
+/* =====================================================
+   素材一覧を表示
+===================================================== */
+
+const materialsArea =
+  document.getElementById("materials");
+
+
+function showMaterials(category = "all") {
+
+  materialsArea.innerHTML = "";
+
+  const filtered =
+    category === "all"
+      ? materials
+      : materials.filter(
+          item => item.category === category
+        );
+
+
+  filtered.forEach(item => {
+
+    const card =
+      document.createElement("div");
+
+    card.className = "card";
+
+
+    /* 画像 */
+
+    const imageBox =
+      document.createElement("div");
+
+    imageBox.className = "image-box";
+
+
+    const img =
+      document.createElement("img");
+
+    img.src = item.image;
+    img.alt = item.title;
+
+
+    imageBox.appendChild(img);
+
+
+    /* 画像クリック */
+
+    imageBox.addEventListener(
+      "click",
+      () => openModal(item)
+    );
+
+
+    /* 情報 */
+
+    const info =
+      document.createElement("div");
+
+    info.className = "card-info";
+
+
+    const title =
+      document.createElement("div");
+
+    title.className = "card-title";
+
+    title.textContent =
+      item.title;
+
+
+    const description =
+      document.createElement("div");
+
+    description.className =
+      "card-description";
+
+    description.textContent =
+      item.description;
+
+
+    /* ダウンロード */
+
+    const download =
+      document.createElement("a");
+
+    download.className =
+      "download-btn";
+
+    download.href =
+      item.image;
+
+    download.download = "";
+
+    download.textContent =
+      "📥 ダウンロード";
+
+
+    info.appendChild(title);
+    info.appendChild(description);
+    info.appendChild(download);
+
+
+    card.appendChild(imageBox);
+    card.appendChild(info);
+
+
+    materialsArea.appendChild(card);
+
+  });
+
+}
+
+
+/* =====================================================
+   カテゴリ切り替え
+===================================================== */
+
+document
+  .querySelectorAll(".category-btn")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll(".category-btn")
+          .forEach(btn =>
+            btn.classList.remove("active")
+          );
+
+        button.classList.add("active");
+
+        showMaterials(
+          button.dataset.category
+        );
+
+      }
+    );
+
+  });
+
+
+/* =====================================================
+   モーダル
+===================================================== */
+
+const modal =
+  document.getElementById("modal");
+
+const modalImage =
+  document.getElementById("modalImage");
+
+const modalTitle =
+  document.getElementById("modalTitle");
+
+const modalDescription =
+  document.getElementById("modalDescription");
+
+const modalDownload =
+  document.getElementById("modalDownload");
+
+
+function openModal(item) {
+
+  modalImage.src =
+    item.image;
+
+  modalImage.alt =
+    item.title;
+
+  modalTitle.textContent =
+    item.title;
+
+  modalDescription.textContent =
+    item.description;
+
+  modalDownload.href =
+    item.image;
+
+  modal.classList.add("show");
+
+}
+
+
+/* 閉じる */
+
+document
+  .getElementById("closeBtn")
+  .addEventListener(
+    "click",
+    closeModal
+  );
+
+
+modal.addEventListener(
+  "click",
+  event => {
+
+    if (event.target === modal) {
+      closeModal();
+    }
+
+  }
+);
+
+
+function closeModal() {
+
+  modal.classList.remove("show");
+
+}
+
+
+/* =====================================================
+   初期表示
+===================================================== */
+
+showMaterials();
+
+</script>
+
+</body>
+</html>
