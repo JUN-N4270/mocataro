@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -23,6 +24,7 @@ body {
     "Yu Gothic",
     sans-serif;
 }
+
 
 /* =========================
    ヘッダー
@@ -101,7 +103,7 @@ header p {
 
 
 /* =========================
-   素材カード
+   カード
 ========================= */
 
 .card {
@@ -135,6 +137,7 @@ header p {
     linear-gradient(-45deg,transparent 75%,#eee 75%);
 
   background-size: 20px 20px;
+
   background-position:
     0 0,
     0 10px,
@@ -178,7 +181,7 @@ header p {
 
 
 /* =========================
-   URL表示
+   URL
 ========================= */
 
 .url-label {
@@ -190,6 +193,7 @@ header p {
 
 .url-box {
   width: 100%;
+
   background: #f1f3f5;
   border: 1px solid #ddd;
   border-radius: 7px;
@@ -242,7 +246,40 @@ header p {
 
 
 /* =========================
-   ダウンロード
+   ゲームを開く
+========================= */
+
+.game-btn {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 7px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #7b1fa2;
+  color: white;
+
+  padding: 10px 5px;
+
+  font-size: 13px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  text-align: center;
+  text-decoration: none;
+}
+
+.game-btn:active {
+  transform: scale(.97);
+}
+
+
+/* =========================
+   PNG保存
 ========================= */
 
 .download-btn {
@@ -327,775 +364,5 @@ header p {
   object-fit: contain;
 }
 
-.modal-info {
-  padding: 15px;
-}
-
-.modal-title {
-  font-size: 19px;
-  font-weight: bold;
-}
-
-.modal-description {
-  font-size: 13px;
-  color: #666;
-  margin-top: 5px;
-}
-
-
-/* モーダルURL */
-
-.modal-url-label {
-  font-size: 11px;
-  font-weight: bold;
-  color: #555;
-  margin-top: 12px;
-  margin-bottom: 4px;
-}
-
-.modal-url-box {
-  background: #f1f3f5;
-  border: 1px solid #ddd;
-  border-radius: 7px;
-
-  padding: 8px;
-
-  font-size: 11px;
-
-  word-break: break-all;
-
-  user-select: text;
-}
-
-.modal-copy {
-  display: block;
-
-  width: 100%;
-
-  margin-top: 7px;
-
-  background: #455a64;
-  color: white;
-
-  border: none;
-  border-radius: 9px;
-
-  padding: 10px;
-
-  font-weight: bold;
-
-  cursor: pointer;
-}
-
-.modal-download {
-  display: block;
-
-  margin-top: 7px;
-
-  background: #1976d2;
-  color: white;
-
-  text-align: center;
-
-  padding: 12px;
-
-  border-radius: 10px;
-
-  text-decoration: none;
-
-  font-weight: bold;
-}
-
-.close-btn {
-  position: absolute;
-
-  right: 10px;
-  top: 10px;
-
-  width: 38px;
-  height: 38px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: rgba(0,0,0,.65);
-  color: white;
-
-  font-size: 22px;
-
-  cursor: pointer;
-
-  z-index: 10;
-}
-
-
-/* =========================
-   フッター
-========================= */
-
-footer {
-  text-align: center;
-  padding: 25px 10px 35px;
-  font-size: 12px;
-  color: #888;
-}
-
-
-/* =========================
-   PC
-========================= */
-
-@media (min-width: 700px) {
-
-  .materials {
-    grid-template-columns:
-      repeat(auto-fill, minmax(190px, 1fr));
-  }
-
-  header h1 {
-    font-size: 34px;
-  }
-}
-</style>
-</head>
-
-
-<body>
-
-<header>
-  <h1>📦 mocataro 素材置き場</h1>
-  <p>ゲームや印刷に使える素材をまとめています</p>
-</header>
-
-
-<!-- =========================
-     カテゴリ
-========================= -->
-
-<div class="category-area">
-
-  <div class="category-buttons">
-
-    <button
-      class="category-btn active"
-      data-category="all">
-      すべて
-    </button>
-
-    <button
-      class="category-btn"
-      data-category="puzzle">
-      🧩 パズル
-    </button>
-
-    <button
-      class="category-btn"
-      data-category="print">
-      🖨️ 印刷素材
-    </button>
-
-    <button
-      class="category-btn"
-      data-category="other">
-      🎨 その他
-    </button>
-
-  </div>
-
-</div>
-
-
-<!-- =========================
-     素材一覧
-========================= -->
-
-<div
-  id="materials"
-  class="materials">
-</div>
-
-
-<footer>
-  © mocataro
-</footer>
-
-
-<!-- =========================
-     拡大表示
-========================= -->
-
-<div
-  id="modal"
-  class="modal">
-
-  <div class="modal-content">
-
-    <button
-      id="closeBtn"
-      class="close-btn">
-      ×
-    </button>
-
-    <div class="modal-image-area">
-
-      <img
-        id="modalImage"
-        class="modal-image"
-        src=""
-        alt="">
-
-    </div>
-
-    <div class="modal-info">
-
-      <div
-        id="modalTitle"
-        class="modal-title">
-      </div>
-
-      <div
-        id="modalDescription"
-        class="modal-description">
-      </div>
-
-
-      <!-- URL -->
-
-      <div class="modal-url-label">
-        🔗 素材URL
-      </div>
-
-      <div
-        id="modalUrl"
-        class="modal-url-box">
-      </div>
-
-      <button
-        id="modalCopy"
-        class="modal-copy">
-        📋 URLをコピー
-      </button>
-
-
-      <!-- ダウンロード -->
-
-      <a
-        id="modalDownload"
-        class="modal-download"
-        href=""
-        download>
-        📥 PNGをダウンロード
-      </a>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<script>
-
-/* =====================================================
-   素材データ
-
-   新しい素材を追加するときは、
-   ↓ここに1個追加するだけ
-===================================================== */
-
-const materials = [
-
-  {
-    title: "絵カード1-6",
-    description: "印刷素材",
-    category: "print",
-    image: "print/card1-6.png"
-  },
-
-  {
-    title: "絵カード7-9",
-    description: "印刷素材",
-    category: "print",
-    image: "print/card7-9.png"
-  },
-
-  {
-    title: "①〜⑨",
-    description: "印刷素材",
-    category: "print",
-    image: "print/num1-9.png"
-  },
-
-  {
-    title: "トコトコ",
-    description: "印刷素材",
-    category: "print",
-    image: "print/tokotoko.png"
-  }
-
-];
-
-
-/* =====================================================
-   素材一覧
-===================================================== */
-
-const materialsArea =
-  document.getElementById("materials");
-
-
-function showMaterials(category = "all") {
-
-  materialsArea.innerHTML = "";
-
-  const filtered =
-    category === "all"
-      ? materials
-      : materials.filter(
-          item => item.category === category
-        );
-
-
-  filtered.forEach(item => {
-
-    const card =
-      document.createElement("div");
-
-    card.className = "card";
-
-
-    /* =========================
-       素材URLを作成
-    ========================= */
-
-    const imageUrl =
-      new URL(
-        item.image,
-        window.location.href
-      ).href;
-
-
-    /* =========================
-       画像
-    ========================= */
-
-    const imageBox =
-      document.createElement("div");
-
-    imageBox.className = "image-box";
-
-
-    const img =
-      document.createElement("img");
-
-    img.src = item.image;
-    img.alt = item.title;
-
-
-    imageBox.appendChild(img);
-
-
-    imageBox.addEventListener(
-      "click",
-      () => openModal(item)
-    );
-
-
-    /* =========================
-       情報
-    ========================= */
-
-    const info =
-      document.createElement("div");
-
-    info.className = "card-info";
-
-
-    const title =
-      document.createElement("div");
-
-    title.className = "card-title";
-
-    title.textContent =
-      item.title;
-
-
-    const description =
-      document.createElement("div");
-
-    description.className =
-      "card-description";
-
-    description.textContent =
-      item.description;
-
-
-    /* =========================
-       URL
-    ========================= */
-
-    const urlLabel =
-      document.createElement("div");
-
-    urlLabel.className =
-      "url-label";
-
-    urlLabel.textContent =
-      "🔗 素材URL";
-
-
-    const urlBox =
-      document.createElement("div");
-
-    urlBox.className =
-      "url-box";
-
-    urlBox.textContent =
-      imageUrl;
-
-
-    /* =========================
-       URLコピー
-    ========================= */
-
-    const copyButton =
-      document.createElement("button");
-
-    copyButton.className =
-      "copy-btn";
-
-    copyButton.textContent =
-      "📋 URLをコピー";
-
-
-    copyButton.addEventListener(
-      "click",
-      async event => {
-
-        event.stopPropagation();
-
-        try {
-
-          await navigator.clipboard.writeText(
-            imageUrl
-          );
-
-          copyButton.textContent =
-            "✅ コピーしました！";
-
-          copyButton.classList.add(
-            "copied"
-          );
-
-
-          setTimeout(() => {
-
-            copyButton.textContent =
-              "📋 URLをコピー";
-
-            copyButton.classList.remove(
-              "copied"
-            );
-
-          }, 1500);
-
-        } catch (error) {
-
-          /*
-           * コピーできない環境用
-           */
-
-          const textArea =
-            document.createElement("textarea");
-
-          textArea.value =
-            imageUrl;
-
-          document.body.appendChild(
-            textArea
-          );
-
-          textArea.select();
-
-          document.execCommand(
-            "copy"
-          );
-
-          textArea.remove();
-
-
-          copyButton.textContent =
-            "✅ コピーしました！";
-
-          copyButton.classList.add(
-            "copied"
-          );
-
-          setTimeout(() => {
-
-            copyButton.textContent =
-              "📋 URLをコピー";
-
-            copyButton.classList.remove(
-              "copied"
-            );
-
-          }, 1500);
-
-        }
-
-      }
-    );
-
-
-    /* =========================
-       ダウンロード
-    ========================= */
-
-    const download =
-      document.createElement("a");
-
-    download.className =
-      "download-btn";
-
-    download.href =
-      item.image;
-
-    download.download = "";
-
-    download.textContent =
-      "📥 PNGを保存";
-
-
-    /* =========================
-       組み立て
-    ========================= */
-
-    info.appendChild(title);
-    info.appendChild(description);
-
-    info.appendChild(urlLabel);
-    info.appendChild(urlBox);
-    info.appendChild(copyButton);
-
-    info.appendChild(download);
-
-
-    card.appendChild(imageBox);
-    card.appendChild(info);
-
-
-    materialsArea.appendChild(card);
-
-  });
-
-}
-
-
-/* =====================================================
-   カテゴリ切り替え
-===================================================== */
-
-document
-  .querySelectorAll(".category-btn")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        document
-          .querySelectorAll(".category-btn")
-          .forEach(btn =>
-            btn.classList.remove("active")
-          );
-
-        button.classList.add("active");
-
-        showMaterials(
-          button.dataset.category
-        );
-
-      }
-    );
-
-  });
-
-
-/* =====================================================
-   モーダル
-===================================================== */
-
-const modal =
-  document.getElementById("modal");
-
-const modalImage =
-  document.getElementById("modalImage");
-
-const modalTitle =
-  document.getElementById("modalTitle");
-
-const modalDescription =
-  document.getElementById("modalDescription");
-
-const modalUrl =
-  document.getElementById("modalUrl");
-
-const modalCopy =
-  document.getElementById("modalCopy");
-
-const modalDownload =
-  document.getElementById("modalDownload");
-
-
-let currentModalUrl = "";
-
-
-function openModal(item) {
-
-  const imageUrl =
-    new URL(
-      item.image,
-      window.location.href
-    ).href;
-
-
-  modalImage.src =
-    item.image;
-
-  modalImage.alt =
-    item.title;
-
-  modalTitle.textContent =
-    item.title;
-
-  modalDescription.textContent =
-    item.description;
-
-  modalUrl.textContent =
-    imageUrl;
-
-  modalDownload.href =
-    item.image;
-
-  currentModalUrl =
-    imageUrl;
-
-
-  modalCopy.textContent =
-    "📋 URLをコピー";
-
-  modalCopy.classList.remove(
-    "copied"
-  );
-
-
-  modal.classList.add("show");
-
-}
-
-
-/* =====================================================
-   モーダルURLコピー
-===================================================== */
-
-modalCopy.addEventListener(
-  "click",
-  async () => {
-
-    try {
-
-      await navigator.clipboard.writeText(
-        currentModalUrl
-      );
-
-      modalCopy.textContent =
-        "✅ コピーしました！";
-
-      modalCopy.classList.add(
-        "copied"
-      );
-
-
-      setTimeout(() => {
-
-        modalCopy.textContent =
-          "📋 URLをコピー";
-
-        modalCopy.classList.remove(
-          "copied"
-        );
-
-      }, 1500);
-
-    } catch (error) {
-
-      const textArea =
-        document.createElement("textarea");
-
-      textArea.value =
-        currentModalUrl;
-
-      document.body.appendChild(
-        textArea
-      );
-
-      textArea.select();
-
-      document.execCommand(
-        "copy"
-      );
-
-      textArea.remove();
-
-
-      modalCopy.textContent =
-        "✅ コピーしました！";
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   閉じる
-===================================================== */
-
-document
-  .getElementById("closeBtn")
-  .addEventListener(
-    "click",
-    closeModal
-  );
-
-
-modal.addEventListener(
-  "click",
-  event => {
-
-    if (event.target === modal) {
-      closeModal();
-    }
-
-  }
-);
-
-
-function closeModal() {
-
-  modal.classList.remove("show");
-
-}
-
-
-/* =====================================================
-   初期表示
-===================================================== */
-
-showMaterials();
-
-</script>
-
-</body>
-</html>
+.modal
+```
