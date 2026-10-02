@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+      initial-scale=1.0,
+      maximum-scale=1.0,
+      user-scalable=no">
+
+<title>一番大きい掛け算</title>
+
+
+<style>
+
+/* =================================================
+   基本
+================================================= */
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+body {
+
+    margin: 0;
+
+    background: #EAF6FC;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        sans-serif;
+
+    color: #34505F;
+
+    user-select: none;
+
+    overflow-x: hidden;
+}
+
+
+/* =================================================
+   ゲーム全体
+================================================= */
+
+.game {
+
+    width: 100%;
+
+    min-height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    padding-bottom: 25px;
+}
+
+
+/* =================================================
+   タイトル
+================================================= */
+
+.title {
+
+    width: 100%;
+
+    text-align: center;
+
+    padding-top: 25px;
+
+    font-size: 25px;
+
+    font-weight: bold;
+
+    color: #34505F;
+}
+
+
+/* =================================================
+   スコア
+================================================= */
+
+.score-area {
+
+    width: 90%;
+
+    max-width: 500px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-top: 15px;
+
+    color: #34505F;
+
+    font-size: 18px;
+
+    font-weight: bold;
+}
+
+
+/* =================================================
+   問題ボード
+================================================= */
+
+.board {
+
+    position: relative;
+
+    width: 90vw;
+
+    max-width: 500px;
+
+    aspect-ratio: 1 / 1;
+
+    margin-top: 25px;
+
+    background: #F4FBFD;
+
+    border: 3px solid #9CCFE8;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 3px 10px rgba(52,80,95,0.12);
+
+    cursor: pointer;
+
+    touch-action: manipulation;
+}
+
+
+/* =================================================
+   問題
+================================================= */
+
+.question {
+
+    position: absolute;
+
+    width: 50%;
+
+    height: 50%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    font-size:
+        clamp(25px, 8vw, 42px);
+
+    font-weight: bold;
+
+    color: #34505F;
+
+    line-height: 1.15;
+
+    z-index: 2;
+
+    border-radius: 10px;
+
+    pointer-events: none;
+
+    transition:
+        background 0.15s,
+        transform 0.15s;
+}
+
+
+/* =================================================
+   式
+================================================= */
+
+.expression {
+
+    display: block;
+}
+
+
+/* =================================================
+   答え
+================================================= */
+
+.answer {
+
+    display: block;
+
+    margin-top: 6px;
+
+    font-size:
+        clamp(22px, 6vw, 34px);
+
+    color: #E87551;
+
+    font-weight: bold;
+}
+
+
+/* =================================================
+   4方向
+================================================= */
+
+.top {
+
+    top: 0;
+
+    left: 25%;
+}
+
+
+.left {
+
+    top: 25%;
+
+    left: 0;
+}
+
+
+.right {
+
+    top: 25%;
+
+    right: 0;
+}
+
+
+.bottom {
+
+    bottom: 0;
+
+    left: 25%;
+}
+
+
+/* =================================================
+   斜め線
+================================================= */
+
+.line1,
+.line2 {
+
+    position: absolute;
+
+    pointer-events: none;
+
+    background: #BFDDE9;
+
+    z-index: 5;
+}
+
+
+.line1 {
+
+    width: 141.5%;
+
+    height: 2px;
+
+    top: 50%;
+
+    left: -20.7%;
+
+    transform: rotate(45deg);
+}
+
+
+.line2 {
+
+    width: 141.5%;
+
+    height: 2px;
+
+    top: 50%;
+
+    left: -20.7%;
+
+    transform: rotate(-45deg);
+}
+
+
+/* =================================================
+   中央タイマー
+================================================= */
+
+.center {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    width: 76px;
+
+    height: 76px;
+
+    border-radius: 50%;
+
+    background: #FFFFFF;
+
+    border:
+        3px solid #9CCFE8;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 42px;
+
+    font-weight: bold;
+
+    color: #E87551;
+
+    z-index: 10;
+
+    pointer-events: none;
+
+    box-shadow:
+        0 2px 7px rgba(52,80,95,0.15);
+
+    transition:
+        color 0.2s,
+        border-color 0.2s,
+        transform 0.2s;
+}
+
+
+/* =================================================
+   残り時間が少ないときのタイマー
+================================================= */
+
+.center.warning {
+
+    color: #D9534F;
+
+    border-color: #D9534F;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1.08);
+}
+
+
+/* =================================================
+   メッセージ
+================================================= */
+
+.message {
+
+    margin-top: 18px;
+
+    height: 35px;
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    color: #34505F;
+}
+
+
+/* =================================================
+   Instagram
+================================================= */
+
+.instagram {
+
+    margin-top: 18px;
+
+    width: 90%;
+
+    max-width: 500px;
+
+    text-align: center;
+}
+
+
+.instagram-text {
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    color: #34505F;
+
+    margin-bottom: 5px;
+}
+
+
+.instagram-link {
+
+    display: inline-block;
+
+    text-decoration: none;
+}
+
+
+.instagram-link img {
+
+    display: block;
+
+    width: 170px;
+
+    max-width: 55vw;
+
+    height: auto;
+
+    margin: 0 auto;
+}
+
+
+/* =================================================
+   時間切れ警告オーバーレイ
+================================================= */
+
+.warning-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(230, 60, 60, 0);
+
+    pointer-events: none;
+
+    z-index: 80;
+
+    transition:
+        background 0.25s ease;
+}
+
+
+/*
+   残り2秒
+*/
+
+.warning-overlay.level-2 {
+
+    background:
+        rgba(230, 60, 60, 0.10);
+}
+
+
+/*
+   残り1秒
+*/
+
+.warning-overlay.level-1 {
+
+    background:
+        rgba(230, 60, 60, 0.20);
+
+    animation:
+        warningPulse 0.5s infinite alternate;
+}
+
+
+@keyframes warningPulse {
+
+    from {
+
+        opacity: 0.65;
+
+    }
+
+    to {
+
+        opacity: 1;
+
+    }
+
+}
+
+
+/* =================================================
+   スタート・結果画面
+================================================= */
+
+.overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(52,80,95,0.90);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 100;
+}
+
+
+.overlay-box {
+
+    width: 85%;
+
+    max-width: 400px;
+
+    text-align: center;
+
+    color: white;
+}
+
+
+/* =================================================
+   スタート画面
+================================================= */
+
+#startScreen h1 {
+
+    font-size: 32px;
+
+    line-height: 1.4;
+
+    margin-bottom: 10px;
+}
+
+
+#startScreen p {
+
+    font-size: 18px;
+
+    margin-bottom: 18px;
+}
+
+
+/* =================================================
+   制限時間選択
+================================================= */
+
+.time-label {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    margin-bottom: 12px;
+}
+
+
+.time-options {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    margin-bottom: 25px;
+}
+
+
+.time-button {
+
+    border: 2px solid #FFFFFF;
+
+    border-radius: 12px;
+
+    padding:
+        10px 17px;
+
+    min-width: 75px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    background:
+        rgba(255,255,255,0.15);
+
+    color: #FFFFFF;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s,
+        color 0.15s,
+        transform 0.15s;
+}
+
+
+.time-button.selected {
+
+    background: #FFFFFF;
+
+    color: #34505F;
+
+    transform: scale(1.05);
+
+}
+
+
+/* =================================================
+   ボタン
+================================================= */
+
+.start-button {
+
+    border: none;
+
+    border-radius: 15px;
+
+    padding:
+        18px 45px;
+
+    font-size: 25px;
+
+    font-weight: bold;
+
+    background: #FFFFFF;
+
+    color: #34505F;
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,0.2);
+
+    cursor: pointer;
+}
+
+
+/* =================================================
+   結果画面
+================================================= */
+
+#resultScreen {
+
+    display: none;
+}
+
+
+#resultScreen h1 {
+
+    font-size: 32px;
+
+    margin-bottom: 20px;
+}
+
+
+.result-score {
+
+    font-size: 54px;
+
+    font-weight: bold;
+
+    color: #FFFFFF;
+
+    margin: 10px 0;
+}
+
+
+.result-percent {
+
+    font-size: 24px;
+
+    margin-bottom: 30px;
+}
+
+
+.result-message {
+
+    font-size: 20px;
+
+    margin-bottom: 25px;
+}
+
+
+/* =================================================
+   正解
+================================================= */
+
+.correct {
+
+    animation:
+        correct 0.35s;
+
+    background:
+        rgba(117,190,145,0.25);
+}
+
+
+@keyframes correct {
+
+    0% {
+
+        transform: scale(1);
+
+    }
+
+    50% {
+
+        transform: scale(1.12);
+
+    }
+
+    100% {
+
+        transform: scale(1);
+
+    }
+
+}
+
+
+/* =================================================
+   不正解
+================================================= */
+
+.wrong {
+
+    animation:
+        wrong 0.35s;
+
+    background:
+        rgba(232,117,81,0.15);
+}
+
+
+@keyframes wrong {
+
+    0% {
+
+        transform: translateX(0);
+
+    }
+
+    25% {
+
+        transform: translateX(-10px);
+
+    }
+
+    50% {
+
+        transform: translateX(10px);
+
+    }
+
+    75% {
+
+        transform: translateX(-10px);
+
+    }
+
+    100% {
+
+        transform: translateX(0);
+
+    }
+
+}
+
+
+/* =================================================
+   スマホ
+================================================= */
+
+@media (max-width: 400px) {
+
+    .title {
+
+        font-size: 22px;
+
+    }
+
+
+    .score-area {
+
+        font-size: 16px;
+
+    }
+
+
+    .message {
+
+        font-size: 22px;
+
+    }
+
+
+    .time-button {
+
+        min-width: 68px;
+
+        padding:
+            9px 10px;
+
+        font-size: 17px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =================================================
+     警告オーバーレイ
+================================================= -->
+
+<div
+    id="warningOverlay"
+    class="warning-overlay">
+</div>
+
+
+
+<!-- =================================================
+     ゲーム本体
+================================================= -->
+
+<div class="game">
+
+
+    <div class="title">
+
+        一番大きい掛け算はどれ?
+
+    </div>
+
+
+    <div class="score-area">
+
+
+        <div>
+
+            スコア:
+            <span id="score">0</span>
+
+        </div>
+
+
+        <div>
+
+            問題:
+            <span id="questionNumber">1</span>
+            / 10
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         問題ボード
+    ================================================= -->
+
+    <div
+        class="board"
+        id="board">
+
+
+        <div class="line1"></div>
+
+        <div class="line2"></div>
+
+
+        <!-- 上 -->
+
+        <div
+            class="question top"
+            data-index="0">
+
+        </div>
+
+
+        <!-- 左 -->
+
+        <div
+            class="question left"
+            data-index="1">
+
+        </div>
+
+
+        <!-- 右 -->
+
+        <div
+            class="question right"
+            data-index="2">
+
+        </div>
+
+
+        <!-- 下 -->
+
+        <div
+            class="question bottom"
+            data-index="3">
+
+        </div>
+
+
+        <!-- タイマー -->
+
+        <div
+            class="center"
+            id="timer">
+
+            5
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- メッセージ -->
+
+    <div
+        class="message"
+        id="message">
+
+    </div>
+
+
+
+    <!-- =================================================
+         Instagram
+    ================================================= -->
+
+    <div class="instagram">
+
+
+        <div class="instagram-text">
+
+            📱 mocataroのInstagramはこちら↓↓
+
+        </div>
+
+
+        <a
+            class="instagram-link"
+            href="https://www.instagram.com/mocataro_asobo/"
+            target="_blank"
+            rel="noopener">
+
+
+            <img
+                src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
+                alt="Instagramはこちら">
+
+
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =================================================
+     スタート画面
+================================================= -->
+
+<div
+    class="overlay"
+    id="startScreen">
+
+
+    <div class="overlay-box">
+
+
+        <h1>
+
+            一番大きい<br>
+            掛け算をタップ!
+
+        </h1>
+
+
+        <p>
+
+            全10問!
+
+        </p>
+
+
+        <!-- 制限時間 -->
+
+        <div class="time-label">
+
+            1問の制限時間
+
+        </div>
+
+
+        <div class="time-options">
+
+
+            <button
+                type="button"
+                class="time-button selected"
+                data-time="5">
+
+                5秒
+
+            </button>
+
+
+            <button
+                type="button"
+                class="time-button"
+                data-time="10">
+
+                10秒
+
+            </button>
+
+
+            <button
+                type="button"
+                class="time-button"
+                data-time="15">
+
+                15秒
+
+            </button>
+
+
+        </div>
+
+
+        <button
+            type="button"
+            class="start-button"
+            id="startButton">
+
+            START
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =================================================
+     結果画面
+================================================= -->
+
+<div
+    class="overlay"
+    id="resultScreen">
+
+
+    <div class="overlay-box">
+
+
+        <h1>
+
+            🎉 FINISH!
+
+        </h1>
+
+
+        <div class="result-score">
+
+            <span id="finalScore">
+                0
+            </span>
+            / 10
+
+        </div>
+
+
+        <div class="result-percent">
+
+            正解率:
+            <span id="finalPercent">
+                0
+            </span>%
+
+        </div>
+
+
+        <div
+            class="result-message"
+            id="resultMessage">
+
+        </div>
+
+
+        <button
+            type="button"
+            class="start-button"
+            id="retryButton">
+
+            もう一度遊ぶ
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* =================================================
+   ゲーム設定
+================================================= */
+
+const TOTAL_QUESTIONS = 10;
+
+
+/*
+   初期値
+
+   スタート画面で
+   5 / 10 / 15秒から選択する
+*/
+
+let TIME_LIMIT = 5;
+
+
+/* =================================================
+   ゲーム変数
+================================================= */
+
+let score = 0;
+
+let questionNumber = 1;
+
+let correctIndex = 0;
+
+let timeLeft = TIME_LIMIT;
+
+let timerInterval = null;
+
+let playing = false;
+
+let currentAnswers = [];
+
+
+/* =================================================
+   DOM
+================================================= */
+
+const board =
+    document.getElementById(
+        "board"
+    );
+
+
+const timer =
+    document.getElementById(
+        "timer"
+    );
+
+
+const scoreElement =
+    document.getElementById(
+        "score"
+    );
+
+
+const questionNumberElement =
+    document.getElementById(
+        "questionNumber"
+    );
+
+
+const messageElement =
+    document.getElementById(
+        "message"
+    );
+
+
+const startScreen =
+    document.getElementById(
+        "startScreen"
+    );
+
+
+const resultScreen =
+    document.getElementById(
+        "resultScreen"
+    );
+
+
+const finalScore =
+    document.getElementById(
+        "finalScore"
+    );
+
+
+const finalPercent =
+    document.getElementById(
+        "finalPercent"
+    );
+
+
+const resultMessage =
+    document.getElementById(
+        "resultMessage"
+    );
+
+
+const warningOverlay =
+    document.getElementById(
+        "warningOverlay"
+    );
+
+
+const questions =
+    document.querySelectorAll(
+        ".question"
+    );
+
+
+const timeButtons =
+    document.querySelectorAll(
+        ".time-button"
+    );
+
+
+/* =================================================
+   効果音用
+================================================= */
+
+let audioContext = null;
+
+
+function initAudio() {
+
+    if (!audioContext) {
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if (AudioContext) {
+
+            audioContext =
+                new AudioContext();
+
+        }
+
+    }
+
+
+    if (
+        audioContext &&
+        audioContext.state === "suspended"
+    ) {
+
+        audioContext.resume();
+
+    }
+
+}
+
+
+/* =================================================
+   ピンポン!
+================================================= */
+
+function playCorrectSound() {
+
+
+    if (!audioContext) {
+
+        return;
+
+    }
+
+
+    const now =
+        audioContext.currentTime;
+
+
+    const osc1 =
+        audioContext.createOscillator();
+
+
+    const gain1 =
+        audioContext.createGain();
+
+
+    osc1.type =
+        "sine";
+
+
+    osc1.frequency.setValueAtTime(
+        880,
+        now
+    );
+
+
+    gain1.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    gain1.gain.exponentialRampToValueAtTime(
+        0.25,
+        now + 0.01
+    );
+
+
+    gain1.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.18
+    );
+
+
+    osc1.connect(gain1);
+
+    gain1.connect(
+        audioContext.destination
+    );
+
+
+    osc1.start(now);
+
+    osc1.stop(
+        now + 0.2
+    );
+
+
+    const osc2 =
+        audioContext.createOscillator();
+
+
+    const gain2 =
+        audioContext.createGain();
+
+
+    osc2.type =
+        "sine";
+
+
+    osc2.frequency.setValueAtTime(
+        1320,
+        now + 0.16
+    );
+
+
+    gain2.gain.setValueAtTime(
+        0.0001,
+        now + 0.16
+    );
+
+
+    gain2.gain.exponentialRampToValueAtTime(
+        0.25,
+        now + 0.17
+    );
+
+
+    gain2.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.40
+    );
+
+
+    osc2.connect(gain2);
+
+    gain2.connect(
+        audioContext.destination
+    );
+
+
+    osc2.start(
+        now + 0.16
+    );
+
+
+    osc2.stop(
+        now + 0.42
+    );
+
+}
+
+
+/* =================================================
+   ブブー!
+================================================= */
+
+function playWrongSound() {
+
+
+    if (!audioContext) {
+
+        return;
+
+    }
+
+
+    const now =
+        audioContext.currentTime;
+
+
+    const osc =
+        audioContext.createOscillator();
+
+
+    const gain =
+        audioContext.createGain();
+
+
+    osc.type =
+        "sawtooth";
+
+
+    osc.frequency.setValueAtTime(
+        220,
+        now
+    );
+
+
+    osc.frequency.linearRampToValueAtTime(
+        120,
+        now + 0.35
+    );
+
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.22,
+        now + 0.01
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.38
+    );
+
+
+    osc.connect(gain);
+
+    gain.connect(
+        audioContext.destination
+    );
+
+
+    osc.start(now);
+
+    osc.stop(
+        now + 0.4
+    );
+
+}
+
+
+/* =================================================
+   カウントダウン音
+================================================= */
+
+function playTickSound() {
+
+
+    if (!audioContext) {
+
+        return;
+
+    }
+
+
+    const now =
+        audioContext.currentTime;
+
+
+    const osc =
+        audioContext.createOscillator();
+
+
+    const gain =
+        audioContext.createGain();
+
+
+    osc.type =
+        "square";
+
+
+    osc.frequency.setValueAtTime(
+        600,
+        now
+    );
+
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.08,
+        now + 0.01
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.08
+    );
+
+
+    osc.connect(gain);
+
+    gain.connect(
+        audioContext.destination
+    );
+
+
+    osc.start(now);
+
+    osc.stop(
+        now + 0.1
+    );
+
+}
+
+
+/* =================================================
+   警告リセット
+================================================= */
+
+function resetWarning() {
+
+    warningOverlay.classList.remove(
+        "level-2"
+    );
+
+    warningOverlay.classList.remove(
+        "level-1"
+    );
+
+    timer.classList.remove(
+        "warning"
+    );
+
+}
+
+
+/* =================================================
+   問題作成
+================================================= */
+
+function makeQuestion() {
+
+    const expressions = [];
+
+    const answers = [];
+
+
+    while (
+        expressions.length < 4
+    ) {
+
+        const a =
+            Math.floor(
+                Math.random() * 9
+            ) + 2;
+
+
+        const b =
+            Math.floor(
+                Math.random() * 9
+            ) + 2;
+
+
+        const answer =
+            a * b;
+
+
+        /*
+           同じ答えが出た場合は
+           作り直す
+        */
+
+        if (
+            answers.includes(answer)
+        ) {
+
+            continue;
+
+        }
+
+
+        expressions.push(
+            `${a} × ${b}`
+        );
+
+
+        answers.push(
+            answer
+        );
+
+    }
+
+
+    const max =
+        Math.max(
+            ...answers
+        );
+
+
+    correctIndex =
+        answers.indexOf(
+            max
+        );
+
+
+    currentAnswers =
+        answers;
+
+
+    questions.forEach(
+        (element, index) => {
+
+            element.classList.remove(
+                "correct"
+            );
+
+            element.classList.remove(
+                "wrong"
+            );
+
+
+            element.innerHTML = `
+
+                <span class="expression">
+
+                    ${expressions[index]}
+
+                </span>
+
+            `;
+
+        }
+    );
+
+}
+
+
+/* =================================================
+   タイマー
+================================================= */
+
+function startTimer() {
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    resetWarning();
+
+
+    timeLeft =
+        TIME_LIMIT;
+
+
+    timer.textContent =
+        timeLeft;
+
+
+    timerInterval =
+        setInterval(
+            () => {
+
+                timeLeft--;
+
+
+                timer.textContent =
+                    timeLeft;
+
+
+                /*
+                   残り2秒
+                */
+
+                if (
+                    timeLeft === 2
+                ) {
+
+                    warningOverlay.classList.add(
+                        "level-2"
+                    );
+
+                    timer.classList.add(
+                        "warning"
+                    );
+
+                    playTickSound();
+
+                }
+
+
+                /*
+                   残り1秒
+                */
+
+                if (
+                    timeLeft === 1
+                ) {
+
+                    warningOverlay.classList.remove(
+                        "level-2"
+                    );
+
+                    warningOverlay.classList.add(
+                        "level-1"
+                    );
+
+                    timer.classList.add(
+                        "warning"
+                    );
+
+                    playTickSound();
+
+                }
+
+
+                /*
+                   0秒
+                */
+
+                if (
+                    timeLeft <= 0
+                ) {
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+                    timeUp();
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+/* =================================================
+   次の問題
+================================================= */
+
+function nextQuestion() {
+
+    if (
+        questionNumber >
+        TOTAL_QUESTIONS
+    ) {
+
+        finishGame();
+
+        return;
+
+    }
+
+
+    playing = true;
+
+
+    messageElement.textContent =
+        "";
+
+
+    resetWarning();
+
+
+    makeQuestion();
+
+
+    startTimer();
+
+}
+
+
+/* =================================================
+   答え表示
+================================================= */
+
+function showAnswers() {
+
+    questions.forEach(
+        (element, index) => {
+
+            if (
+                element.querySelector(
+                    ".answer"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const answerElement =
+                document.createElement(
+                    "span"
+                );
+
+
+            answerElement.className =
+                "answer";
+
+
+            answerElement.textContent =
+                `= ${currentAnswers[index]}`;
+
+
+            element.appendChild(
+                answerElement
+            );
+
+        }
+    );
+
+}
+
+
+/* =================================================
+   正解
+================================================= */
+
+function correctAnswer(
+    element
+) {
+
+    playing = false;
+
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    resetWarning();
+
+
+    playCorrectSound();
+
+
+    score++;
+
+
+    scoreElement.textContent =
+        score;
+
+
+    showAnswers();
+
+
+    element.classList.add(
+        "correct"
+    );
+
+
+    messageElement.textContent =
+        "⭕ ピンポン!";
+
+
+    setTimeout(
+        () => {
+
+            questionNumber++;
+
+
+            questionNumberElement.textContent =
+                questionNumber;
+
+
+            nextQuestion();
+
+        },
+        1000
+    );
+
+}
+
+
+/* =================================================
+   不正解
+================================================= */
+
+function wrongAnswer(
+    element
+) {
+
+    playing = false;
+
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    resetWarning();
+
+
+    playWrongSound();
+
+
+    showAnswers();
+
+
+    element.classList.add(
+        "wrong"
+    );
+
+
+    questions[
+        correctIndex
+    ].classList.add(
+        "correct"
+    );
+
+
+    messageElement.textContent =
+        "❌ ブブー!";
+
+
+    setTimeout(
+        () => {
+
+            questionNumber++;
+
+
+            questionNumberElement.textContent =
+                questionNumber;
+
+
+            nextQuestion();
+
+        },
+        1300
+    );
+
+}
+
+
+/* =================================================
+   時間切れ
+================================================= */
+
+function timeUp() {
+
+    playing = false;
+
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    resetWarning();
+
+
+    playWrongSound();
+
+
+    showAnswers();
+
+
+    questions[
+        correctIndex
+    ].classList.add(
+        "correct"
+    );
+
+
+    messageElement.textContent =
+        "⏰ ブブー!";
+
+
+    setTimeout(
+        () => {
+
+            questionNumber++;
+
+
+            questionNumberElement.textContent =
+                questionNumber;
+
+
+            nextQuestion();
+
+        },
+        1300
+    );
+
+}
+
+
+/* =================================================
+   タップ判定
+================================================= */
+
+board.addEventListener(
+    "click",
+    (event) => {
+
+        if (!playing) {
+
+            return;
+
+        }
+
+
+        initAudio();
+
+
+        const rect =
+            board.getBoundingClientRect();
+
+
+        const x =
+            event.clientX -
+            rect.left;
+
+
+        const y =
+            event.clientY -
+            rect.top;
+
+
+        const centerX =
+            rect.width / 2;
+
+
+        const centerY =
+            rect.height / 2;
+
+
+        const dx =
+            x - centerX;
+
+
+        const dy =
+            y - centerY;
+
+
+        const centerDistance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+
+        /*
+           中央タイマー付近は
+           タップ判定しない
+        */
+
+        if (
+            centerDistance < 45
+        ) {
+
+            return;
+
+        }
+
+
+        let index;
+
+
+        /*
+           上下か左右かを判定
+        */
+
+        if (
+            Math.abs(dy) >
+            Math.abs(dx)
+        ) {
+
+            if (
+                dy < 0
+            ) {
+
+                index = 0;
+
+            }
+
+            else {
+
+                index = 3;
+
+            }
+
+        }
+
+        else {
+
+            if (
+                dx < 0
+            ) {
+
+                index = 1;
+
+            }
+
+            else {
+
+                index = 2;
+
+            }
+
+        }
+
+
+        const selectedElement =
+            questions[index];
+
+
+        if (
+            index === correctIndex
+        ) {
+
+            correctAnswer(
+                selectedElement
+            );
+
+        }
+
+        else {
+
+            wrongAnswer(
+                selectedElement
+            );
+
+        }
+
+    }
+);
+
+
+/* =================================================
+   ゲーム終了
+================================================= */
+
+function finishGame() {
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    resetWarning();
+
+
+    playing = false;
+
+
+    const percent =
+        Math.round(
+            score /
+            TOTAL_QUESTIONS *
+            100
+        );
+
+
+    finalScore.textContent =
+        score;
+
+
+    finalPercent.textContent =
+        percent;
+
+
+    if (
+        score === 10
+    ) {
+
+        resultMessage.textContent =
+            "🎉 パーフェクト!";
+
+    }
+
+    else if (
+        score >= 8
+    ) {
+
+        resultMessage.textContent =
+            "🔥 すごい!";
+
+    }
+
+    else if (
+        score >= 5
+    ) {
+
+        resultMessage.textContent =
+            "👍 いい感じ!";
+
+    }
+
+    else {
+
+        resultMessage.textContent =
+            "💪 もう一度挑戦してみよう!";
+
+    }
+
+
+    resultScreen.style.display =
+        "flex";
+
+}
+
+
+/* =================================================
+   ゲーム開始
+================================================= */
+
+function startGame() {
+
+    initAudio();
+
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    score = 0;
+
+    questionNumber = 1;
+
+    playing = false;
+
+
+    scoreElement.textContent =
+        0;
+
+
+    questionNumberElement.textContent =
+        1;
+
+
+    messageElement.textContent =
+        "";
+
+
+    resetWarning();
+
+
+    resultScreen.style.display =
+        "none";
+
+
+    nextQuestion();
+
+}
+
+
+/* =================================================
+   制限時間選択
+================================================= */
+
+timeButtons.forEach(
+    (button) => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                /*
+                   選択した秒数を保存
+                */
+
+                TIME_LIMIT =
+                    Number(
+                        button.dataset.time
+                    );
+
+
+                /*
+                   見た目の選択状態を変更
+                */
+
+                timeButtons.forEach(
+                    (item) => {
+
+                        item.classList.remove(
+                            "selected"
+                        );
+
+                    }
+                );
+
+
+                button.classList.add(
+                    "selected"
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =================================================
+   START
+================================================= */
+
+document
+.getElementById(
+    "startButton"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        startScreen.style.display =
+            "none";
+
+        startGame();
+
+    }
+);
+
+
+/* =================================================
+   もう一度
+================================================= */
+
+document
+.getElementById(
+    "retryButton"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        resultScreen.style.display =
+            "none";
+
+        startScreen.style.display =
+            "flex";
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>
