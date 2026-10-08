@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0,
                maximum-scale=1.0, user-scalable=no">
 
-<title>マグネットゲーム</title>
+<title>マグネットゲーム</title>
 
 <style>
 
@@ -71,7 +71,7 @@ body {
 
 
 /* =========================================================
-   プレイヤー
+   プレイヤー
 ========================================================= */
 
 .player {
@@ -276,7 +276,7 @@ body {
 
 
 /* =========================================================
-   ボード
+   ボード
 ========================================================= */
 
 #board {
@@ -368,7 +368,7 @@ body {
 
 
 /* =========================================================
-   ドラッグ中
+   ドラッグ中
 ========================================================= */
 
 .magnet.dragging {
@@ -733,22 +733,13 @@ body {
 <div id="game">
 
 
-    <!-- =====================================================
-         上部UI
-    ====================================================== -->
-
     <div id="topUI">
-
-
-        <!-- 赤 -->
 
         <div
             id="redPlayer"
             class="player">
 
-            <span
-                class="dot redDot">
-            </span>
+            <span class="dot redDot"></span>
 
             <span>
                 赤
@@ -763,25 +754,16 @@ body {
         </div>
 
 
-        <!-- やり直す -->
-
-        <button
-            id="resetButton">
-
+        <button id="resetButton">
             やり直す
-
         </button>
 
-
-        <!-- 青 -->
 
         <div
             id="bluePlayer"
             class="player">
 
-            <span
-                class="dot blueDot">
-            </span>
+            <span class="dot blueDot"></span>
 
             <span>
                 青
@@ -796,44 +778,25 @@ body {
         </div>
 
 
-        <!-- ルール説明 -->
-
         <div id="gameRule">
 
             くっつけた磁石は、自分の手持ちになる。<br>
 
-            手持ちの磁石をゼロにしたら勝ち🏅
+            手持ちの磁石をゼロにしたら勝ち🏅
 
         </div>
-
 
     </div>
 
 
-    <!-- =====================================================
-         ボード
-    ====================================================== -->
-
     <div id="board"></div>
 
-
-    <!-- =====================================================
-         ターン表示
-    ====================================================== -->
 
     <div id="turnNotice"></div>
 
 
-    <!-- =====================================================
-         獲得表示
-    ====================================================== -->
-
     <div id="gainNotice"></div>
 
-
-    <!-- =====================================================
-         勝利画面
-    ====================================================== -->
 
     <div id="winScreen">
 
@@ -842,15 +805,12 @@ body {
             <div id="winText"></div>
 
             <button id="restartButton">
-
-                もう一度遊ぶ
-
+                もう一度遊ぶ
             </button>
 
         </div>
 
     </div>
-
 
 </div>
 
@@ -1000,6 +960,20 @@ let draggingNewMagnet =
 
 
 /* =========================================================
+   ★ 操作中のプレイヤー情報
+========================================================= */
+
+let operationPlayer =
+    null;
+
+let operationMagnet =
+    null;
+
+let operationAbsorbed =
+    false;
+
+
+/* =========================================================
    ターンフォーカス
 ========================================================= */
 
@@ -1014,6 +988,122 @@ function updateTurnFocus() {
         "active",
         currentPlayer === "blue"
     );
+}
+
+
+/* =========================================================
+   ★ 操作開始
+========================================================= */
+
+function beginOperation(
+    player,
+    magnet
+) {
+
+    operationPlayer =
+        player;
+
+    operationMagnet =
+        magnet;
+
+    operationAbsorbed =
+        false;
+
+    turnLocked =
+        true;
+}
+
+
+/* =========================================================
+   ★ 操作終了
+========================================================= */
+
+function clearOperation() {
+
+    operationPlayer =
+        null;
+
+    operationMagnet =
+        null;
+
+    operationAbsorbed =
+        false;
+}
+
+
+/* =========================================================
+   ★ 吸着しなかった操作の終了判定
+========================================================= */
+
+function finishOperationIfSettled() {
+
+    if (
+        gameOver ||
+        !operationMagnet ||
+        operationAbsorbed
+    ) {
+
+        return;
+    }
+
+
+    const magnet =
+        operationMagnet;
+
+
+    if (
+        !magnet.active
+    ) {
+
+        return;
+    }
+
+
+    if (
+        magnet.cluster
+    ) {
+
+        return;
+    }
+
+
+    const speed =
+        Math.sqrt(
+
+            magnet.vx *
+            magnet.vx +
+
+            magnet.vy *
+            magnet.vy
+
+        );
+
+
+    if (
+        speed >
+        STOP_SPEED
+    ) {
+
+        return;
+    }
+
+
+    /*
+       ここで初めてターン終了
+    */
+
+    clearOperation();
+
+    turnLocked =
+        false;
+
+
+    if (
+        !checkWin()
+    ) {
+
+        nextTurn();
+    }
 }
 
 
@@ -1344,8 +1434,16 @@ function mergeClusters(
     }
 
 
+    /*
+       ★ collectorは最初の操作プレイヤーを優先
+    */
+
     const finalCollector =
-        collector;
+        collector ||
+        clusterA.collector ||
+        clusterB.collector ||
+        operationPlayer ||
+        currentPlayer;
 
 
     cancelRemoval(
@@ -1889,8 +1987,13 @@ function processClusterChain(
             );
 
 
+        /*
+           ★ 最初の操作プレイヤーを維持
+        */
+
         const collector =
             current.collector ||
+            operationPlayer ||
             currentPlayer;
 
 
@@ -1965,17 +2068,44 @@ function stickMagnets(
     }
 
 
+    /*
+       ★ 操作中の磁石が吸着したら、
+          この操作は「吸着あり」
+    */
+
+    if (
+        operationMagnet === a ||
+        operationMagnet === b
+    ) {
+
+        operationAbsorbed =
+            true;
+    }
+
+
+    /*
+       ★ collectorは操作プレイヤーを最優先
+    */
+
+    const finalCollector =
+        operationPlayer ||
+        collector ||
+        currentPlayer;
+
+
     let clusterA =
         a.cluster ||
         createCluster(
-            a
+            a,
+            finalCollector
         );
 
 
     let clusterB =
         b.cluster ||
         createCluster(
-            b
+            b,
+            finalCollector
         );
 
 
@@ -2003,7 +2133,7 @@ function stickMagnets(
 
             b,
 
-            collector
+            finalCollector
 
         );
 
@@ -2279,6 +2409,11 @@ function removeCluster(
         members.length;
 
 
+    /*
+       ★ クラスター生成時に保存した
+          「最初に操作したプレイヤー」
+    */
+
     const collector =
         cluster.collector;
 
@@ -2350,6 +2485,14 @@ function removeCluster(
         resolvingCluster =
             null;
 
+
+        /*
+           ★ 吸着処理が完全終了してから
+              初めてターンロック解除
+        */
+
+        clearOperation();
+
         turnLocked =
             false;
 
@@ -2388,7 +2531,7 @@ function showGain(
 
 
     gainNotice.textContent =
-        `${icon} +${count}`;
+        `${icon} ＋${count}`;
 
 
     gainNotice.classList.add(
@@ -2413,7 +2556,7 @@ function checkWin() {
     ) {
 
         winGame(
-            "🔴 赤の勝ち!"
+            "🔴 赤の勝ち！"
         );
 
         return true;
@@ -2425,7 +2568,7 @@ function checkWin() {
     ) {
 
         winGame(
-            "🔵 青の勝ち!"
+            "🔵 青の勝ち！"
         );
 
         return true;
@@ -2461,7 +2604,7 @@ function winGame(
 
 
 /* =========================================================
-   新しい磁石のドラッグ開始
+   新しい磁石のドラッグ開始
 ========================================================= */
 
 function startNewMagnetDrag(
@@ -2503,6 +2646,16 @@ function startNewMagnetDrag(
         currentPlayer,
 
         stock - 1
+    );
+
+
+    /*
+       ★ この瞬間のプレイヤーを固定
+    */
+
+    beginOperation(
+        currentPlayer,
+        magnet
     );
 
 
@@ -2584,14 +2737,10 @@ board.addEventListener(
             }
 
 
-            if (
-                magnet.owner !==
-                currentPlayer
-            ) {
-
-                return;
-            }
-
+            /*
+               ★ 所有者チェックを削除
+               赤でも青でも単体なら動かせる
+            */
 
             if (
                 magnet.cluster
@@ -2599,6 +2748,16 @@ board.addEventListener(
 
                 return;
             }
+
+
+            /*
+               ★ 操作開始時点のプレイヤーを固定
+            */
+
+            beginOperation(
+                currentPlayer,
+                magnet
+            );
 
 
             draggingMagnet =
@@ -2742,7 +2901,7 @@ board.addEventListener(
 
                 result.target,
 
-                currentPlayer
+                operationPlayer
 
             );
         }
@@ -2785,6 +2944,10 @@ board.addEventListener(
         );
 
 
+        /*
+           指を離した瞬間に最終チェック
+        */
+
         const result =
             findNearestTarget(
 
@@ -2805,7 +2968,7 @@ board.addEventListener(
 
                 result.target,
 
-                currentPlayer
+                operationPlayer
 
             );
 
@@ -2813,12 +2976,12 @@ board.addEventListener(
         }
 
 
-        if (
-            !checkWin()
-        ) {
+        /*
+           ★ ここではターン変更しない
+           ★ 磁石が完全に止まるまで待つ
+        */
 
-            nextTurn();
-        }
+        finishOperationIfSettled();
 
     }
 );
@@ -2853,12 +3016,11 @@ board.addEventListener(
             false;
 
 
-        if (
-            !checkWin()
-        ) {
+        /*
+           ★ cancelでも即ターン変更しない
+        */
 
-            nextTurn();
-        }
+        finishOperationIfSettled();
 
     }
 );
@@ -3242,15 +3404,44 @@ function moveFreeMagnet(
         result.target
     ) {
 
+        /*
+           ★ 操作中の磁石なら
+              操作開始プレイヤーを使用
+        */
+
+        const collector =
+            (
+                operationMagnet === magnet &&
+                operationPlayer
+            )
+                ? operationPlayer
+                : currentPlayer;
+
+
         stickMagnets(
 
             magnet,
 
             result.target,
 
-            currentPlayer
+            collector
 
         );
+
+        return;
+    }
+
+
+    /*
+       ★ 吸着しなかった操作なら
+          完全停止後にターン終了
+    */
+
+    if (
+        operationMagnet === magnet
+    ) {
+
+        finishOperationIfSettled();
     }
 }
 
@@ -3375,6 +3566,13 @@ function physics() {
                 );
             }
         }
+
+
+        /*
+           ★ 念のため、操作磁石が停止しているか確認
+        */
+
+        finishOperationIfSettled();
     }
 
 
@@ -3427,7 +3625,7 @@ resetButton.addEventListener(
 
 
 /* =========================================================
-   もう一度遊ぶ
+   もう一度遊ぶ
 ========================================================= */
 
 restartButton.addEventListener(
