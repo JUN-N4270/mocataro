@@ -1,33 +1,24 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-               maximum-scale=1.0, user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>マグネットゲーム</title>
 
 <style>
-
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
+html, body {
     margin: 0;
     padding: 0;
-
     width: 100%;
     height: 100%;
-
     overflow: hidden;
-
     font-family: sans-serif;
-
     background: #eef5f8;
 }
 
@@ -38,3645 +29,1417 @@ body {
     overflow: hidden;
 }
 
-
-/* =========================================================
-   上部UI
-========================================================= */
-
+/* 上部UI */
 #topUI {
-
     position: absolute;
-
     top: 0;
     left: 0;
-
     width: 100%;
     height: 105px;
-
     display: flex;
-
     align-items: flex-start;
     justify-content: space-between;
-
     padding: 10px 18px;
-
-    background:
-        rgba(255,255,255,0.92);
-
-    box-shadow:
-        0 2px 8px rgba(0,0,0,0.12);
-
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     z-index: 1000;
 }
 
-
-/* =========================================================
-   プレイヤー
-========================================================= */
-
+/* プレイヤー */
 .player {
-
     position: relative;
-
     display: flex;
-
     align-items: center;
-
     gap: 8px;
-
     font-size: 18px;
-
     font-weight: bold;
-
     padding: 7px 12px;
-
     border-radius: 14px;
-
     background: transparent;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-
 
 .player.active {
-
-    background:
-        rgba(255,255,255,0.98);
-
-    transform:
-        scale(1.08);
+    background: rgba(255,255,255,0.98);
+    transform: scale(1.08);
 }
-
 
 #redPlayer.active {
-
-    box-shadow:
-        0 0 0 3px rgba(229,57,53,0.38),
-        0 0 14px rgba(229,57,53,0.25),
-        0 4px 12px rgba(0,0,0,0.16);
+    box-shadow: 0 0 0 3px rgba(229,57,53,0.38),
+                0 0 14px rgba(229,57,53,0.25),
+                0 4px 12px rgba(0,0,0,0.16);
 }
-
 
 #bluePlayer.active {
-
-    box-shadow:
-        0 0 0 3px rgba(25,118,210,0.38),
-        0 0 14px rgba(25,118,210,0.25),
-        0 4px 12px rgba(0,0,0,0.16);
+    box-shadow: 0 0 0 3px rgba(25,118,210,0.38),
+                0 0 14px rgba(25,118,210,0.25),
+                0 4px 12px rgba(0,0,0,0.16);
 }
 
-
+/* TURNを少し下げる */
 .player.active::after {
-
-    content:
-        "TURN";
-
+    content: "TURN";
     position: absolute;
-
     right: -4px;
     top: -5px;
-
-    padding:
-        2px 6px;
-
-    border-radius:
-        8px;
-
-    background:
-        #333;
-
-    color:
-        white;
-
-    font-size:
-        9px;
-
-    font-weight:
-        bold;
-
-    line-height:
-        1.2;
-
-    box-shadow:
-        0 2px 5px rgba(0,0,0,0.2);
+    padding: 2px 6px;
+    border-radius: 8px;
+    background: #333;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    line-height: 1.2;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-
 .dot {
-
     width: 22px;
     height: 22px;
-
     border-radius: 50%;
-
     flex-shrink: 0;
 }
 
-
-.redDot {
-    background: #e53935;
-}
-
-
-.blueDot {
-    background: #1976d2;
-}
-
+.redDot { background: #e53935; }
+.blueDot { background: #1976d2; }
 
 .stock {
-
     font-size: 24px;
-
     font-weight: bold;
 }
 
-
-/* =========================================================
-   やり直す
-========================================================= */
-
+/* やり直す */
 #resetButton {
-
     position: absolute;
-
     left: 50%;
     top: 27px;
-
-    transform:
-        translate(-50%, -50%);
-
-    border:
-        none;
-
-    padding:
-        7px 13px;
-
-    border-radius:
-        10px;
-
-    background:
-        #e8eef2;
-
-    color:
-        #44515a;
-
-    font-size:
-        14px;
-
-    font-weight:
-        bold;
-
-    box-shadow:
-        0 2px 5px rgba(0,0,0,0.12);
-
-    white-space:
-        nowrap;
-
-    touch-action:
-        manipulation;
+    transform: translate(-50%, -50%);
+    border: none;
+    padding: 7px 13px;
+    border-radius: 10px;
+    background: #e8eef2;
+    color: #44515a;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    white-space: nowrap;
+    touch-action: manipulation;
 }
 
-
-/* =========================================================
-   ルール説明
-========================================================= */
-
+/* ルール */
 #gameRule {
-
     position: absolute;
-
     left: 50%;
     bottom: 5px;
-
-    transform:
-        translateX(-50%);
-
+    transform: translateX(-50%);
     width: 100%;
-
     text-align: center;
-
     font-size: 12px;
-
     line-height: 1.35;
-
     font-weight: normal;
-
-    color:
-        rgba(70,80,85,0.55);
-
-    pointer-events:
-        none;
-
-    white-space:
-        nowrap;
+    color: rgba(70,80,85,0.55);
+    pointer-events: none;
+    white-space: nowrap;
 }
 
-
-/* =========================================================
-   ボード
-========================================================= */
-
+/* ボード */
 #board {
-
     position: absolute;
-
     left: 0;
     top: 105px;
-
     width: 100%;
     height: calc(100% - 105px);
-
     overflow: hidden;
 }
 
-
-/* =========================================================
-   磁石
-========================================================= */
-
+/* 磁石 */
 .magnet {
-
     position: absolute;
-
     width: 54px;
     height: 54px;
-
     border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle at 35% 30%,
-            #666 0%,
-            #292929 30%,
-            #050505 72%,
-            #000 100%
-        );
-
-    border:
-        2px solid #111;
-
-    box-shadow:
-        inset 3px 3px 5px rgba(255,255,255,0.18),
-        inset -3px -3px 5px rgba(0,0,0,0.7),
-        0 3px 6px rgba(0,0,0,0.25);
-
-    transform-origin:
-        center center;
-
-    user-select:
-        none;
-
-    touch-action:
-        none;
-
-    will-change:
-        left,
-        top,
-        transform;
+    background: radial-gradient(circle at 35% 30%,
+        #666 0%, #292929 30%, #050505 72%, #000 100%);
+    border: 2px solid #111;
+    box-shadow: inset 3px 3px 5px rgba(255,255,255,0.18),
+                inset -3px -3px 5px rgba(0,0,0,0.7),
+                0 3px 6px rgba(0,0,0,0.25);
+    transform-origin: center center;
+    user-select: none;
+    touch-action: none;
+    will-change: left, top, transform;
 }
-
 
 .magnet::after {
-
-    content:
-        "";
-
-    position:
-        absolute;
-
-    width:
-        13px;
-
-    height:
-        13px;
-
-    left:
-        10px;
-
-    top:
-        8px;
-
-    border-radius:
-        50%;
-
-    background:
-        rgba(255,255,255,0.18);
+    content: "";
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    left: 10px;
+    top: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
 }
-
-
-/* =========================================================
-   ドラッグ中
-========================================================= */
 
 .magnet.dragging {
-
-    transform:
-        scale(1.08);
-
-    box-shadow:
-        0 8px 16px rgba(0,0,0,0.35),
-        inset 3px 3px 5px rgba(255,255,255,0.18),
-        inset -3px -3px 5px rgba(0,0,0,0.7);
-
-    z-index:
-        500;
+    transform: scale(1.08);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.35),
+                inset 3px 3px 5px rgba(255,255,255,0.18),
+                inset -3px -3px 5px rgba(0,0,0,0.7);
+    z-index: 500;
 }
 
-
-/* =========================================================
-   吸着衝撃
-========================================================= */
-
+/* 吸着衝撃 */
 .magnet.impact {
-
-    animation:
-        impact 0.12s ease-out;
+    animation: impact 0.12s ease-out;
 }
-
 
 @keyframes impact {
-
-    0% {
-        transform:
-            scale(1);
-    }
-
-    50% {
-        transform:
-            scale(1.18);
-    }
-
-    100% {
-        transform:
-            scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+    100% { transform: scale(1); }
 }
 
-
-/* =========================================================
-   消滅
-========================================================= */
-
+/* 消滅 */
 .magnet.fading {
-
-    pointer-events:
-        none;
-
-    animation:
-        fadeOut 0.35s ease forwards;
+    pointer-events: none;
+    animation: fadeOut 0.35s ease forwards;
 }
-
 
 @keyframes fadeOut {
-
-    from {
-
-        opacity:
-            1;
-
-        transform:
-            scale(1);
-    }
-
-    to {
-
-        opacity:
-            0;
-
-        transform:
-            scale(0.65);
-    }
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.65); }
 }
 
-
-/* =========================================================
-   ターン表示
-========================================================= */
-
+/* ターン表示 */
 #turnNotice {
-
-    position:
-        absolute;
-
-    left:
-        50%;
-
-    top:
-        38%;
-
-    transform:
-        translate(-50%, -50%)
-        scale(0.9);
-
-    padding:
-        12px 22px;
-
-    border-radius:
-        16px;
-
-    background:
-        rgba(255,255,255,0.72);
-
-    font-size:
-        25px;
-
-    font-weight:
-        bold;
-
-    color:
-        rgba(30,30,30,0.72);
-
-    box-shadow:
-        0 5px 20px rgba(0,0,0,0.10);
-
-    opacity:
-        0;
-
-    pointer-events:
-        none;
-
-    z-index:
-        2000;
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    transform: translate(-50%, -50%) scale(0.9);
+    padding: 12px 22px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.72);
+    font-size: 25px;
+    font-weight: bold;
+    color: rgba(30,30,30,0.72);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.10);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2000;
 }
-
 
 #turnNotice.show {
-
-    animation:
-        turnNotice 1s ease forwards;
+    animation: turnNotice 1s ease forwards;
 }
-
 
 @keyframes turnNotice {
-
     0% {
-
-        opacity:
-            0;
-
-        transform:
-            translate(-50%, -50%)
-            scale(0.88);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.88);
     }
-
     20% {
-
-        opacity:
-            0.72;
-
-        transform:
-            translate(-50%, -50%)
-            scale(1);
+        opacity: 0.72;
+        transform: translate(-50%, -50%) scale(1);
     }
-
     70% {
-
-        opacity:
-            0.72;
-
-        transform:
-            translate(-50%, -50%)
-            scale(1);
+        opacity: 0.72;
+        transform: translate(-50%, -50%) scale(1);
     }
-
     100% {
-
-        opacity:
-            0;
-
-        transform:
-            translate(-50%, -50%)
-            scale(1.03);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.03);
     }
 }
 
-
-/* =========================================================
-   獲得表示
-========================================================= */
-
+/* 獲得表示 */
 #gainNotice {
-
-    position:
-        absolute;
-
-    left:
-        50%;
-
-    top:
-        38%;
-
-    transform:
-        translate(-50%, -50%);
-
-    font-size:
-        28px;
-
-    font-weight:
-        bold;
-
-    color:
-        #222;
-
-    opacity:
-        0;
-
-    pointer-events:
-        none;
-
-    z-index:
-        2100;
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: bold;
+    color: #222;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2100;
 }
-
 
 #gainNotice.show {
-
-    animation:
-        gain 0.9s ease forwards;
+    animation: gain 0.9s ease forwards;
 }
-
 
 @keyframes gain {
-
     0% {
-
-        opacity:
-            0;
-
-        transform:
-            translate(-50%, -20%);
+        opacity: 0;
+        transform: translate(-50%, -20%);
     }
-
     20% {
-
-        opacity:
-            1;
-
-        transform:
-            translate(-50%, -50%);
+        opacity: 1;
+        transform: translate(-50%, -50%);
     }
-
     70% {
-
-        opacity:
-            1;
-
-        transform:
-            translate(-50%, -60%);
+        opacity: 1;
+        transform: translate(-50%, -60%);
     }
-
     100% {
-
-        opacity:
-            0;
-
-        transform:
-            translate(-50%, -90%);
+        opacity: 0;
+        transform: translate(-50%, -90%);
     }
 }
 
-
-/* =========================================================
-   勝利画面
-========================================================= */
-
+/* 勝利画面 */
 #winScreen {
-
-    position:
-        absolute;
-
-    inset:
-        0;
-
-    display:
-        none;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    background:
-        rgba(0,0,0,0.55);
-
-    z-index:
-        5000;
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.55);
+    z-index: 5000;
 }
-
 
 #winBox {
-
-    background:
-        white;
-
-    padding:
-        35px 45px;
-
-    border-radius:
-        24px;
-
-    text-align:
-        center;
-
-    box-shadow:
-        0 10px 40px rgba(0,0,0,0.3);
+    background: white;
+    padding: 35px 45px;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
 }
-
 
 #winText {
-
-    font-size:
-        36px;
-
-    font-weight:
-        bold;
-
-    margin-bottom:
-        25px;
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 25px;
 }
-
 
 #restartButton {
-
-    border:
-        none;
-
-    padding:
-        14px 28px;
-
-    border-radius:
-        12px;
-
-    background:
-        #333;
-
-    color:
-        white;
-
-    font-size:
-        18px;
-
-    font-weight:
-        bold;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    background: #333;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
 }
-
 </style>
 </head>
 
-
 <body>
-
 <div id="game">
 
-
     <div id="topUI">
-
-        <div
-            id="redPlayer"
-            class="player">
-
+        <div id="redPlayer" class="player">
             <span class="dot redDot"></span>
-
-            <span>
-                赤
-            </span>
-
-            <span
-                id="redStock"
-                class="stock">
-                10
-            </span>
-
+            <span>赤</span>
+            <span id="redStock" class="stock">10</span>
         </div>
 
+        <button id="resetButton">やり直す</button>
 
-        <button id="resetButton">
-            やり直す
-        </button>
-
-
-        <div
-            id="bluePlayer"
-            class="player">
-
+        <div id="bluePlayer" class="player">
             <span class="dot blueDot"></span>
-
-            <span>
-                青
-            </span>
-
-            <span
-                id="blueStock"
-                class="stock">
-                10
-            </span>
-
+            <span>青</span>
+            <span id="blueStock" class="stock">10</span>
         </div>
-
 
         <div id="gameRule">
-
             くっつけた磁石は、自分の手持ちになる。<br>
-
             手持ちの磁石をゼロにしたら勝ち🏅
-
         </div>
-
     </div>
 
-
     <div id="board"></div>
-
-
     <div id="turnNotice"></div>
-
-
     <div id="gainNotice"></div>
 
-
     <div id="winScreen">
-
         <div id="winBox">
-
             <div id="winText"></div>
-
-            <button id="restartButton">
-                もう一度遊ぶ
-            </button>
-
+            <button id="restartButton">もう一度遊ぶ</button>
         </div>
-
     </div>
 
 </div>
 
-
 <script>
-
 /* =========================================================
-   設定
+   設定（既存仕様を維持）
 ========================================================= */
 
-const R =
-    27;
+const R = 27;
+const MAGNET_SIZE = R * 2;
+const CONTACT_DISTANCE = MAGNET_SIZE;
+const STICK_DISTANCE = 105;
+const ATTRACT_DISTANCE = 150;
+const MAGNET_FORCE = 0.65;
+const IMPULSE = 7;
+const FRICTION = 0.92;
+const STOP_SPEED = 0.08;
+const REMOVE_DELAY = 500;
+const FADE_TIME = 350;
+const INITIAL_STOCK = 10;
 
-const MAGNET_SIZE =
-    R * 2;
-
-const CONTACT_DISTANCE =
-    MAGNET_SIZE;
-
-const STICK_DISTANCE =
-    105;
-
-const ATTRACT_DISTANCE =
-    150;
-
-const MAGNET_FORCE =
-    0.65;
-
-const IMPULSE =
-    7;
-
-const FRICTION =
-    0.92;
-
-const STOP_SPEED =
-    0.08;
-
-const REMOVE_DELAY =
-    500;
-
-const FADE_TIME =
-    350;
-
-const INITIAL_STOCK =
-    10;
-
+/* ターン判定の安定確認 */
+const SETTLED_FRAMES_REQUIRED = 12;
 
 /* =========================================================
    DOM
 ========================================================= */
 
-const board =
-    document.getElementById(
-        "board"
-    );
-
-const redStockEl =
-    document.getElementById(
-        "redStock"
-    );
-
-const blueStockEl =
-    document.getElementById(
-        "blueStock"
-    );
-
-const redPlayerEl =
-    document.getElementById(
-        "redPlayer"
-    );
-
-const bluePlayerEl =
-    document.getElementById(
-        "bluePlayer"
-    );
-
-const resetButton =
-    document.getElementById(
-        "resetButton"
-    );
-
-const turnNotice =
-    document.getElementById(
-        "turnNotice"
-    );
-
-const gainNotice =
-    document.getElementById(
-        "gainNotice"
-    );
-
-const winScreen =
-    document.getElementById(
-        "winScreen"
-    );
-
-const winText =
-    document.getElementById(
-        "winText"
-    );
-
-const restartButton =
-    document.getElementById(
-        "restartButton"
-    );
-
+const board = document.getElementById("board");
+const redStockEl = document.getElementById("redStock");
+const blueStockEl = document.getElementById("blueStock");
+const redPlayerEl = document.getElementById("redPlayer");
+const bluePlayerEl = document.getElementById("bluePlayer");
+const resetButton = document.getElementById("resetButton");
+const turnNotice = document.getElementById("turnNotice");
+const gainNotice = document.getElementById("gainNotice");
+const winScreen = document.getElementById("winScreen");
+const winText = document.getElementById("winText");
+const restartButton = document.getElementById("restartButton");
 
 /* =========================================================
    状態
 ========================================================= */
 
-let currentPlayer =
-    "red";
-
-let redStock =
-    INITIAL_STOCK;
-
-let blueStock =
-    INITIAL_STOCK;
-
-let magnets =
-    [];
-
-let draggingMagnet =
-    null;
-
-let pointerOffsetX =
-    0;
-
-let pointerOffsetY =
-    0;
-
-let turnLocked =
-    false;
-
-let resolvingCluster =
-    null;
-
-let gameOver =
-    false;
-
-let nextMagnetId =
-    1;
-
-let draggingNewMagnet =
-    false;
-
-
-/* =========================================================
-   ★ 操作中のプレイヤー情報
-========================================================= */
-
-let operationPlayer =
-    null;
-
-let operationMagnet =
-    null;
-
-let operationAbsorbed =
-    false;
-
-
-/* =========================================================
-   ターンフォーカス
-========================================================= */
-
-function updateTurnFocus() {
-
-    redPlayerEl.classList.toggle(
-        "active",
-        currentPlayer === "red"
-    );
-
-    bluePlayerEl.classList.toggle(
-        "active",
-        currentPlayer === "blue"
-    );
-}
-
-
-/* =========================================================
-   ★ 操作開始
-========================================================= */
-
-function beginOperation(
-    player,
-    magnet
-) {
-
-    operationPlayer =
-        player;
-
-    operationMagnet =
-        magnet;
-
-    operationAbsorbed =
-        false;
-
-    turnLocked =
-        true;
-}
-
-
-/* =========================================================
-   ★ 操作終了
-========================================================= */
-
-function clearOperation() {
-
-    operationPlayer =
-        null;
-
-    operationMagnet =
-        null;
-
-    operationAbsorbed =
-        false;
-}
-
-
-/* =========================================================
-   ★ 吸着しなかった操作の終了判定
-========================================================= */
-
-function finishOperationIfSettled() {
-
-    if (
-        gameOver ||
-        !operationMagnet ||
-        operationAbsorbed
-    ) {
-
-        return;
-    }
-
-
-    const magnet =
-        operationMagnet;
-
-
-    if (
-        !magnet.active
-    ) {
-
-        return;
-    }
-
-
-    if (
-        magnet.cluster
-    ) {
-
-        return;
-    }
-
-
-    const speed =
-        Math.sqrt(
-
-            magnet.vx *
-            magnet.vx +
-
-            magnet.vy *
-            magnet.vy
-
-        );
-
-
-    if (
-        speed >
-        STOP_SPEED
-    ) {
-
-        return;
-    }
-
-
-    /*
-       ここで初めてターン終了
-    */
-
-    clearOperation();
-
-    turnLocked =
-        false;
-
-
-    if (
-        !checkWin()
-    ) {
-
-        nextTurn();
-    }
-}
-
-
-/* =========================================================
-   磁石生成
-========================================================= */
-
-function createMagnet(
-    x,
-    y
-) {
-
-    const el =
-        document.createElement(
-            "div"
-        );
-
-
-    el.className =
-        "magnet";
-
-
-    el.style.left =
-        `${x - R}px`;
-
-    el.style.top =
-        `${y - R}px`;
-
-
-    board.appendChild(
-        el
-    );
-
-
-    const magnet = {
-
-        id:
-            nextMagnetId++,
-
-        x:
-            x,
-
-        y:
-            y,
-
-        vx:
-            0,
-
-        vy:
-            0,
-
-        owner:
-            currentPlayer,
-
-        el:
-            el,
-
-        active:
-            true,
-
-        cluster:
-            null,
-
-        scheduledRemove:
-            false
-    };
-
-
-    magnets.push(
-        magnet
-    );
-
-
-    return magnet;
-}
-
-
-/* =========================================================
-   描画
-========================================================= */
-
-function renderMagnet(
-    magnet
-) {
-
-    if (
-        !magnet ||
-        !magnet.active
-    ) {
-
-        return;
-    }
-
-
-    magnet.el.style.left =
-        `${magnet.x - R}px`;
-
-    magnet.el.style.top =
-        `${magnet.y - R}px`;
-}
-
-
-/* =========================================================
-   クラスター描画
-========================================================= */
-
-function renderCluster(
-    cluster
-) {
-
-    if (!cluster) {
-        return;
-    }
-
-
-    for (
-        const magnet
-        of cluster.members
-    ) {
-
-        renderMagnet(
-            magnet
-        );
-    }
-}
-
-
-/* =========================================================
-   ストック
-========================================================= */
-
-function getStock(
-    player
-) {
-
-    return player === "red"
-        ? redStock
-        : blueStock;
-}
-
-
-function setStock(
-    player,
-    value
-) {
-
-    if (
-        player === "red"
-    ) {
-
-        redStock =
-            value;
-
-        redStockEl.textContent =
-            value;
-
-    } else {
-
-        blueStock =
-            value;
-
-        blueStockEl.textContent =
-            value;
-    }
-}
-
+let currentPlayer = "red";
+let redStock = INITIAL_STOCK;
+let blueStock = INITIAL_STOCK;
+let magnets = [];
+let draggingMagnet = null;
+let pointerOffsetX = 0;
+let pointerOffsetY = 0;
+let turnLocked = false;
+let resolvingCluster = null;
+let gameOver = false;
+let nextMagnetId = 1;
+let draggingNewMagnet = false;
+
+/* 操作の所有者を最後まで保持 */
+let operationPlayer = null;
+let operationMagnet = null;
+let operationAbsorbed = false;
+let settledFrames = 0;
 
 /* =========================================================
    ターン表示
 ========================================================= */
 
-function showTurnNotice(
-    player
-) {
+function updateTurnFocus() {
+    redPlayerEl.classList.toggle("active", currentPlayer === "red");
+    bluePlayerEl.classList.toggle("active", currentPlayer === "blue");
+}
 
+function showTurnNotice(player) {
     updateTurnFocus();
-
-
-    turnNotice.classList.remove(
-        "show"
-    );
-
-
+    turnNotice.classList.remove("show");
     void turnNotice.offsetWidth;
 
-
     turnNotice.textContent =
-        player === "red"
-            ? "🔴 赤のターン"
-            : "🔵 青のターン";
+        player === "red" ? "🔴 赤のターン" : "🔵 青のターン";
 
-
-    turnNotice.classList.add(
-        "show"
-    );
+    turnNotice.classList.add("show");
 }
-
-
-/* =========================================================
-   ターン変更
-========================================================= */
 
 function nextTurn() {
+    if (gameOver || turnLocked) return;
 
-    if (gameOver) {
-        return;
-    }
-
-
-    if (turnLocked) {
-        return;
-    }
-
-
-    currentPlayer =
-        currentPlayer === "red"
-            ? "blue"
-            : "red";
-
-
-    showTurnNotice(
-        currentPlayer
-    );
+    currentPlayer = currentPlayer === "red" ? "blue" : "red";
+    showTurnNotice(currentPlayer);
 }
 
+/* =========================================================
+   操作管理
+========================================================= */
+
+function beginOperation(player, magnet) {
+    operationPlayer = player;
+    operationMagnet = magnet;
+    operationAbsorbed = false;
+    settledFrames = 0;
+    turnLocked = true;
+}
+
+/*
+ * 吸着がなかった場合のみ使用。
+ * 指を離した直後にはターンを変えず、
+ * 盤面全体の動きが落ち着いた状態が続いたら交代する。
+ */
+function finishOperationIfSettled() {
+    if (
+        gameOver ||
+        !operationPlayer ||
+        operationAbsorbed ||
+        draggingMagnet
+    ) {
+        settledFrames = 0;
+        return;
+    }
+
+    if (resolvingCluster) {
+        settledFrames = 0;
+        return;
+    }
+
+    /* クラスターが盤面に残っている間は終了しない */
+    if (magnets.some(m => m.active && m.cluster)) {
+        settledFrames = 0;
+        return;
+    }
+
+    /* 盤面の自由磁石すべてが停止しているか確認 */
+    const moving = magnets.some(m => {
+        if (!m.active || m.scheduledRemove) return false;
+        return Math.hypot(m.vx, m.vy) > STOP_SPEED;
+    });
+
+    if (moving) {
+        settledFrames = 0;
+        return;
+    }
+
+    /*
+     * 吸着距離内のペアが残っていれば、
+     * 物理処理が吸着を検出するまで待つ。
+     */
+    for (let i = 0; i < magnets.length; i++) {
+        const a = magnets[i];
+        if (!a.active || a.scheduledRemove) continue;
+
+        for (let j = i + 1; j < magnets.length; j++) {
+            const b = magnets[j];
+            if (!b.active || b.scheduledRemove) continue;
+
+            if (distance(a, b) <= STICK_DISTANCE) {
+                settledFrames = 0;
+                return;
+            }
+        }
+    }
+
+    settledFrames++;
+
+    if (settledFrames < SETTLED_FRAMES_REQUIRED) return;
+
+    clearOperation();
+
+    turnLocked = false;
+
+    if (!checkWin()) {
+        nextTurn();
+    }
+}
+
+function clearOperation() {
+    operationPlayer = null;
+    operationMagnet = null;
+    operationAbsorbed = false;
+    settledFrames = 0;
+}
+
+/* =========================================================
+   磁石生成・描画
+========================================================= */
+
+function createMagnet(x, y) {
+    const el = document.createElement("div");
+    el.className = "magnet";
+    el.style.left = `${x - R}px`;
+    el.style.top = `${y - R}px`;
+    board.appendChild(el);
+
+    const magnet = {
+        id: nextMagnetId++,
+        x,
+        y,
+        vx: 0,
+        vy: 0,
+        owner: currentPlayer,
+        el,
+        active: true,
+        cluster: null,
+        scheduledRemove: false
+    };
+
+    magnets.push(magnet);
+    return magnet;
+}
+
+function renderMagnet(magnet) {
+    if (!magnet || !magnet.active) return;
+
+    magnet.el.style.left = `${magnet.x - R}px`;
+    magnet.el.style.top = `${magnet.y - R}px`;
+}
+
+function renderCluster(cluster) {
+    if (!cluster) return;
+
+    for (const magnet of cluster.members) {
+        renderMagnet(magnet);
+    }
+}
+
+/* =========================================================
+   ストック
+========================================================= */
+
+function getStock(player) {
+    return player === "red" ? redStock : blueStock;
+}
+
+function setStock(player, value) {
+    if (player === "red") {
+        redStock = value;
+        redStockEl.textContent = value;
+    } else {
+        blueStock = value;
+        blueStockEl.textContent = value;
+    }
+}
 
 /* =========================================================
    距離
 ========================================================= */
 
-function distance(
-    a,
-    b
-) {
-
-    const dx =
-        b.x - a.x;
-
-    const dy =
-        b.y - a.y;
-
-
-    return Math.sqrt(
-        dx * dx +
-        dy * dy
-    );
+function distance(a, b) {
+    return Math.hypot(b.x - a.x, b.y - a.y);
 }
-
 
 /* =========================================================
    クラスター生成
 ========================================================= */
 
-function createCluster(
-    magnet,
-    collector = null
-) {
-
-    if (
-        magnet.cluster
-    ) {
-
-        return magnet.cluster;
-    }
-
+function createCluster(magnet, collector = null) {
+    if (magnet.cluster) return magnet.cluster;
 
     const cluster = {
-
-        members:
-            new Set([
-                magnet
-            ]),
-
-        bonds:
-            [],
-
-        vx:
-            magnet.vx,
-
-        vy:
-            magnet.vy,
-
-        collector:
-            collector,
-
-        removeTimer:
-            null,
-
-        removing:
-            false
+        members: new Set([magnet]),
+        bonds: [],
+        vx: magnet.vx,
+        vy: magnet.vy,
+        collector: collector || operationPlayer || currentPlayer,
+        removeTimer: null,
+        fadeTimer: null,
+        removing: false
     };
 
-
-    magnet.cluster =
-        cluster;
-
-
+    magnet.cluster = cluster;
     return cluster;
 }
-
-
-/* =========================================================
-   クラスター結合
-========================================================= */
-
-function mergeClusters(
-    clusterA,
-    clusterB,
-    magnetA,
-    magnetB,
-    collector
-) {
-
-    if (
-        !clusterA ||
-        !clusterB
-    ) {
-
-        return null;
-    }
-
-
-    if (
-        clusterA === clusterB
-    ) {
-
-        return clusterA;
-    }
-
-
-    /*
-       ★ collectorは最初の操作プレイヤーを優先
-    */
-
-    const finalCollector =
-        collector ||
-        clusterA.collector ||
-        clusterB.collector ||
-        operationPlayer ||
-        currentPlayer;
-
-
-    cancelRemoval(
-        clusterA
-    );
-
-    cancelRemoval(
-        clusterB
-    );
-
-
-    const dx =
-        magnetB.x -
-        magnetA.x;
-
-    const dy =
-        magnetB.y -
-        magnetA.y;
-
-
-    const d =
-        Math.sqrt(
-            dx * dx +
-            dy * dy
-        ) || 1;
-
-
-    const nx =
-        dx / d;
-
-    const ny =
-        dy / d;
-
-
-    const correction =
-        d -
-        CONTACT_DISTANCE;
-
-
-    for (
-        const magnet
-        of clusterA.members
-    ) {
-
-        magnet.x +=
-            nx * correction;
-
-        magnet.y +=
-            ny * correction;
-    }
-
-
-    const merged = {
-
-        members:
-            new Set(),
-
-        bonds:
-            [],
-
-        vx:
-            (
-                clusterA.vx +
-                clusterB.vx
-            ) / 2,
-
-        vy:
-            (
-                clusterA.vy +
-                clusterB.vy
-            ) / 2,
-
-        collector:
-            finalCollector,
-
-        removeTimer:
-            null,
-
-        removing:
-            false
-    };
-
-
-    for (
-        const magnet
-        of clusterA.members
-    ) {
-
-        merged.members.add(
-            magnet
-        );
-
-        magnet.cluster =
-            merged;
-    }
-
-
-    for (
-        const magnet
-        of clusterB.members
-    ) {
-
-        merged.members.add(
-            magnet
-        );
-
-        magnet.cluster =
-            merged;
-    }
-
-
-    merged.bonds.push(
-        ...clusterA.bonds
-    );
-
-    merged.bonds.push(
-        ...clusterB.bonds
-    );
-
-
-    merged.bonds.push({
-
-        a:
-            magnetA,
-
-        b:
-            magnetB
-    });
-
-
-    clusterA.members.clear();
-
-    clusterA.bonds.length =
-        0;
-
-
-    clusterB.members.clear();
-
-    clusterB.bonds.length =
-        0;
-
-
-    solveBonds(
-        merged
-    );
-
-
-    renderCluster(
-        merged
-    );
-
-
-    return merged;
-}
-
 
 /* =========================================================
    結合距離維持
 ========================================================= */
 
-function solveBonds(
-    cluster
-) {
+function solveBonds(cluster) {
+    if (!cluster) return;
 
-    if (!cluster) {
-        return;
-    }
+    for (const bond of cluster.bonds) {
+        const a = bond.a;
+        const b = bond.b;
 
+        if (!a.active || !b.active) continue;
 
-    for (
-        const bond
-        of cluster.bonds
-    ) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const d = Math.hypot(dx, dy) || 1;
+        const diff = d - CONTACT_DISTANCE;
+        const nx = dx / d;
+        const ny = dy / d;
+        const correction = diff * 0.5;
 
-        const a =
-            bond.a;
-
-        const b =
-            bond.b;
-
-
-        if (
-            !a.active ||
-            !b.active
-        ) {
-
-            continue;
-        }
-
-
-        const dx =
-            b.x - a.x;
-
-        const dy =
-            b.y - a.y;
-
-
-        const d =
-            Math.sqrt(
-                dx * dx +
-                dy * dy
-            ) || 1;
-
-
-        const diff =
-            d -
-            CONTACT_DISTANCE;
-
-
-        const nx =
-            dx / d;
-
-        const ny =
-            dy / d;
-
-
-        const correction =
-            diff * 0.5;
-
-
-        a.x +=
-            nx * correction;
-
-        a.y +=
-            ny * correction;
-
-
-        b.x -=
-            nx * correction;
-
-        b.y -=
-            ny * correction;
+        a.x += nx * correction;
+        a.y += ny * correction;
+        b.x -= nx * correction;
+        b.y -= ny * correction;
     }
 }
 
+/* =========================================================
+   クラスター結合
+========================================================= */
+
+function mergeClusters(clusterA, clusterB, magnetA, magnetB, collector) {
+    if (!clusterA || !clusterB) return null;
+    if (clusterA === clusterB) return clusterA;
+
+    /*
+     * 最初に操作したプレイヤーを優先。
+     * 連鎖結合でも獲得者を変更しない。
+     */
+    const finalCollector =
+        operationPlayer ||
+        collector ||
+        clusterA.collector ||
+        clusterB.collector ||
+        currentPlayer;
+
+    cancelRemoval(clusterA);
+    cancelRemoval(clusterB);
+
+    const dx = magnetB.x - magnetA.x;
+    const dy = magnetB.y - magnetA.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const nx = dx / d;
+    const ny = dy / d;
+    const correction = d - CONTACT_DISTANCE;
+
+    for (const magnet of clusterA.members) {
+        magnet.x += nx * correction;
+        magnet.y += ny * correction;
+    }
+
+    const merged = {
+        members: new Set(),
+        bonds: [],
+        vx: (clusterA.vx + clusterB.vx) / 2,
+        vy: (clusterA.vy + clusterB.vy) / 2,
+        collector: finalCollector,
+        removeTimer: null,
+        fadeTimer: null,
+        removing: false
+    };
+
+    for (const magnet of clusterA.members) {
+        merged.members.add(magnet);
+        magnet.cluster = merged;
+    }
+
+    for (const magnet of clusterB.members) {
+        merged.members.add(magnet);
+        magnet.cluster = merged;
+    }
+
+    merged.bonds.push(...clusterA.bonds, ...clusterB.bonds);
+    merged.bonds.push({ a: magnetA, b: magnetB });
+
+    clusterA.members.clear();
+    clusterA.bonds.length = 0;
+    clusterB.members.clear();
+    clusterB.bonds.length = 0;
+
+    solveBonds(merged);
+    renderCluster(merged);
+
+    return merged;
+}
 
 /* =========================================================
    衝撃
 ========================================================= */
 
-function kickCluster(
-    cluster,
-    from,
-    to
-) {
+function kickCluster(cluster, from, to) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const d = Math.hypot(dx, dy) || 1;
 
-    const dx =
-        to.x -
-        from.x;
+    cluster.vx = dx / d * IMPULSE;
+    cluster.vy = dy / d * IMPULSE;
 
-    const dy =
-        to.y -
-        from.y;
+    for (const magnet of cluster.members) {
+        magnet.vx = cluster.vx;
+        magnet.vy = cluster.vy;
 
-
-    const d =
-        Math.sqrt(
-            dx * dx +
-            dy * dy
-        ) || 1;
-
-
-    const nx =
-        dx / d;
-
-    const ny =
-        dy / d;
-
-
-    cluster.vx =
-        nx * IMPULSE;
-
-    cluster.vy =
-        ny * IMPULSE;
-
-
-    for (
-        const magnet
-        of cluster.members
-    ) {
-
-        magnet.vx =
-            cluster.vx;
-
-        magnet.vy =
-            cluster.vy;
-
-
-        magnet.el.classList.remove(
-            "impact"
-        );
-
-
+        magnet.el.classList.remove("impact");
         void magnet.el.offsetWidth;
-
-
-        magnet.el.classList.add(
-            "impact"
-        );
+        magnet.el.classList.add("impact");
     }
 }
-
 
 /* =========================================================
    最近接磁石
 ========================================================= */
 
-function findNearestTarget(
-    magnet,
-    maxDistance
-) {
+function findNearestTarget(magnet, maxDistance) {
+    let best = null;
+    let bestDistance = Infinity;
 
-    let best =
-        null;
-
-    let bestDistance =
-        Infinity;
-
-
-    for (
-        const other
-        of magnets
-    ) {
-
-        if (
-            other === magnet
-        ) {
-
+    for (const other of magnets) {
+        if (other === magnet || !other.active || other.scheduledRemove) {
             continue;
         }
 
-
-        if (
-            !other.active
-        ) {
-
+        if (magnet.cluster && other.cluster === magnet.cluster) {
             continue;
         }
 
+        const d = distance(magnet, other);
 
-        if (
-            other.scheduledRemove
-        ) {
-
-            continue;
-        }
-
-
-        if (
-            magnet.cluster &&
-            other.cluster ===
-            magnet.cluster
-        ) {
-
-            continue;
-        }
-
-
-        const d =
-            distance(
-                magnet,
-                other
-            );
-
-
-        if (
-            d <= maxDistance &&
-            d < bestDistance
-        ) {
-
-            best =
-                other;
-
-            bestDistance =
-                d;
+        if (d <= maxDistance && d < bestDistance) {
+            best = other;
+            bestDistance = d;
         }
     }
 
-
-    return {
-
-        target:
-            best,
-
-        distance:
-            bestDistance
-    };
+    return { target: best, distance: bestDistance };
 }
-
 
 /* =========================================================
    クラスター吸着対象
 ========================================================= */
 
-function findClusterTarget(
-    cluster
-) {
+function findClusterTarget(cluster) {
+    let best = null;
+    let bestFrom = null;
+    let bestDistance = Infinity;
 
-    let best =
-        null;
+    for (const a of cluster.members) {
+        if (!a.active) continue;
 
-    let bestFrom =
-        null;
+        for (const b of magnets) {
+            if (!b.active || b.scheduledRemove) continue;
+            if (cluster.members.has(b)) continue;
 
-    let bestDistance =
-        Infinity;
+            const d = distance(a, b);
 
-
-    for (
-        const a
-        of cluster.members
-    ) {
-
-        if (
-            !a.active
-        ) {
-
-            continue;
-        }
-
-
-        for (
-            const b
-            of magnets
-        ) {
-
-            if (
-                !b.active
-            ) {
-
-                continue;
-            }
-
-
-            if (
-                b.scheduledRemove
-            ) {
-
-                continue;
-            }
-
-
-            if (
-                cluster.members.has(
-                    b
-                )
-            ) {
-
-                continue;
-            }
-
-
-            const d =
-                distance(
-                    a,
-                    b
-                );
-
-
-            if (
-                d <= STICK_DISTANCE &&
-                d < bestDistance
-            ) {
-
-                best =
-                    b;
-
-                bestFrom =
-                    a;
-
-                bestDistance =
-                    d;
+            if (d <= STICK_DISTANCE && d < bestDistance) {
+                best = b;
+                bestFrom = a;
+                bestDistance = d;
             }
         }
     }
 
-
-    return {
-
-        target:
-            best,
-
-        from:
-            bestFrom,
-
-        distance:
-            bestDistance
-    };
+    return { target: best, from: bestFrom, distance: bestDistance };
 }
-
 
 /* =========================================================
    連鎖吸着
 ========================================================= */
 
-function processClusterChain(
-    cluster
-) {
+function processClusterChain(cluster) {
+    let current = cluster;
 
-    let current =
-        cluster;
+    for (let i = 0; i < 100; i++) {
+        if (!current || current.members.size === 0) break;
 
+        const result = findClusterTarget(current);
+        if (!result.target) break;
 
-    for (
-        let i = 0;
-        i < 100;
-        i++
-    ) {
-
-        if (
-            !current ||
-            current.members.size === 0
-        ) {
-
-            break;
-        }
-
-
-        const result =
-            findClusterTarget(
-                current
-            );
-
-
-        if (
-            !result.target
-        ) {
-
-            break;
-        }
-
-
-        const target =
-            result.target;
-
-
-        const targetCluster =
-            target.cluster ||
-            createCluster(
-                target
-            );
-
-
-        /*
-           ★ 最初の操作プレイヤーを維持
-        */
+        const target = result.target;
+        const targetCluster = target.cluster || createCluster(target);
 
         const collector =
-            current.collector ||
             operationPlayer ||
+            current.collector ||
             currentPlayer;
 
+        current = mergeClusters(
+            current,
+            targetCluster,
+            result.from,
+            target,
+            collector
+        );
 
-        current =
-            mergeClusters(
+        if (!current) break;
 
-                current,
-
-                targetCluster,
-
-                result.from,
-
-                target,
-
-                collector
-
-            );
-
-
-        if (!current) {
-            break;
+        /* 吸着中の操作は終了扱いにしない */
+        if (operationMagnet &&
+            current.members.has(operationMagnet)) {
+            operationAbsorbed = true;
         }
 
+        turnLocked = true;
+        settledFrames = 0;
 
-        kickCluster(
-            current,
-            result.from,
-            target
-        );
+        kickCluster(current, result.from, target);
+        solveBonds(current);
+        renderCluster(current);
+        cancelRemoval(current);
 
-
-        solveBonds(
-            current
-        );
-
-
-        renderCluster(
-            current
-        );
-
-
-        cancelRemoval(
-            current
-        );
-
-
-        resolvingCluster =
-            current;
+        resolvingCluster = current;
     }
-
 
     return current;
 }
-
 
 /* =========================================================
    吸着
 ========================================================= */
 
-function stickMagnets(
-    a,
-    b,
-    collector
-) {
+function stickMagnets(a, b, collector) {
+    if (!a.active || !b.active) return null;
 
-    if (
-        !a.active ||
-        !b.active
-    ) {
-
-        return null;
-    }
-
-
-    /*
-       ★ 操作中の磁石が吸着したら、
-          この操作は「吸着あり」
-    */
-
-    if (
+    const operationInvolved =
         operationMagnet === a ||
-        operationMagnet === b
-    ) {
+        operationMagnet === b ||
+        (a.cluster && operationMagnet &&
+         a.cluster.members.has(operationMagnet)) ||
+        (b.cluster && operationMagnet &&
+         b.cluster.members.has(operationMagnet));
 
-        operationAbsorbed =
-            true;
+    if (operationInvolved) {
+        operationAbsorbed = true;
+        settledFrames = 0;
     }
-
-
-    /*
-       ★ collectorは操作プレイヤーを最優先
-    */
 
     const finalCollector =
         operationPlayer ||
         collector ||
         currentPlayer;
 
+    const clusterA = a.cluster || createCluster(a, finalCollector);
+    const clusterB = b.cluster || createCluster(b, finalCollector);
 
-    let clusterA =
-        a.cluster ||
-        createCluster(
-            a,
-            finalCollector
-        );
+    if (clusterA === clusterB) return clusterA;
 
+    turnLocked = true;
+    settledFrames = 0;
 
-    let clusterB =
-        b.cluster ||
-        createCluster(
-            b,
-            finalCollector
-        );
-
-
-    if (
-        clusterA ===
-        clusterB
-    ) {
-
-        return clusterA;
-    }
-
-
-    turnLocked =
-        true;
-
-
-    let merged =
-        mergeClusters(
-
-            clusterA,
-
-            clusterB,
-
-            a,
-
-            b,
-
-            finalCollector
-
-        );
-
-
-    if (!merged) {
-        return null;
-    }
-
-
-    resolvingCluster =
-        merged;
-
-
-    kickCluster(
-        merged,
+    let merged = mergeClusters(
+        clusterA,
+        clusterB,
         a,
-        b
+        b,
+        finalCollector
     );
 
+    if (!merged) return null;
 
-    solveBonds(
-        merged
-    );
+    resolvingCluster = merged;
 
+    kickCluster(merged, a, b);
+    solveBonds(merged);
+    renderCluster(merged);
 
-    renderCluster(
-        merged
-    );
-
-
-    merged =
-        processClusterChain(
-            merged
-        );
-
-
-    resolvingCluster =
-        merged;
-
+    merged = processClusterChain(merged);
+    resolvingCluster = merged;
 
     return merged;
 }
-
 
 /* =========================================================
    消去タイマー解除
 ========================================================= */
 
-function cancelRemoval(
-    cluster
-) {
+function cancelRemoval(cluster) {
+    if (!cluster) return;
 
-    if (!cluster) {
-        return;
+    if (cluster.removeTimer) {
+        clearTimeout(cluster.removeTimer);
+        cluster.removeTimer = null;
     }
 
-
-    if (
-        cluster.removeTimer
-    ) {
-
-        clearTimeout(
-            cluster.removeTimer
-        );
-
-        cluster.removeTimer =
-            null;
+    if (cluster.fadeTimer) {
+        clearTimeout(cluster.fadeTimer);
+        cluster.fadeTimer = null;
     }
 
+    cluster.removing = false;
 
-    cluster.removing =
-        false;
-
-
-    for (
-        const magnet
-        of cluster.members
-    ) {
-
-        magnet.scheduledRemove =
-            false;
-
-
-        magnet.el.classList.remove(
-            "fading"
-        );
+    for (const magnet of cluster.members) {
+        magnet.scheduledRemove = false;
+        magnet.el.classList.remove("fading");
     }
 }
-
 
 /* =========================================================
    クラスター速度
 ========================================================= */
 
-function clusterSpeed(
-    cluster
-) {
-
-    return Math.sqrt(
-
-        cluster.vx *
-        cluster.vx +
-
-        cluster.vy *
-        cluster.vy
-
-    );
+function clusterSpeed(cluster) {
+    return Math.hypot(cluster.vx, cluster.vy);
 }
-
 
 /* =========================================================
    消去予約
 ========================================================= */
 
-function scheduleRemoval(
-    cluster
-) {
+function scheduleRemoval(cluster) {
+    if (!cluster || cluster.removing) return;
+    if (clusterSpeed(cluster) > STOP_SPEED) return;
+    if (findClusterTarget(cluster).target) return;
 
-    if (!cluster) {
-        return;
-    }
+    cluster.removing = true;
 
+    cluster.removeTimer = setTimeout(() => {
+        cluster.removeTimer = null;
 
-    if (
-        cluster.removing
-    ) {
+        if (!cluster.members.size) return;
 
-        return;
-    }
+        if (clusterSpeed(cluster) > STOP_SPEED ||
+            findClusterTarget(cluster).target) {
+            cluster.removing = false;
+            return;
+        }
 
+        for (const magnet of cluster.members) {
+            if (!magnet.active) continue;
 
-    if (
-        clusterSpeed(
-            cluster
-        ) >
-        STOP_SPEED
-    ) {
+            magnet.scheduledRemove = true;
+            magnet.el.classList.add("fading");
+        }
 
-        return;
-    }
+        cluster.fadeTimer = setTimeout(() => {
+            cluster.fadeTimer = null;
+            removeCluster(cluster);
+        }, FADE_TIME);
 
-
-    const result =
-        findClusterTarget(
-            cluster
-        );
-
-
-    if (
-        result.target
-    ) {
-
-        return;
-    }
-
-
-    cluster.removing =
-        true;
-
-
-    cluster.removeTimer =
-        setTimeout(
-            () => {
-
-                if (
-                    clusterSpeed(
-                        cluster
-                    ) >
-                    STOP_SPEED
-                ) {
-
-                    cluster.removing =
-                        false;
-
-                    cluster.removeTimer =
-                        null;
-
-                    return;
-                }
-
-
-                const check =
-                    findClusterTarget(
-                        cluster
-                    );
-
-
-                if (
-                    check.target
-                ) {
-
-                    cluster.removing =
-                        false;
-
-                    cluster.removeTimer =
-                        null;
-
-                    return;
-                }
-
-
-                for (
-                    const magnet
-                    of cluster.members
-                ) {
-
-                    if (
-                        !magnet.active
-                    ) {
-
-                        continue;
-                    }
-
-
-                    magnet.scheduledRemove =
-                        true;
-
-
-                    magnet.el.classList.add(
-                        "fading"
-                    );
-                }
-
-
-                setTimeout(
-                    () => {
-
-                        removeCluster(
-                            cluster
-                        );
-
-                    },
-                    FADE_TIME
-                );
-
-            },
-            REMOVE_DELAY
-        );
+    }, REMOVE_DELAY);
 }
 
-
 /* =========================================================
-   クラスター削除
+   クラスター削除・獲得
 ========================================================= */
 
-function removeCluster(
-    cluster
-) {
+function removeCluster(cluster) {
+    if (!cluster) return;
 
-    if (!cluster) {
-        return;
-    }
+    const members = Array.from(cluster.members).filter(m => m.active);
+    if (members.length === 0) return;
 
-
-    const members =
-        Array.from(
-            cluster.members
-        ).filter(
-            magnet =>
-                magnet.active
-        );
-
-
-    if (
-        members.length === 0
-    ) {
-
-        return;
-    }
-
-
-    const count =
-        members.length;
-
+    const count = members.length;
 
     /*
-       ★ クラスター生成時に保存した
-          「最初に操作したプレイヤー」
-    */
+     * クラスターに保存した獲得者を使用する。
+     * 削除時のcurrentPlayerは参照しない。
+     */
+    const collector = cluster.collector;
 
-    const collector =
-        cluster.collector;
-
-
-    for (
-        const magnet
-        of members
-    ) {
-
-        magnet.active =
-            false;
-
-        magnet.cluster =
-            null;
-
+    for (const magnet of members) {
+        magnet.active = false;
+        magnet.cluster = null;
         magnet.el.remove();
     }
 
-
-    magnets =
-        magnets.filter(
-            magnet =>
-                magnet.active
-        );
-
+    magnets = magnets.filter(m => m.active);
 
     cluster.members.clear();
+    cluster.bonds.length = 0;
+    cluster.removeTimer = null;
+    cluster.fadeTimer = null;
+    cluster.removing = false;
 
-    cluster.bonds.length =
-        0;
-
-    cluster.removeTimer =
-        null;
-
-    cluster.removing =
-        false;
-
-
-    if (
-        collector
-    ) {
-
-        const stock =
-            getStock(
-                collector
-            );
-
-
-        setStock(
-            collector,
-
-            stock + count
-        );
-
-
-        showGain(
-            collector,
-
-            count
-        );
+    if (collector) {
+        setStock(collector, getStock(collector) + count);
+        showGain(collector, count);
     }
 
+    if (resolvingCluster === cluster) {
+        resolvingCluster = null;
+    }
 
-    if (
-        resolvingCluster ===
-        cluster
-    ) {
-
-        resolvingCluster =
-            null;
-
-
-        /*
-           ★ 吸着処理が完全終了してから
-              初めてターンロック解除
-        */
-
+    /*
+     * 吸着した操作は、吸着クラスターの消滅・獲得が
+     * 完了してから操作終了とする。
+     */
+    if (operationAbsorbed &&
+        (!resolvingCluster || resolvingCluster.members.size === 0)) {
         clearOperation();
+        turnLocked = false;
 
-        turnLocked =
-            false;
-
-
-        if (
-            !checkWin()
-        ) {
-
+        if (!checkWin()) {
             nextTurn();
         }
     }
 }
 
-
 /* =========================================================
    獲得表示
 ========================================================= */
 
-function showGain(
-    player,
-    count
-) {
-
-    gainNotice.classList.remove(
-        "show"
-    );
-
-
+function showGain(player, count) {
+    gainNotice.classList.remove("show");
     void gainNotice.offsetWidth;
 
-
-    const icon =
-        player === "red"
-            ? "🔴"
-            : "🔵";
-
-
-    gainNotice.textContent =
-        `${icon} ＋${count}`;
-
-
-    gainNotice.classList.add(
-        "show"
-    );
+    const icon = player === "red" ? "🔴" : "🔵";
+    gainNotice.textContent = `${icon} ＋${count}`;
+    gainNotice.classList.add("show");
 }
-
 
 /* =========================================================
    勝利判定
 ========================================================= */
 
 function checkWin() {
+    if (gameOver) return true;
 
-    if (gameOver) {
+    if (redStock <= 0) {
+        winGame("🔴 赤の勝ち！");
         return true;
     }
 
-
-    if (
-        redStock <= 0
-    ) {
-
-        winGame(
-            "🔴 赤の勝ち！"
-        );
-
+    if (blueStock <= 0) {
+        winGame("🔵 青の勝ち！");
         return true;
     }
-
-
-    if (
-        blueStock <= 0
-    ) {
-
-        winGame(
-            "🔵 青の勝ち！"
-        );
-
-        return true;
-    }
-
 
     return false;
 }
 
-
-/* =========================================================
-   勝利
-========================================================= */
-
-function winGame(
-    text
-) {
-
-    gameOver =
-        true;
-
-    turnLocked =
-        true;
-
-
-    winText.textContent =
-        text;
-
-
-    winScreen.style.display =
-        "flex";
+function winGame(text) {
+    gameOver = true;
+    turnLocked = true;
+    winText.textContent = text;
+    winScreen.style.display = "flex";
 }
-
 
 /* =========================================================
    新しい磁石のドラッグ開始
 ========================================================= */
 
-function startNewMagnetDrag(
-    x,
-    y
-) {
+function startNewMagnetDrag(x, y) {
+    if (turnLocked || gameOver) return;
 
-    if (
-        turnLocked ||
-        gameOver
-    ) {
+    const stock = getStock(currentPlayer);
+    if (stock <= 0) return;
 
-        return;
-    }
+    const magnet = createMagnet(x, y);
+    setStock(currentPlayer, stock - 1);
 
+    beginOperation(currentPlayer, magnet);
 
-    const stock =
-        getStock(
-            currentPlayer
-        );
+    draggingMagnet = magnet;
+    draggingNewMagnet = true;
+    pointerOffsetX = 0;
+    pointerOffsetY = 0;
 
-
-    if (
-        stock <= 0
-    ) {
-
-        return;
-    }
-
-
-    const magnet =
-        createMagnet(
-            x,
-            y
-        );
-
-
-    setStock(
-        currentPlayer,
-
-        stock - 1
-    );
-
-
-    /*
-       ★ この瞬間のプレイヤーを固定
-    */
-
-    beginOperation(
-        currentPlayer,
-        magnet
-    );
-
-
-    draggingMagnet =
-        magnet;
-
-    draggingNewMagnet =
-        true;
-
-
-    pointerOffsetX =
-        0;
-
-    pointerOffsetY =
-        0;
-
-
-    magnet.el.classList.add(
-        "dragging"
-    );
+    magnet.el.classList.add("dragging");
 }
-
 
 /* =========================================================
    pointerdown
 ========================================================= */
 
-board.addEventListener(
-    "pointerdown",
+board.addEventListener("pointerdown", e => {
+    if (gameOver || turnLocked) return;
 
-    e => {
+    const rect = board.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-        if (gameOver) {
-            return;
-        }
+    const target = e.target.closest(".magnet");
 
-
-        if (turnLocked) {
-            return;
-        }
-
-
-        const rect =
-            board.getBoundingClientRect();
-
-
-        const x =
-            e.clientX -
-            rect.left;
-
-
-        const y =
-            e.clientY -
-            rect.top;
-
-
-        const target =
-            e.target.closest(
-                ".magnet"
-            );
-
+    if (target) {
+        const magnet = magnets.find(m => m.el === target);
+        if (!magnet || magnet.cluster || magnet.scheduledRemove) return;
 
         /*
-           既存磁石
-        */
+         * 所有者による制限は設けない。
+         * 単体磁石なら赤・青どちらでも動かせる。
+         */
+        beginOperation(currentPlayer, magnet);
 
-        if (target) {
+        draggingMagnet = magnet;
+        draggingNewMagnet = false;
+        pointerOffsetX = magnet.x - x;
+        pointerOffsetY = magnet.y - y;
 
-            const magnet =
-                magnets.find(
-                    m =>
-                        m.el ===
-                        target
-                );
-
-
-            if (!magnet) {
-                return;
-            }
-
-
-            /*
-               ★ 所有者チェックを削除
-               赤でも青でも単体なら動かせる
-            */
-
-            if (
-                magnet.cluster
-            ) {
-
-                return;
-            }
-
-
-            /*
-               ★ 操作開始時点のプレイヤーを固定
-            */
-
-            beginOperation(
-                currentPlayer,
-                magnet
-            );
-
-
-            draggingMagnet =
-                magnet;
-
-            draggingNewMagnet =
-                false;
-
-
-            pointerOffsetX =
-                magnet.x -
-                x;
-
-            pointerOffsetY =
-                magnet.y -
-                y;
-
-
-            magnet.el.classList.add(
-                "dragging"
-            );
-
-
-            board.setPointerCapture(
-                e.pointerId
-            );
-
-
-            return;
-        }
-
-
-        /*
-           新しい磁石
-        */
-
-        startNewMagnetDrag(
-            x,
-            y
-        );
-
-
-        if (
-            draggingMagnet
-        ) {
-
-            board.setPointerCapture(
-                e.pointerId
-            );
-        }
-
+        magnet.el.classList.add("dragging");
+        board.setPointerCapture(e.pointerId);
+        e.preventDefault();
+        return;
     }
-);
 
+    startNewMagnetDrag(x, y);
+
+    if (draggingMagnet) {
+        board.setPointerCapture(e.pointerId);
+        e.preventDefault();
+    }
+});
 
 /* =========================================================
    pointermove
 ========================================================= */
 
-board.addEventListener(
-    "pointermove",
+board.addEventListener("pointermove", e => {
+    if (!draggingMagnet) return;
 
-    e => {
+    const magnet = draggingMagnet;
+    const rect = board.getBoundingClientRect();
 
-        if (
-            !draggingMagnet
-        ) {
+    magnet.x = e.clientX - rect.left + pointerOffsetX;
+    magnet.y = e.clientY - rect.top + pointerOffsetY;
+    magnet.vx = 0;
+    magnet.vy = 0;
+    settledFrames = 0;
 
-            return;
-        }
+    renderMagnet(magnet);
 
+    const result = findNearestTarget(magnet, STICK_DISTANCE);
 
-        const magnet =
-            draggingMagnet;
+    if (result.target) {
+        magnet.el.classList.remove("dragging");
+        draggingMagnet = null;
+        draggingNewMagnet = false;
 
-
-        const rect =
-            board.getBoundingClientRect();
-
-
-        const x =
-            e.clientX -
-            rect.left +
-            pointerOffsetX;
-
-
-        const y =
-            e.clientY -
-            rect.top +
-            pointerOffsetY;
-
-
-        magnet.x =
-            x;
-
-        magnet.y =
-            y;
-
-
-        magnet.vx =
-            0;
-
-        magnet.vy =
-            0;
-
-
-        renderMagnet(
-            magnet
-        );
-
-
-        const result =
-            findNearestTarget(
-
-                magnet,
-
-                STICK_DISTANCE
-
-            );
-
-
-        if (
-            result.target
-        ) {
-
-            magnet.el.classList.remove(
-                "dragging"
-            );
-
-
-            draggingMagnet =
-                null;
-
-            draggingNewMagnet =
-                false;
-
-
-            stickMagnets(
-
-                magnet,
-
-                result.target,
-
-                operationPlayer
-
-            );
-        }
-
+        stickMagnets(magnet, result.target, operationPlayer);
     }
-);
-
+});
 
 /* =========================================================
    pointerup
 ========================================================= */
 
-board.addEventListener(
-    "pointerup",
+board.addEventListener("pointerup", () => {
+    if (!draggingMagnet) return;
 
-    e => {
+    const magnet = draggingMagnet;
 
-        if (
-            !draggingMagnet
-        ) {
+    draggingMagnet = null;
+    draggingNewMagnet = false;
+    magnet.el.classList.remove("dragging");
+    settledFrames = 0;
 
-            return;
-        }
+    const result = findNearestTarget(magnet, STICK_DISTANCE);
 
-
-        const magnet =
-            draggingMagnet;
-
-
-        draggingMagnet =
-            null;
-
-
-        draggingNewMagnet =
-            false;
-
-
-        magnet.el.classList.remove(
-            "dragging"
-        );
-
-
-        /*
-           指を離した瞬間に最終チェック
-        */
-
-        const result =
-            findNearestTarget(
-
-                magnet,
-
-                STICK_DISTANCE
-
-            );
-
-
-        if (
-            result.target
-        ) {
-
-            stickMagnets(
-
-                magnet,
-
-                result.target,
-
-                operationPlayer
-
-            );
-
-            return;
-        }
-
-
-        /*
-           ★ ここではターン変更しない
-           ★ 磁石が完全に止まるまで待つ
-        */
-
-        finishOperationIfSettled();
-
+    if (result.target) {
+        stickMagnets(magnet, result.target, operationPlayer);
+        return;
     }
-);
 
+    /*
+     * 重要：ここではターンを交代しない。
+     * 物理処理が落ち着いたかどうかをphysics()で確認する。
+     */
+});
 
 /* =========================================================
    pointercancel
 ========================================================= */
 
-board.addEventListener(
-    "pointercancel",
+board.addEventListener("pointercancel", () => {
+    if (!draggingMagnet) return;
 
-    () => {
+    draggingMagnet.el.classList.remove("dragging");
+    draggingMagnet = null;
+    draggingNewMagnet = false;
+    settledFrames = 0;
 
-        if (
-            !draggingMagnet
-        ) {
-
-            return;
-        }
-
-
-        draggingMagnet.el.classList.remove(
-            "dragging"
-        );
-
-
-        draggingMagnet =
-            null;
-
-        draggingNewMagnet =
-            false;
-
-
-        /*
-           ★ cancelでも即ターン変更しない
-        */
-
-        finishOperationIfSettled();
-
-    }
-);
-
+    /* キャンセル時も即座にターン交代しない */
+});
 
 /* =========================================================
    クラスター移動
 ========================================================= */
 
-function moveCluster(
-    cluster
-) {
+function moveCluster(cluster) {
+    cluster.vx *= FRICTION;
+    cluster.vy *= FRICTION;
 
-    cluster.vx *=
-        FRICTION;
+    if (Math.abs(cluster.vx) < STOP_SPEED) cluster.vx = 0;
+    if (Math.abs(cluster.vy) < STOP_SPEED) cluster.vy = 0;
 
-    cluster.vy *=
-        FRICTION;
-
-
-    if (
-        Math.abs(
-            cluster.vx
-        ) < STOP_SPEED
-    ) {
-
-        cluster.vx =
-            0;
+    for (const magnet of cluster.members) {
+        magnet.x += cluster.vx;
+        magnet.y += cluster.vy;
     }
 
+    const width = board.clientWidth;
+    const height = board.clientHeight;
 
-    if (
-        Math.abs(
-            cluster.vy
-        ) < STOP_SPEED
-    ) {
-
-        cluster.vy =
-            0;
-    }
-
-
-    for (
-        const magnet
-        of cluster.members
-    ) {
-
-        magnet.x +=
-            cluster.vx;
-
-        magnet.y +=
-            cluster.vy;
-    }
-
-
-    const width =
-        board.clientWidth;
-
-    const height =
-        board.clientHeight;
-
-
-    for (
-        const magnet
-        of cluster.members
-    ) {
-
-        if (
-            magnet.x < R
-        ) {
-
-            magnet.x =
-                R;
-
-            cluster.vx =
-                Math.abs(
-                    cluster.vx
-                ) * 0.6;
+    for (const magnet of cluster.members) {
+        if (magnet.x < R) {
+            magnet.x = R;
+            cluster.vx = Math.abs(cluster.vx) * 0.6;
         }
 
-
-        if (
-            magnet.x >
-            width - R
-        ) {
-
-            magnet.x =
-                width - R;
-
-            cluster.vx =
-                -Math.abs(
-                    cluster.vx
-                ) * 0.6;
+        if (magnet.x > width - R) {
+            magnet.x = width - R;
+            cluster.vx = -Math.abs(cluster.vx) * 0.6;
         }
 
-
-        if (
-            magnet.y < R
-        ) {
-
-            magnet.y =
-                R;
-
-            cluster.vy =
-                Math.abs(
-                    cluster.vy
-                ) * 0.6;
+        if (magnet.y < R) {
+            magnet.y = R;
+            cluster.vy = Math.abs(cluster.vy) * 0.6;
         }
 
-
-        if (
-            magnet.y >
-            height - R
-        ) {
-
-            magnet.y =
-                height - R;
-
-            cluster.vy =
-                -Math.abs(
-                    cluster.vy
-                ) * 0.6;
+        if (magnet.y > height - R) {
+            magnet.y = height - R;
+            cluster.vy = -Math.abs(cluster.vy) * 0.6;
         }
     }
 
+    solveBonds(cluster);
 
-    solveBonds(
-        cluster
-    );
-
-
-    for (
-        const magnet
-        of cluster.members
-    ) {
-
-        magnet.vx =
-            cluster.vx;
-
-        magnet.vy =
-            cluster.vy;
+    for (const magnet of cluster.members) {
+        magnet.vx = cluster.vx;
+        magnet.vy = cluster.vy;
     }
 }
-
 
 /* =========================================================
    磁力
 ========================================================= */
 
-function applyMagneticForce(
-    magnet
-) {
+function applyMagneticForce(magnet) {
+    let fx = 0;
+    let fy = 0;
 
-    let fx =
-        0;
+    for (const other of magnets) {
+        if (other === magnet || !other.active || other.cluster) continue;
 
-    let fy =
-        0;
+        const dx = other.x - magnet.x;
+        const dy = other.y - magnet.y;
+        const d = Math.hypot(dx, dy);
 
+        if (d <= 0 || d > ATTRACT_DISTANCE) continue;
 
-    for (
-        const other
-        of magnets
-    ) {
+        const strength = MAGNET_FORCE * (1 - d / ATTRACT_DISTANCE);
 
-        if (
-            other === magnet
-        ) {
-
-            continue;
-        }
-
-
-        if (
-            !other.active
-        ) {
-
-            continue;
-        }
-
-
-        if (
-            other.cluster
-        ) {
-
-            continue;
-        }
-
-
-        const dx =
-            other.x -
-            magnet.x;
-
-        const dy =
-            other.y -
-            magnet.y;
-
-
-        const d =
-            Math.sqrt(
-                dx * dx +
-                dy * dy
-            );
-
-
-        if (
-            d <= 0 ||
-            d > ATTRACT_DISTANCE
-        ) {
-
-            continue;
-        }
-
-
-        const strength =
-            MAGNET_FORCE *
-            (
-                1 -
-                d /
-                ATTRACT_DISTANCE
-            );
-
-
-        fx +=
-            dx /
-            d *
-            strength;
-
-
-        fy +=
-            dy /
-            d *
-            strength;
+        fx += dx / d * strength;
+        fy += dy / d * strength;
     }
 
-
-    magnet.vx +=
-        fx;
-
-    magnet.vy +=
-        fy;
+    magnet.vx += fx;
+    magnet.vy += fy;
 }
-
 
 /* =========================================================
    自由磁石移動
 ========================================================= */
 
-function moveFreeMagnet(
-    magnet
-) {
+function moveFreeMagnet(magnet) {
+    applyMagneticForce(magnet);
 
-    applyMagneticForce(
-        magnet
-    );
+    magnet.vx *= FRICTION;
+    magnet.vy *= FRICTION;
 
+    const speed = Math.hypot(magnet.vx, magnet.vy);
+    const maxSpeed = 8;
 
-    magnet.vx *=
-        FRICTION;
-
-    magnet.vy *=
-        FRICTION;
-
-
-    const speed =
-        Math.sqrt(
-
-            magnet.vx *
-            magnet.vx +
-
-            magnet.vy *
-            magnet.vy
-
-        );
-
-
-    const maxSpeed =
-        8;
-
-
-    if (
-        speed >
-        maxSpeed
-    ) {
-
-        magnet.vx =
-            magnet.vx /
-            speed *
-            maxSpeed;
-
-        magnet.vy =
-            magnet.vy /
-            speed *
-            maxSpeed;
+    if (speed > maxSpeed) {
+        magnet.vx = magnet.vx / speed * maxSpeed;
+        magnet.vy = magnet.vy / speed * maxSpeed;
     }
 
+    magnet.x += magnet.vx;
+    magnet.y += magnet.vy;
 
-    magnet.x +=
-        magnet.vx;
+    const width = board.clientWidth;
+    const height = board.clientHeight;
 
-    magnet.y +=
-        magnet.vy;
-
-
-    const width =
-        board.clientWidth;
-
-    const height =
-        board.clientHeight;
-
-
-    if (
-        magnet.x < R
-    ) {
-
-        magnet.x =
-            R;
-
-        magnet.vx =
-            Math.abs(
-                magnet.vx
-            ) * 0.6;
+    if (magnet.x < R) {
+        magnet.x = R;
+        magnet.vx = Math.abs(magnet.vx) * 0.6;
     }
 
-
-    if (
-        magnet.x >
-        width - R
-    ) {
-
-        magnet.x =
-            width - R;
-
-        magnet.vx =
-            -Math.abs(
-                magnet.vx
-            ) * 0.6;
+    if (magnet.x > width - R) {
+        magnet.x = width - R;
+        magnet.vx = -Math.abs(magnet.vx) * 0.6;
     }
 
-
-    if (
-        magnet.y < R
-    ) {
-
-        magnet.y =
-            R;
-
-        magnet.vy =
-            Math.abs(
-                magnet.vy
-            ) * 0.6;
+    if (magnet.y < R) {
+        magnet.y = R;
+        magnet.vy = Math.abs(magnet.vy) * 0.6;
     }
 
-
-    if (
-        magnet.y >
-        height - R
-    ) {
-
-        magnet.y =
-            height - R;
-
-        magnet.vy =
-            -Math.abs(
-                magnet.vy
-            ) * 0.6;
+    if (magnet.y > height - R) {
+        magnet.y = height - R;
+        magnet.vy = -Math.abs(magnet.vy) * 0.6;
     }
 
+    const result = findNearestTarget(magnet, STICK_DISTANCE);
 
-    const result =
-        findNearestTarget(
-
-            magnet,
-
-            STICK_DISTANCE
-
-        );
-
-
-    if (
-        result.target
-    ) {
-
-        /*
-           ★ 操作中の磁石なら
-              操作開始プレイヤーを使用
-        */
-
+    if (result.target) {
         const collector =
-            (
-                operationMagnet === magnet &&
-                operationPlayer
-            )
+            operationMagnet === magnet && operationPlayer
                 ? operationPlayer
                 : currentPlayer;
 
-
-        stickMagnets(
-
-            magnet,
-
-            result.target,
-
-            collector
-
-        );
-
-        return;
-    }
-
-
-    /*
-       ★ 吸着しなかった操作なら
-          完全停止後にターン終了
-    */
-
-    if (
-        operationMagnet === magnet
-    ) {
-
-        finishOperationIfSettled();
+        stickMagnets(magnet, result.target, collector);
     }
 }
-
 
 /* =========================================================
    メイン物理
 ========================================================= */
 
 function physics() {
-
     if (!gameOver) {
+        const freeMagnets = magnets.filter(m =>
+            m.active &&
+            !m.cluster &&
+            !m.scheduledRemove &&
+            m !== draggingMagnet
+        );
 
-        const freeMagnets =
-            magnets.filter(
-
-                magnet =>
-
-                    magnet.active &&
-
-                    !magnet.cluster &&
-
-                    !magnet.scheduledRemove &&
-
-                    magnet !==
-                    draggingMagnet
-
-            );
-
-
-        for (
-            const magnet
-            of freeMagnets
-        ) {
-
-            moveFreeMagnet(
-                magnet
-            );
+        for (const magnet of freeMagnets) {
+            moveFreeMagnet(magnet);
         }
 
+        const clusters = new Set();
 
-        const clusters =
-            new Set();
-
-
-        for (
-            const magnet
-            of magnets
-        ) {
-
-            if (
-                magnet.active &&
-                magnet.cluster
-            ) {
-
-                clusters.add(
-                    magnet.cluster
-                );
+        for (const magnet of magnets) {
+            if (magnet.active && magnet.cluster) {
+                clusters.add(magnet.cluster);
             }
         }
 
-
-        for (
-            const originalCluster
-            of clusters
-        ) {
-
-            if (
-                !originalCluster ||
-                originalCluster.members.size === 0
-            ) {
-
+        for (const originalCluster of clusters) {
+            if (!originalCluster || originalCluster.members.size === 0) {
                 continue;
             }
 
-
-            moveCluster(
-                originalCluster
-            );
-
+            moveCluster(originalCluster);
 
             const activeCluster =
-                processClusterChain(
-                    originalCluster
-                ) ||
-                originalCluster;
+                processClusterChain(originalCluster) || originalCluster;
 
-
-            if (
-                !activeCluster ||
-                activeCluster.members.size === 0
-            ) {
-
+            if (!activeCluster || activeCluster.members.size === 0) {
                 continue;
             }
 
+            solveBonds(activeCluster);
+            renderCluster(activeCluster);
 
-            solveBonds(
-                activeCluster
-            );
-
-
-            renderCluster(
-                activeCluster
-            );
-
-
-            if (
-                clusterSpeed(
-                    activeCluster
-                ) <=
-                STOP_SPEED
-            ) {
-
-                scheduleRemoval(
-                    activeCluster
-                );
-
+            if (clusterSpeed(activeCluster) <= STOP_SPEED) {
+                scheduleRemoval(activeCluster);
             } else {
-
-                cancelRemoval(
-                    activeCluster
-                );
+                cancelRemoval(activeCluster);
             }
         }
 
-
         /*
-           ★ 念のため、操作磁石が停止しているか確認
-        */
-
+         * ターン交代はここで一元管理する。
+         * ドラッグ中・吸着中・連鎖中・消滅待ちには交代しない。
+         */
         finishOperationIfSettled();
     }
 
+    for (const magnet of magnets) {
+        if (!magnet.active) continue;
 
-    for (
-        const magnet
-        of magnets
-    ) {
-
-        if (
-            !magnet.active
-        ) {
-
-            continue;
-        }
-
-
-        if (
-            magnet !==
-            draggingMagnet &&
-
-            !magnet.cluster
-        ) {
-
-            renderMagnet(
-                magnet
-            );
+        if (magnet !== draggingMagnet && !magnet.cluster) {
+            renderMagnet(magnet);
         }
     }
 
-
-    requestAnimationFrame(
-        physics
-    );
+    requestAnimationFrame(physics);
 }
-
 
 /* =========================================================
    やり直す
 ========================================================= */
 
-resetButton.addEventListener(
-    "click",
+resetButton.addEventListener("click", () => {
+    location.reload();
+});
 
-    () => {
-
-        location.reload();
-
-    }
-);
-
-
-/* =========================================================
-   もう一度遊ぶ
-========================================================= */
-
-restartButton.addEventListener(
-    "click",
-
-    () => {
-
-        location.reload();
-
-    }
-);
-
+restartButton.addEventListener("click", () => {
+    location.reload();
+});
 
 /* =========================================================
    初期化
 ========================================================= */
 
-redStock =
-    INITIAL_STOCK;
+redStock = INITIAL_STOCK;
+blueStock = INITIAL_STOCK;
 
-blueStock =
-    INITIAL_STOCK;
+redStockEl.textContent = redStock;
+blueStockEl.textContent = blueStock;
 
-
-redStockEl.textContent =
-    redStock;
-
-blueStockEl.textContent =
-    blueStock;
-
-
-currentPlayer =
-    "red";
-
-
+currentPlayer = "red";
 updateTurnFocus();
+showTurnNotice("red");
 
-
-showTurnNotice(
-    "red"
-);
-
-
-/* =========================================================
-   START
-========================================================= */
-
-requestAnimationFrame(
-    physics
-);
-
+/* START */
+requestAnimationFrame(physics);
 </script>
 
 </body>
