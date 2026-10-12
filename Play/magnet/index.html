@@ -76,7 +76,6 @@ html, body {
                 0 4px 12px rgba(0,0,0,0.16);
 }
 
-/* TURNを少し下げる */
 .player.active::after {
     content: "TURN";
     position: absolute;
@@ -364,7 +363,8 @@ html, body {
 
 <script>
 /* =========================================================
-   設定（既存仕様を維持）
+   設定
+   引力の強さ・範囲は変更しない
 ========================================================= */
 
 const R = 27;
@@ -379,9 +379,8 @@ const STOP_SPEED = 0.08;
 const REMOVE_DELAY = 500;
 const FADE_TIME = 350;
 const INITIAL_STOCK = 10;
-
-/* ターン判定の安定確認 */
 const SETTLED_FRAMES_REQUIRED = 12;
+const DRAG_SPEED_LIMIT = 8;
 
 /* =========================================================
    DOM
@@ -407,20 +406,34 @@ let currentPlayer = "red";
 let redStock = INITIAL_STOCK;
 let blueStock = INITIAL_STOCK;
 let magnets = [];
+
 let draggingMagnet = null;
 let pointerOffsetX = 0;
 let pointerOffsetY = 0;
 let turnLocked = false;
-let resolvingCluster = null;
 let gameOver = false;
 let nextMagnetId = 1;
 let draggingNewMagnet = false;
 
-/* 操作の所有者を最後まで保持 */
+/*
+ * 操作中のプレイヤーと磁石を記録する。
+ * 別の場所にあるクラスターの状態には依存させない。
+ */
 let operationPlayer = null;
 let operationMagnet = null;
 let operationAbsorbed = false;
+
+/*
+ * 今回の操作によって吸着したクラスターだけを追跡。
+ * 別のクラスターによる上書きを防止する。
+ */
+let operationCluster = null;
+
 let settledFrames = 0;
+
+/* ドラッグ速度 */
+let dragVX = 0;
+let dragVY = 0;
 
 /* =========================================================
    ターン表示
@@ -433,6 +446,7 @@ function updateTurnFocus() {
 
 function showTurnNotice(player) {
     updateTurnFocus();
+
     turnNotice.classList.remove("show");
     void turnNotice.offsetWidth;
 
@@ -457,61 +471,104 @@ function beginOperation(player, magnet) {
     operationPlayer = player;
     operationMagnet = magnet;
     operationAbsorbed = false;
+    operationCluster = null;
     settledFrames = 0;
     turnLocked = true;
 }
 
+/* 操作情報を初期化 */
+function clearOperation() {
+    operationPlayer = null;
+    operationMagnet = null;
+    operationAbsorbed = false;
+    operationCluster = null;
+    settledFrames = 0;
+}
+
 /*
- * 吸着がなかった場合のみ使用。
- * 指を離した直後にはターンを変えず、
- * 盤面全体の動きが落ち着いた状態が続いたら交代する。
+ * 操作完了処理はここに一本化する。
+ * ターンを交代する前に勝敗を判定する。
+ */
+function completeOperation() {
+    if (!operationPlayer || gameOver) return;
+
+    clearOperation();
+    turnLocked = false;
+
+    if (!checkWin()) {
+        nextTurn();
+    }
+}
+
+/*
+ * 吸着した場合、対象クラスターの消滅が完了するまで待つ。
+ * 別の場所にあるクラスターは待つ条件にしない。
  */
 function finishOperationIfSettled() {
-    if (
-        gameOver ||
-        !operationPlayer ||
-        operationAbsorbed ||
-        draggingMagnet
-    ) {
+    if (gameOver || !operationPlayer || draggingMagnet) {
         settledFrames = 0;
         return;
     }
 
-    if (resolvingCluster) {
-        settledFrames = 0;
+    if (operationAbsorbed) {
+        /*
+         * 吸着したクラスターが残っている間は待つ。
+         * removeCluster() が獲得後に完了処理を呼ぶ。
+         */
+        if (operationCluster && operationCluster.members.size > 0) {
+            settledFrames = 0;
+            return;
+        }
+
+        /*
+         * 吸着済みなのに追跡クラスターがなくなった場合の
+         * 保険。獲得処理が残っていないときだけ完了する。
+         */
+        if (!operationCluster) {
+            completeOperation();
+        }
+
         return;
     }
 
-    /* クラスターが盤面に残っている間は終了しない */
-    if (magnets.some(m => m.active && m.cluster)) {
-        settledFrames = 0;
-        return;
-    }
+    /*
+     * 吸着していない場合は、自由磁石の動きが
+     * 落ち着いたかを確認する。
+     * 無関係なクラスターは判定に含めない。
+     */
+    const movingFreeMagnet = magnets.some(m => {
+        if (
+            !m.active ||
+            m.scheduledRemove ||
+            m.cluster ||
+            m === draggingMagnet
+        ) {
+            return false;
+        }
 
-    /* 盤面の自由磁石すべてが停止しているか確認 */
-    const moving = magnets.some(m => {
-        if (!m.active || m.scheduledRemove) return false;
         return Math.hypot(m.vx, m.vy) > STOP_SPEED;
     });
 
-    if (moving) {
+    if (movingFreeMagnet) {
         settledFrames = 0;
         return;
     }
 
     /*
-     * 吸着距離内のペアが残っていれば、
-     * 物理処理が吸着を検出するまで待つ。
+     * 操作した磁石が、他の磁石と吸着距離内に残っていれば
+     * 物理処理による吸着判定を待つ。
      */
-    for (let i = 0; i < magnets.length; i++) {
-        const a = magnets[i];
-        if (!a.active || a.scheduledRemove) continue;
+    if (operationMagnet && operationMagnet.active) {
+        for (const other of magnets) {
+            if (
+                other === operationMagnet ||
+                !other.active ||
+                other.scheduledRemove
+            ) {
+                continue;
+            }
 
-        for (let j = i + 1; j < magnets.length; j++) {
-            const b = magnets[j];
-            if (!b.active || b.scheduledRemove) continue;
-
-            if (distance(a, b) <= STICK_DISTANCE) {
+            if (distance(operationMagnet, other) <= STICK_DISTANCE) {
                 settledFrames = 0;
                 return;
             }
@@ -520,22 +577,9 @@ function finishOperationIfSettled() {
 
     settledFrames++;
 
-    if (settledFrames < SETTLED_FRAMES_REQUIRED) return;
-
-    clearOperation();
-
-    turnLocked = false;
-
-    if (!checkWin()) {
-        nextTurn();
+    if (settledFrames >= SETTLED_FRAMES_REQUIRED) {
+        completeOperation();
     }
-}
-
-function clearOperation() {
-    operationPlayer = null;
-    operationMagnet = null;
-    operationAbsorbed = false;
-    settledFrames = 0;
 }
 
 /* =========================================================
@@ -547,6 +591,7 @@ function createMagnet(x, y) {
     el.className = "magnet";
     el.style.left = `${x - R}px`;
     el.style.top = `${y - R}px`;
+
     board.appendChild(el);
 
     const magnet = {
@@ -665,10 +710,10 @@ function mergeClusters(clusterA, clusterB, magnetA, magnetB, collector) {
     if (!clusterA || !clusterB) return null;
     if (clusterA === clusterB) return clusterA;
 
-    /*
-     * 最初に操作したプレイヤーを優先。
-     * 連鎖結合でも獲得者を変更しない。
-     */
+    const wasOperationCluster =
+        clusterA === operationCluster ||
+        clusterB === operationCluster;
+
     const finalCollector =
         operationPlayer ||
         collector ||
@@ -679,6 +724,9 @@ function mergeClusters(clusterA, clusterB, magnetA, magnetB, collector) {
     cancelRemoval(clusterA);
     cancelRemoval(clusterB);
 
+    /*
+     * 接触位置を補正する。
+     */
     const dx = magnetB.x - magnetA.x;
     const dy = magnetB.y - magnetA.y;
     const d = Math.hypot(dx, dy) || 1;
@@ -687,10 +735,18 @@ function mergeClusters(clusterA, clusterB, magnetA, magnetB, collector) {
     const correction = d - CONTACT_DISTANCE;
 
     for (const magnet of clusterA.members) {
-        magnet.x += nx * correction;
-        magnet.y += ny * correction;
+        magnet.x += nx * correction * 0.5;
+        magnet.y += ny * correction * 0.5;
     }
 
+    for (const magnet of clusterB.members) {
+        magnet.x -= nx * correction * 0.5;
+        magnet.y -= ny * correction * 0.5;
+    }
+
+    /*
+     * 結合前の速度を引き継ぐ。
+     */
     const merged = {
         members: new Set(),
         bonds: [],
@@ -717,8 +773,17 @@ function mergeClusters(clusterA, clusterB, magnetA, magnetB, collector) {
 
     clusterA.members.clear();
     clusterA.bonds.length = 0;
+
     clusterB.members.clear();
     clusterB.bonds.length = 0;
+
+    /*
+     * 操作中のクラスターが結合された場合は、
+     * 新しいクラスターに追跡先を更新する。
+     */
+    if (wasOperationCluster) {
+        operationCluster = merged;
+    }
 
     solveBonds(merged);
     renderCluster(merged);
@@ -727,7 +792,7 @@ function mergeClusters(clusterA, clusterB, magnetA, magnetB, collector) {
 }
 
 /* =========================================================
-   衝撃
+   吸着衝撃と慣性
 ========================================================= */
 
 function kickCluster(cluster, from, to) {
@@ -735,8 +800,16 @@ function kickCluster(cluster, from, to) {
     const dy = to.y - from.y;
     const d = Math.hypot(dx, dy) || 1;
 
-    cluster.vx = dx / d * IMPULSE;
-    cluster.vy = dy / d * IMPULSE;
+    cluster.vx += dx / d * IMPULSE;
+    cluster.vy += dy / d * IMPULSE;
+
+    const speed = Math.hypot(cluster.vx, cluster.vy);
+    const maxSpeed = 12;
+
+    if (speed > maxSpeed) {
+        cluster.vx = cluster.vx / speed * maxSpeed;
+        cluster.vy = cluster.vy / speed * maxSpeed;
+    }
 
     for (const magnet of cluster.members) {
         magnet.vx = cluster.vx;
@@ -757,7 +830,11 @@ function findNearestTarget(magnet, maxDistance) {
     let bestDistance = Infinity;
 
     for (const other of magnets) {
-        if (other === magnet || !other.active || other.scheduledRemove) {
+        if (
+            other === magnet ||
+            !other.active ||
+            other.scheduledRemove
+        ) {
             continue;
         }
 
@@ -802,7 +879,11 @@ function findClusterTarget(cluster) {
         }
     }
 
-    return { target: best, from: bestFrom, distance: bestDistance };
+    return {
+        target: best,
+        from: bestFrom,
+        distance: bestDistance
+    };
 }
 
 /* =========================================================
@@ -826,6 +907,8 @@ function processClusterChain(cluster) {
             current.collector ||
             currentPlayer;
 
+        const oldCurrent = current;
+
         current = mergeClusters(
             current,
             targetCluster,
@@ -836,10 +919,18 @@ function processClusterChain(cluster) {
 
         if (!current) break;
 
-        /* 吸着中の操作は終了扱いにしない */
-        if (operationMagnet &&
-            current.members.has(operationMagnet)) {
+        /*
+         * 操作した磁石が連鎖クラスターに含まれる場合だけ、
+         * この操作による吸着として記録する。
+         */
+        if (
+            operationMagnet &&
+            current.members.has(operationMagnet)
+        ) {
             operationAbsorbed = true;
+            operationCluster = current;
+        } else if (oldCurrent === operationCluster) {
+            operationCluster = current;
         }
 
         turnLocked = true;
@@ -849,8 +940,6 @@ function processClusterChain(cluster) {
         solveBonds(current);
         renderCluster(current);
         cancelRemoval(current);
-
-        resolvingCluster = current;
     }
 
     return current;
@@ -866,15 +955,12 @@ function stickMagnets(a, b, collector) {
     const operationInvolved =
         operationMagnet === a ||
         operationMagnet === b ||
-        (a.cluster && operationMagnet &&
+        (a.cluster &&
+         operationMagnet &&
          a.cluster.members.has(operationMagnet)) ||
-        (b.cluster && operationMagnet &&
+        (b.cluster &&
+         operationMagnet &&
          b.cluster.members.has(operationMagnet));
-
-    if (operationInvolved) {
-        operationAbsorbed = true;
-        settledFrames = 0;
-    }
 
     const finalCollector =
         operationPlayer ||
@@ -899,14 +985,35 @@ function stickMagnets(a, b, collector) {
 
     if (!merged) return null;
 
-    resolvingCluster = merged;
+    /*
+     * 操作した磁石が吸着に参加した場合、
+     * 今回の操作のクラスターを登録する。
+     */
+    if (
+        operationInvolved ||
+        (operationMagnet && merged.members.has(operationMagnet))
+    ) {
+        operationAbsorbed = true;
+        operationCluster = merged;
+    }
 
     kickCluster(merged, a, b);
     solveBonds(merged);
     renderCluster(merged);
 
     merged = processClusterChain(merged);
-    resolvingCluster = merged;
+
+    /*
+     * 連鎖で操作クラスターが統合された場合も追跡を維持。
+     */
+    if (
+        operationAbsorbed &&
+        operationMagnet &&
+        merged &&
+        merged.members.has(operationMagnet)
+    ) {
+        operationCluster = merged;
+    }
 
     return merged;
 }
@@ -958,10 +1065,21 @@ function scheduleRemoval(cluster) {
     cluster.removeTimer = setTimeout(() => {
         cluster.removeTimer = null;
 
-        if (!cluster.members.size) return;
+        if (!cluster.members.size) {
+            cluster.removing = false;
 
-        if (clusterSpeed(cluster) > STOP_SPEED ||
-            findClusterTarget(cluster).target) {
+            if (cluster === operationCluster) {
+                operationCluster = null;
+                if (operationAbsorbed) completeOperation();
+            }
+
+            return;
+        }
+
+        if (
+            clusterSpeed(cluster) > STOP_SPEED ||
+            findClusterTarget(cluster).target
+        ) {
             cluster.removing = false;
             return;
         }
@@ -988,15 +1106,25 @@ function scheduleRemoval(cluster) {
 function removeCluster(cluster) {
     if (!cluster) return;
 
+    const isOperationCluster = cluster === operationCluster;
     const members = Array.from(cluster.members).filter(m => m.active);
-    if (members.length === 0) return;
-
-    const count = members.length;
 
     /*
-     * クラスターに保存した獲得者を使用する。
-     * 削除時のcurrentPlayerは参照しない。
+     * 空のクラスターが残った場合でも、
+     * 操作ロックが取り残されないようにする。
      */
+    if (members.length === 0) {
+        cluster.members.clear();
+
+        if (isOperationCluster && operationAbsorbed) {
+            operationCluster = null;
+            completeOperation();
+        }
+
+        return;
+    }
+
+    const count = members.length;
     const collector = cluster.collector;
 
     for (const magnet of members) {
@@ -1013,27 +1141,25 @@ function removeCluster(cluster) {
     cluster.fadeTimer = null;
     cluster.removing = false;
 
+    /*
+     * 獲得者はクラスターに保存された値を使用。
+     * 削除時のcurrentPlayerには依存しない。
+     */
     if (collector) {
         setStock(collector, getStock(collector) + count);
         showGain(collector, count);
     }
 
-    if (resolvingCluster === cluster) {
-        resolvingCluster = null;
-    }
-
     /*
-     * 吸着した操作は、吸着クラスターの消滅・獲得が
-     * 完了してから操作終了とする。
+     * 今回の操作クラスターが消えた場合だけ、
+     * 操作終了処理を呼ぶ。
+     *
+     * 他の場所のクラスターが消えても、
+     * ターンロック解除には影響させない。
      */
-    if (operationAbsorbed &&
-        (!resolvingCluster || resolvingCluster.members.size === 0)) {
-        clearOperation();
-        turnLocked = false;
-
-        if (!checkWin()) {
-            nextTurn();
-        }
+    if (isOperationCluster && operationAbsorbed) {
+        operationCluster = null;
+        completeOperation();
     }
 }
 
@@ -1097,6 +1223,9 @@ function startNewMagnetDrag(x, y) {
     pointerOffsetX = 0;
     pointerOffsetY = 0;
 
+    dragVX = 0;
+    dragVY = 0;
+
     magnet.el.classList.add("dragging");
 }
 
@@ -1115,21 +1244,29 @@ board.addEventListener("pointerdown", e => {
 
     if (target) {
         const magnet = magnets.find(m => m.el === target);
-        if (!magnet || magnet.cluster || magnet.scheduledRemove) return;
+
+        if (!magnet || magnet.cluster || magnet.scheduledRemove) {
+            return;
+        }
 
         /*
-         * 所有者による制限は設けない。
-         * 単体磁石なら赤・青どちらでも動かせる。
+         * 赤・青の所有者に関係なく、
+         * 単体の磁石なら動かせる。
          */
         beginOperation(currentPlayer, magnet);
 
         draggingMagnet = magnet;
         draggingNewMagnet = false;
+
         pointerOffsetX = magnet.x - x;
         pointerOffsetY = magnet.y - y;
 
+        dragVX = 0;
+        dragVY = 0;
+
         magnet.el.classList.add("dragging");
         board.setPointerCapture(e.pointerId);
+
         e.preventDefault();
         return;
     }
@@ -1152,18 +1289,38 @@ board.addEventListener("pointermove", e => {
     const magnet = draggingMagnet;
     const rect = board.getBoundingClientRect();
 
-    magnet.x = e.clientX - rect.left + pointerOffsetX;
-    magnet.y = e.clientY - rect.top + pointerOffsetY;
-    magnet.vx = 0;
-    magnet.vy = 0;
-    settledFrames = 0;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
+    const newX = x + pointerOffsetX;
+    const newY = y + pointerOffsetY;
+
+    dragVX = newX - magnet.x;
+    dragVY = newY - magnet.y;
+
+    const dragSpeed = Math.hypot(dragVX, dragVY);
+
+    if (dragSpeed > DRAG_SPEED_LIMIT) {
+        dragVX = dragVX / dragSpeed * DRAG_SPEED_LIMIT;
+        dragVY = dragVY / dragSpeed * DRAG_SPEED_LIMIT;
+    }
+
+    magnet.x = newX;
+    magnet.y = newY;
+    magnet.vx = dragVX;
+    magnet.vy = dragVY;
+
+    settledFrames = 0;
     renderMagnet(magnet);
 
     const result = findNearestTarget(magnet, STICK_DISTANCE);
 
     if (result.target) {
+        magnet.vx = dragVX;
+        magnet.vy = dragVY;
+
         magnet.el.classList.remove("dragging");
+
         draggingMagnet = null;
         draggingNewMagnet = false;
 
@@ -1182,20 +1339,22 @@ board.addEventListener("pointerup", () => {
 
     draggingMagnet = null;
     draggingNewMagnet = false;
+
     magnet.el.classList.remove("dragging");
+
+    /*
+     * ドラッグの速度を維持し、慣性につなげる。
+     */
+    magnet.vx = dragVX;
+    magnet.vy = dragVY;
+
     settledFrames = 0;
 
     const result = findNearestTarget(magnet, STICK_DISTANCE);
 
     if (result.target) {
         stickMagnets(magnet, result.target, operationPlayer);
-        return;
     }
-
-    /*
-     * 重要：ここではターンを交代しない。
-     * 物理処理が落ち着いたかどうかをphysics()で確認する。
-     */
 });
 
 /* =========================================================
@@ -1206,18 +1365,73 @@ board.addEventListener("pointercancel", () => {
     if (!draggingMagnet) return;
 
     draggingMagnet.el.classList.remove("dragging");
+
+    draggingMagnet.vx = dragVX;
+    draggingMagnet.vy = dragVY;
+
     draggingMagnet = null;
     draggingNewMagnet = false;
     settledFrames = 0;
-
-    /* キャンセル時も即座にターン交代しない */
 });
+
+/* =========================================================
+   クラスターに働く磁力
+   引力設定は既存値のまま
+========================================================= */
+
+function applyClusterMagneticForce(cluster) {
+    if (!cluster || cluster.members.size === 0) return;
+
+    for (const other of magnets) {
+        if (
+            !other.active ||
+            other.cluster ||
+            other.scheduledRemove
+        ) {
+            continue;
+        }
+
+        let nearestMember = null;
+        let nearestDistance = Infinity;
+
+        for (const member of cluster.members) {
+            if (!member.active) continue;
+
+            const d = distance(member, other);
+
+            if (d < nearestDistance) {
+                nearestDistance = d;
+                nearestMember = member;
+            }
+        }
+
+        if (
+            !nearestMember ||
+            nearestDistance <= 0 ||
+            nearestDistance > ATTRACT_DISTANCE
+        ) {
+            continue;
+        }
+
+        const dx = other.x - nearestMember.x;
+        const dy = other.y - nearestMember.y;
+
+        const strength =
+            MAGNET_FORCE *
+            (1 - nearestDistance / ATTRACT_DISTANCE);
+
+        cluster.vx += dx / nearestDistance * strength;
+        cluster.vy += dy / nearestDistance * strength;
+    }
+}
 
 /* =========================================================
    クラスター移動
 ========================================================= */
 
 function moveCluster(cluster) {
+    applyClusterMagneticForce(cluster);
+
     cluster.vx *= FRICTION;
     cluster.vy *= FRICTION;
 
@@ -1263,7 +1477,7 @@ function moveCluster(cluster) {
 }
 
 /* =========================================================
-   磁力
+   単体磁石に働く磁力
 ========================================================= */
 
 function applyMagneticForce(magnet) {
@@ -1271,7 +1485,9 @@ function applyMagneticForce(magnet) {
     let fy = 0;
 
     for (const other of magnets) {
-        if (other === magnet || !other.active || other.cluster) continue;
+        if (other === magnet || !other.active || other.cluster) {
+            continue;
+        }
 
         const dx = other.x - magnet.x;
         const dy = other.y - magnet.y;
@@ -1362,6 +1578,10 @@ function physics() {
             moveFreeMagnet(magnet);
         }
 
+        /*
+         * 毎フレーム、現在のクラスターを収集する。
+         * 統合された古いクラスターは空なのでスキップされる。
+         */
         const clusters = new Set();
 
         for (const magnet of magnets) {
@@ -1370,15 +1590,13 @@ function physics() {
             }
         }
 
-        for (const originalCluster of clusters) {
-            if (!originalCluster || originalCluster.members.size === 0) {
-                continue;
-            }
+        for (const cluster of clusters) {
+            if (!cluster || cluster.members.size === 0) continue;
 
-            moveCluster(originalCluster);
+            moveCluster(cluster);
 
             const activeCluster =
-                processClusterChain(originalCluster) || originalCluster;
+                processClusterChain(cluster) || cluster;
 
             if (!activeCluster || activeCluster.members.size === 0) {
                 continue;
@@ -1395,8 +1613,9 @@ function physics() {
         }
 
         /*
-         * ターン交代はここで一元管理する。
-         * ドラッグ中・吸着中・連鎖中・消滅待ちには交代しない。
+         * 操作終了の判定はここで行う。
+         * 別のクラスターが盤面に残っているだけでは
+         * ターン終了を妨げない。
          */
         finishOperationIfSettled();
     }
@@ -1438,9 +1657,8 @@ currentPlayer = "red";
 updateTurnFocus();
 showTurnNotice("red");
 
-/* START */
 requestAnimationFrame(physics);
-</script>
 
+</script>
 </body>
 </html>
