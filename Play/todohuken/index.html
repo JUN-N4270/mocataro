@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#EAF6FC">
 <title>県庁所在地クイズ | mocataro</title>
-
 <style>
 :root {
   --bg: #EAF6FC;
@@ -17,11 +15,9 @@
   --red: #E87979;
   --white: #FFFFFF;
 }
-
 * {
   box-sizing: border-box;
 }
-
 body {
   margin: 0;
   padding: 16px;
@@ -32,24 +28,20 @@ body {
     "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
-
 button, input {
   font: inherit;
 }
-
 button {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-
 button:focus-visible,
 input:focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 3px;
 }
-
 .app {
   width: 100%;
   max-width: 480px;
@@ -59,7 +51,6 @@ input:focus-visible {
   border-radius: 24px;
   box-shadow: 0 6px 20px rgba(52, 80, 95, 0.08);
 }
-
 .brand {
   text-align: center;
   font-size: 13px;
@@ -67,29 +58,24 @@ input:focus-visible {
   letter-spacing: 2px;
   color: #6C9DB6;
 }
-
 h1 {
   margin: 10px 0 8px;
   text-align: center;
   font-size: 28px;
   line-height: 1.5;
 }
-
 .subtitle {
   text-align: center;
   font-size: 14px;
   line-height: 1.8;
   margin-bottom: 24px;
 }
-
 .panel {
   display: none;
 }
-
 .panel.active {
   display: block;
 }
-
 .mode-button,
 .primary-button,
 .secondary-button {
@@ -101,44 +87,37 @@ h1 {
   font-weight: bold;
   font-size: 18px;
 }
-
 .mode-button {
   margin: 8px 0;
   color: var(--text);
   background: var(--bg);
   border: 2px solid var(--border);
 }
-
 .mode-button:active,
 .primary-button:active,
 .secondary-button:active {
   transform: scale(0.98);
 }
-
 .mode-description {
   display: block;
   margin-top: 5px;
   font-size: 12px;
   font-weight: normal;
 }
-
 .primary-button {
   color: white;
   background: var(--blue);
 }
-
 .secondary-button {
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
 }
-
 .small-button {
   min-height: 46px;
   margin-top: 10px;
   font-size: 15px;
 }
-
 .question-number {
   text-align: center;
   font-size: 15px;
@@ -146,7 +125,6 @@ h1 {
   color: #6C9DB6;
   margin: 4px 0 18px;
 }
-
 .progress {
   width: 100%;
   height: 8px;
@@ -155,14 +133,12 @@ h1 {
   overflow: hidden;
   margin-bottom: 24px;
 }
-
 .progress-bar {
   width: 0%;
   height: 100%;
   background: var(--blue);
   transition: width 0.2s;
 }
-
 .question-box {
   min-height: 145px;
   padding: 22px 12px;
@@ -179,14 +155,12 @@ h1 {
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
-
 .input-label {
   display: block;
   margin: 22px 0 8px;
   font-size: 14px;
   font-weight: bold;
 }
-
 .answer-input {
   display: block;
   width: 100%;
@@ -199,12 +173,10 @@ h1 {
   font-size: 20px;
   text-align: center;
 }
-
 .answer-input::placeholder {
   color: #A3B5BF;
   font-size: 15px;
 }
-
 .feedback {
   display: none;
   margin-top: 16px;
@@ -214,35 +186,28 @@ h1 {
   line-height: 1.8;
   overflow-wrap: anywhere;
 }
-
 .feedback.show {
   display: block;
 }
-
 .feedback.correct {
   background: #E8F7EF;
   color: #24794F;
 }
-
 .feedback.wrong {
   background: #FFF0F0;
   color: #B44747;
 }
-
 .feedback-title {
   font-size: 21px;
   font-weight: bold;
 }
-
 .feedback-answer {
   margin-top: 5px;
   font-size: 16px;
 }
-
 .actions {
   margin-top: 16px;
 }
-
 .score-line {
   display: flex;
   justify-content: space-between;
@@ -251,7 +216,6 @@ h1 {
   font-weight: bold;
   margin: 0 0 10px;
 }
-
 .result-score {
   margin: 22px 0;
   text-align: center;
@@ -259,14 +223,12 @@ h1 {
   font-weight: bold;
   color: var(--blue);
 }
-
 .result-message {
   text-align: center;
   font-size: 17px;
   line-height: 1.9;
   margin-bottom: 24px;
 }
-
 .note {
   margin-top: 18px;
   font-size: 12px;
@@ -274,43 +236,60 @@ h1 {
   color: #718A98;
   text-align: center;
 }
-
+/* =====================================
+   Instagramリンク・タップヒア
+   写真を参考に下部へ中央配置
+===================================== */
+.instagram-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 70px auto 0;
+  padding-bottom: 12px;
+  text-decoration: none;
+}
+.instagram-text {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-size: clamp(17px, 4.5vw, 25px);
+  font-weight: bold;
+  line-height: 1.6;
+}
+.instagram-link img {
+  display: block;
+  width: 180px;
+  max-width: 100%;
+  height: auto;
+}
 [hidden] {
   display: none !important;
 }
-
 @media (max-width: 360px) {
   .app {
     padding: 20px 14px;
   }
-
   h1 {
     font-size: 24px;
   }
-
   .question-box {
     font-size: 22px;
   }
 }
 </style>
 </head>
-
 <body>
 <main class="app">
-
   <div class="brand">mocataro</div>
   <h1>🗾 県庁所在地クイズ</h1>
-
   <!-- =========================
        スタート画面
   ========================== -->
   <section id="topPanel" class="panel active">
-
     <p class="subtitle">
       47都道府県からランダムに出題！<br>
       答えを入力して挑戦しよう。
     </p>
-
     <button class="mode-button"
       onclick="startGame('normal')">
       🏙️ 通常問題
@@ -318,7 +297,6 @@ h1 {
         ○○県の県庁所在地は？
       </span>
     </button>
-
     <button class="mode-button"
       onclick="startGame('reverse')">
       🗾 逆問題
@@ -326,7 +304,6 @@ h1 {
         ○○市は何県の県庁所在地？
       </span>
     </button>
-
     <button class="mode-button"
       onclick="startGame('mix')">
       🔀 ミックス問題
@@ -334,39 +311,29 @@ h1 {
         通常問題と逆問題をランダムに出題！
       </span>
     </button>
-
     <p class="note">全10問・毎回ランダム出題</p>
   </section>
-
-
   <!-- =========================
        クイズ画面
   ========================== -->
   <section id="quizPanel" class="panel">
-
     <div class="score-line">
       <span id="modeLabel">通常問題</span>
       <span id="scoreLabel">正解：0問</span>
     </div>
-
     <div id="questionNumber" class="question-number">
       第1問 / 10問
     </div>
-
     <div class="progress">
       <div id="progressBar" class="progress-bar"></div>
     </div>
-
     <div id="questionBox" class="question-box">
       問題
     </div>
-
     <label class="input-label" for="answerInput">
       答えを入力しよう！
     </label>
-
     <form id="answerForm">
-
       <input
         id="answerInput"
         class="answer-input"
@@ -378,15 +345,12 @@ h1 {
         enterkeyhint="done"
         required
       >
-
       <div class="actions">
-
         <button id="checkButton"
           class="primary-button"
           type="submit">
           答え合わせ
         </button>
-
         <button id="nextButton"
           class="primary-button"
           type="button"
@@ -394,69 +358,61 @@ h1 {
           hidden>
           次の問題へ ▶
         </button>
-
         <button class="secondary-button small-button"
           type="button"
           onclick="backToTop()">
           メニューに戻る
         </button>
-
       </div>
     </form>
-
     <div id="feedback"
       class="feedback"
       aria-live="polite">
     </div>
-
   </section>
-
-
   <!-- =========================
        結果画面
   ========================== -->
   <section id="resultPanel" class="panel">
-
     <p class="subtitle">🎉 10問おつかれさま！</p>
-
     <div id="resultScore" class="result-score">
       0 / 10問
     </div>
-
     <div id="resultMessage" class="result-message">
       よくがんばりました！
     </div>
-
     <button class="primary-button"
       onclick="startGame(currentMode)">
       🔄 同じモードでもう一度
     </button>
-
     <button class="secondary-button small-button"
       onclick="backToTop()">
       モードを選び直す
     </button>
-
   </section>
-
-<a href="https://www.instagram.com/mocataro_asobo?obrf=Mm9qM3hqeDlsZHkx"
-   target="_blank"
-   rel="noopener noreferrer">
-  <img
-    src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
-    alt="TAP HERE - mocataro Instagram"
-    style="width:180px; max-width:100%; height:auto;"
+  <!-- =========================
+       Instagramリンク
+       すべての画面で下部に表示
+  ========================== -->
+  <a
+    class="instagram-link"
+    href="https://www.instagram.com/mocataro_asobo?obrf=Mm9qM3hqeDlsZHkx"
+    target="_blank"
+    rel="noopener noreferrer"
   >
-</a>
-
+    <span class="instagram-text">
+      📱 mocataroのInstagramはこちら ↓↓
+    </span>
+    <img
+      src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
+      alt="Tap here! mocataro Instagram"
+    >
+  </a>
 </main>
-
-
 <script>
 // ==========================================
 // 都道府県・県庁所在地データ
 // ==========================================
-
 const questions = {
   "北海道": "札幌市",
   "青森県": "青森市",
@@ -465,7 +421,6 @@ const questions = {
   "秋田県": "秋田市",
   "山形県": "山形市",
   "福島県": "福島市",
-
   "茨城県": "水戸市",
   "栃木県": "宇都宮市",
   "群馬県": "前橋市",
@@ -473,7 +428,6 @@ const questions = {
   "千葉県": "千葉市",
   "東京都": "東京",
   "神奈川県": "横浜市",
-
   "新潟県": "新潟市",
   "富山県": "富山市",
   "石川県": "金沢市",
@@ -483,7 +437,6 @@ const questions = {
   "岐阜県": "岐阜市",
   "静岡県": "静岡市",
   "愛知県": "名古屋市",
-
   "三重県": "津市",
   "滋賀県": "大津市",
   "京都府": "京都市",
@@ -491,18 +444,15 @@ const questions = {
   "兵庫県": "神戸市",
   "奈良県": "奈良市",
   "和歌山県": "和歌山市",
-
   "鳥取県": "鳥取市",
   "島根県": "松江市",
   "岡山県": "岡山市",
   "広島県": "広島市",
   "山口県": "山口市",
-
   "徳島県": "徳島市",
   "香川県": "高松市",
   "愛媛県": "松山市",
   "高知県": "高知市",
-
   "福岡県": "福岡市",
   "佐賀県": "佐賀市",
   "長崎県": "長崎市",
@@ -512,90 +462,63 @@ const questions = {
   "鹿児島県": "鹿児島市",
   "沖縄県": "那覇市"
 };
-
-
 // ==========================================
 // ゲーム設定
 // ==========================================
-
 const TOTAL = 10;
-
 let quiz = [];
 let questionNumber = 0;
 let score = 0;
 let currentMode = "normal";
 let answered = false;
-
-
 // ==========================================
 // 画面切り替え
 // ==========================================
-
 function showPanel(id) {
   document.querySelectorAll(".panel").forEach(panel => {
     panel.classList.remove("active");
   });
-
   document.getElementById(id).classList.add("active");
 }
-
-
 // ==========================================
 // 入力文字の正規化
 // 全角・半角、空白の違いを調整
 // ==========================================
-
 function normalizeAnswer(value) {
   return value
     .normalize("NFKC")
     .replace(/[\s\u3000]+/g, "")
     .trim();
 }
-
-
 // ==========================================
 // 正解として認める表記
 // ==========================================
-
 function getAcceptedAnswers(correctAnswer, mode) {
-
   // 東京都の県庁所在地は「東京」「東京都」を認める
   if (mode === "normal" && correctAnswer === "東京") {
     return ["東京", "東京都"];
   }
-
   return [correctAnswer];
 }
-
-
 // ==========================================
 // 配列をランダムにシャッフル
 // ==========================================
-
 function shuffle(array) {
   const result = [...array];
-
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-
     [result[i], result[j]] = [result[j], result[i]];
   }
-
   return result;
 }
-
-
 // ==========================================
 // 新しいゲーム
 // ==========================================
-
 function startGame(mode) {
   currentMode = mode;
-
   // 47都道府県から重複なしで10問選ぶ
   const prefectures = shuffle(Object.keys(questions))
     .slice(0, TOTAL);
-
   // ミックスでは問題ごとに出題方向をランダム決定
   if (mode === "mix") {
     quiz = prefectures.map(prefecture => ({
@@ -605,32 +528,24 @@ function startGame(mode) {
   } else {
     quiz = prefectures;
   }
-
   questionNumber = 0;
   score = 0;
   answered = false;
-
   const labels = {
     normal: "通常問題",
     reverse: "逆問題",
     mix: "ミックス問題"
   };
-
   document.getElementById("modeLabel").textContent =
     labels[mode];
-
   showPanel("quizPanel");
   showQuestion();
 }
-
-
 // ==========================================
 // 現在の問題データを取得
 // ==========================================
-
 function getCurrentQuestion() {
   const item = quiz[questionNumber];
-
   // ミックス問題は各問題に出題方向を保持する
   if (typeof item === "string") {
     return {
@@ -638,37 +553,27 @@ function getCurrentQuestion() {
       mode: currentMode
     };
   }
-
   return item;
 }
-
-
 // ==========================================
 // 問題表示
 // ==========================================
-
 function showQuestion() {
   if (questionNumber >= TOTAL) {
     showResult();
     return;
   }
-
   answered = false;
-
   const item = getCurrentQuestion();
   const prefecture = item.prefecture;
   const questionMode = item.mode;
   const city = questions[prefecture];
-
   document.getElementById("questionNumber").textContent =
     `第${questionNumber + 1}問 / ${TOTAL}問`;
-
   document.getElementById("scoreLabel").textContent =
     `正解：${score}問`;
-
   document.getElementById("progressBar").style.width =
     `${questionNumber / TOTAL * 100}%`;
-
   // 出題方向に応じて問題文を切り替える
   if (questionMode === "normal") {
     document.getElementById("questionBox").textContent =
@@ -677,104 +582,73 @@ function showQuestion() {
     document.getElementById("questionBox").textContent =
       `${city}は何県の\n県庁所在地？`;
   }
-
   const input = document.getElementById("answerInput");
-
   input.value = "";
   input.disabled = false;
-
   document.getElementById("checkButton").hidden = false;
   document.getElementById("nextButton").hidden = true;
-
   const feedback = document.getElementById("feedback");
-
   feedback.className = "feedback";
   feedback.textContent = "";
-
   input.focus({ preventScroll: true });
 }
-
-
 // ==========================================
 // 答え合わせ
 // ==========================================
-
 document.getElementById("answerForm").addEventListener(
   "submit",
   function(event) {
     event.preventDefault();
-
     if (answered) return;
-
     const input = document.getElementById("answerInput");
     const userAnswer = normalizeAnswer(input.value);
-
     if (!userAnswer) {
       input.focus();
       return;
     }
-
     answered = true;
-
     const item = getCurrentQuestion();
     const prefecture = item.prefecture;
     const questionMode = item.mode;
     const city = questions[prefecture];
-
     // 出題方向に応じた正解を決める
     const correctAnswer =
       questionMode === "normal" ? city : prefecture;
-
     const acceptedAnswers =
       getAcceptedAnswers(correctAnswer, questionMode);
-
     const normalizedAccepted = acceptedAnswers.map(
       answer => normalizeAnswer(answer)
     );
-
     const isCorrect =
       normalizedAccepted.includes(userAnswer);
-
     const feedback = document.getElementById("feedback");
-
     if (isCorrect) {
       score++;
-
       feedback.className = "feedback show correct";
-
       feedback.innerHTML =
         '<div class="feedback-title">⭕ 正解！</div>' +
         '<div class="feedback-answer">' +
         escapeHTML(correctAnswer) +
         '</div>';
-
     } else {
       feedback.className = "feedback show wrong";
-
       feedback.innerHTML =
         '<div class="feedback-title">❌ 不正解</div>' +
         '<div class="feedback-answer">正解は「' +
         escapeHTML(correctAnswer) +
         '」</div>';
     }
-
     document.getElementById("scoreLabel").textContent =
       `正解：${score}問`;
-
     document.getElementById("checkButton").hidden = true;
     document.getElementById("nextButton").hidden = false;
-
     input.disabled = true;
-
     document.getElementById("nextButton").focus();
   }
 );
-
-
 // ==========================================
 // HTML表示用の文字変換
 // ==========================================
-
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
@@ -784,32 +658,22 @@ function escapeHTML(value) {
     "'": "&#39;"
   })[char]);
 }
-
-
 // ==========================================
 // 次の問題
 // ==========================================
-
 function nextQuestion() {
   if (!answered) return;
-
   questionNumber++;
   showQuestion();
 }
-
-
 // ==========================================
 // 結果画面
 // ==========================================
-
 function showResult() {
   document.getElementById("progressBar").style.width = "100%";
-
   document.getElementById("resultScore").textContent =
     `${score} / ${TOTAL}問`;
-
   let message = "";
-
   if (score === TOTAL) {
     message = "🎊 全問正解！すばらしい！";
   } else if (score >= 8) {
@@ -819,18 +683,13 @@ function showResult() {
   } else {
     message = "💪 くり返し挑戦して覚えよう！";
   }
-
   document.getElementById("resultMessage").textContent =
     message;
-
   showPanel("resultPanel");
 }
-
-
 // ==========================================
 // メニューに戻る
 // ==========================================
-
 function backToTop() {
   showPanel("topPanel");
 }
