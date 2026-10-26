@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#EAF6FC">
 <title>かけ算ダッシュ | mocataro</title>
 
@@ -13,8 +13,6 @@
   --text: #34505F;
   --border: #9CCFE8;
   --blue: #2689BD;
-  --red: #E76F8A;
-  --white: #FFFFFF;
 }
 
 * {
@@ -22,172 +20,76 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
   margin: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
+  width: 100%;
+  min-height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", sans-serif;
 }
 
-button {
-  font: inherit;
-  cursor: pointer;
-  touch-action: manipulation;
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 #app {
   width: 100%;
-  max-width: 520px;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  padding: 8px 16px;
 }
 
 header {
   text-align: center;
-  padding: 8px 0 2px;
+  flex: 0 0 auto;
 }
 
 h1 {
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 900;
   margin: 0;
-  font-size: clamp(25px, 7vw, 34px);
-  font-weight: 900;
-  letter-spacing: 1px;
 }
 
-.subtitle {
-  margin-top: 4px;
-  font-size: 13px;
-  opacity: .8;
-}
-
-.player {
+#game {
   flex: 1;
-  min-height: 105px;
-  border: 2px solid var(--border);
-  border-radius: 20px;
-  background: rgba(255,255,255,.72);
+  width: 100%;
+  max-width: 1000px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  position: relative;
-  overflow: hidden;
-  padding: 12px;
+  gap: 12px;
 }
 
-.player.red {
-  border-color: #F0A0B1;
-}
-
-.player.blue {
-  border-color: #82C5E5;
-}
-
-.player-content {
+#equationBox {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.player.red .player-content {
-  transform: rotate(180deg);
-}
-
-.player-name {
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.red .player-name {
-  color: var(--red);
-}
-
-.blue .player-name {
-  color: var(--blue);
-}
-
-.countdown {
-  font-size: clamp(30px, 9vw, 48px);
-  line-height: 1;
-  font-weight: 900;
-  min-height: 48px;
-  font-variant-numeric: tabular-nums;
-}
-
-.tap-button {
-  width: 100%;
-  max-width: 310px;
-  min-height: 55px;
-  border: 0;
-  border-radius: 15px;
-  color: white;
-  font-size: 20px;
-  font-weight: 900;
-  box-shadow: 0 4px 0 rgba(52,80,95,.12);
-  transition: transform .08s, opacity .15s;
-}
-
-.tap-button:active {
-  transform: scale(.97);
-}
-
-.red .tap-button {
-  background: var(--red);
-}
-
-.blue .tap-button {
-  background: var(--blue);
-}
-
-.tap-button:disabled {
-  opacity: .45;
-  cursor: default;
-}
-
-#center {
-  flex: 0 0 auto;
-  min-height: 170px;
-  border: 2px solid var(--border);
-  border-radius: 22px;
+  flex: 1;
+  min-height: 120px;
+  max-height: 55vh;
+  max-height: 55dvh;
   background: white;
+  border: 3px solid var(--border);
+  border-radius: 24px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 14px 8px;
-  text-align: center;
-}
-
-#status {
-  font-size: 14px;
-  font-weight: 800;
-  min-height: 22px;
+  padding: 10px;
 }
 
 #equation {
-  font-size: clamp(42px, 13vw, 66px);
+  font-size: clamp(48px, 12vw, 100px);
+  line-height: 1.1;
   font-weight: 900;
-  letter-spacing: 1px;
-  line-height: 1.2;
-  margin: 7px 0;
-  min-height: 78px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
   visibility: hidden;
 }
 
@@ -197,37 +99,58 @@ h1 {
 }
 
 @keyframes pop {
-  from { transform: scale(.8); opacity: .3; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(.8);
+    opacity: .2;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 #progress {
-  font-size: 13px;
-  opacity: .75;
-  min-height: 18px;
+  font-size: 15px;
+  font-weight: 800;
+  min-height: 20px;
+}
+
+button {
+  width: min(320px, 90%);
+  border: 0;
+  border-radius: 14px;
+  padding: 13px 20px;
+  background: var(--blue);
+  color: white;
+  font-size: 19px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(.98);
 }
 
 #startScreen,
 #resultScreen {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 5;
   background: rgba(234,246,252,.97);
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 22px;
+  align-items: center;
+  padding: 20px;
 }
 
 .modal {
   width: 100%;
-  max-width: 400px;
-  border: 2px solid var(--border);
-  border-radius: 25px;
+  max-width: 420px;
   background: white;
-  padding: 25px 18px;
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  padding: 25px 20px;
   text-align: center;
-  box-shadow: 0 10px 35px rgba(52,80,95,.12);
 }
 
 .modal h2 {
@@ -236,95 +159,94 @@ h1 {
 }
 
 .modal p {
-  line-height: 1.7;
   font-size: 15px;
-}
-
-.primary-button {
-  border: 0;
-  border-radius: 16px;
-  background: var(--blue);
-  color: white;
-  font-size: 21px;
-  font-weight: 900;
-  padding: 15px 25px;
-  width: 100%;
-  margin-top: 12px;
-  box-shadow: 0 4px 0 #1E6E98;
-}
-
-.primary-button:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #1E6E98;
+  line-height: 1.8;
 }
 
 .hidden {
   display: none !important;
 }
 
-#resultTitle {
-  font-size: 28px;
-  font-weight: 900;
-}
-
 #resultText {
   font-size: 18px;
   font-weight: 800;
-  white-space: pre-line;
+  line-height: 1.8;
 }
 
-#notice {
-  min-height: 22px;
+#instagramLink {
+  display: block;
+  width: min(260px, 85%);
+  margin: 8px auto 2px;
   text-align: center;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.instagram {
-  text-align: center;
-  padding: 3px 0 8px;
-  font-size: 13px;
-}
-
-.instagram a {
-  color: var(--blue);
-  font-weight: 800;
   text-decoration: none;
 }
 
-@media (max-height: 700px) {
+#instagramLink img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (orientation: landscape) {
   #app {
-    gap: 6px;
-    padding: 8px;
+    padding: 5px 20px;
   }
 
   header {
-    padding: 2px 0;
+    margin-bottom: 2px;
   }
 
-  .player {
-    min-height: 85px;
-    padding: 7px;
-    gap: 5px;
+  #game {
+    gap: 7px;
   }
 
-  .tap-button {
-    min-height: 43px;
-    font-size: 17px;
+  #equationBox {
+    max-height: 58dvh;
+    border-radius: 20px;
   }
 
-  #center {
-    min-height: 130px;
-    padding: 8px;
+  #progress {
+    min-height: 18px;
   }
 
-  #equation {
-    min-height: 58px;
-    margin: 3px 0;
+  #instagramLink {
+    width: 150px;
+    margin: 2px auto 0;
+  }
+}
+
+@media (max-height: 420px) {
+  #app {
+    padding: 3px 12px;
   }
 
-  .instagram {
-    padding-bottom: 2px;
+  h1 {
+    font-size: 20px;
+  }
+
+  #game {
+    gap: 4px;
+  }
+
+  #equationBox {
+    min-height: 80px;
+    max-height: 55dvh;
+    border-width: 2px;
+  }
+
+  #progress {
+    font-size: 12px;
+  }
+
+  #instagramLink {
+    width: 110px;
+    margin: 0 auto;
+  }
+
+  button {
+    padding: 9px 16px;
+    font-size: 16px;
   }
 }
 </style>
@@ -335,38 +257,30 @@ h1 {
 
   <header>
     <h1>⚡ かけ算ダッシュ！</h1>
-    <div class="subtitle">見えたらタップ！反射神経バトル</div>
   </header>
 
-  <section class="player red">
-    <div class="player-content">
-      <div class="player-name">🔴 赤のプレイヤー</div>
-      <div class="countdown" id="redCount">0</div>
-      <button class="tap-button" id="redTap">赤！ タップ</button>
+  <main id="game">
+    <div id="equationBox">
+      <div id="equation"></div>
     </div>
-  </section>
 
-  <section id="center">
-    <div id="status">スタートを押そう！</div>
-    <div id="equation"></div>
     <div id="progress">全10問</div>
-  </section>
 
-  <section class="player blue">
-    <div class="player-content">
-      <div class="player-name">🔵 青のプレイヤー</div>
-      <div class="countdown" id="blueCount">0</div>
-      <button class="tap-button" id="blueTap">青！ タップ</button>
-    </div>
-  </section>
+    <button id="startButton" class="hidden">スタート</button>
+  </main>
 
-  <div id="notice">式が出るまで待とう！</div>
-
-  <div class="instagram">
-    <a href="https://www.instagram.com/mocataro_asobo/" target="_blank" rel="noopener">
-      📷 mocataro Instagram
-    </a>
-  </div>
+  <a
+    id="instagramLink"
+    href="https://www.instagram.com/mocataro_asobo/"
+    target="_blank"
+    rel="noopener"
+    aria-label="mocataro Instagram"
+  >
+    <img
+      src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
+      alt="TAP HERE"
+    >
+  </a>
 
 </div>
 
@@ -374,297 +288,177 @@ h1 {
   <div class="modal">
     <h2>⚡ かけ算ダッシュ！</h2>
     <p>
-      かけ算の式が出たら、すばやくタップ！<br>
-      赤と青、どちらが速い？<br><br>
-      <strong>7・8・9の段から全10問！</strong><br>
-      同じ答えになる逆の組み合わせは出ないよ。
+      7・8・9の段から全10問！<br>
+      式がランダムに出現して、ランダムに消える。<br>
+      同じ問題や逆順の問題は出ないよ。
     </p>
-    <button class="primary-button" id="startButton">ゲームスタート！</button>
+    <button id="beginButton">スタート！</button>
   </div>
 </div>
 
 <div id="resultScreen" class="hidden">
   <div class="modal">
-    <div id="resultTitle">🏁 結果発表</div>
-    <p id="resultText"></p>
-    <button class="primary-button" id="retryButton">もう一度遊ぶ</button>
+    <h2>🎉 10問終了！</h2>
+    <div id="resultText">全10問終了！</div>
+    <button id="retryButton">もう一度遊ぶ</button>
   </div>
 </div>
 
 <script>
 "use strict";
 
-const TOTAL = 10;
+const TOTAL_QUESTIONS = 10;
 
-// 問題が表示される時間（ミリ秒）
+// 式の表示時間：1〜3秒
 const DISPLAY_MIN = 1000;
 const DISPLAY_MAX = 3000;
 
-// 次の問題が出るまでの待ち時間（ミリ秒）
-const WAIT_MIN = 1000;
-const WAIT_MAX = 3000;
+// 次の式までの待ち時間：2〜7秒
+const WAIT_MIN = 2000;
+const WAIT_MAX = 7000;
 
-const redCount = document.getElementById("redCount");
-const blueCount = document.getElementById("blueCount");
-const redTap = document.getElementById("redTap");
-const blueTap = document.getElementById("blueTap");
-const statusEl = document.getElementById("status");
 const equationEl = document.getElementById("equation");
 const progressEl = document.getElementById("progress");
-const noticeEl = document.getElementById("notice");
 const startScreen = document.getElementById("startScreen");
 const resultScreen = document.getElementById("resultScreen");
-const startButton = document.getElementById("startButton");
+const beginButton = document.getElementById("beginButton");
 const retryButton = document.getElementById("retryButton");
-const resultTitle = document.getElementById("resultTitle");
 const resultText = document.getElementById("resultText");
 
 let questions = [];
-let questionIndex = 0;
-let redScore = 0;
-let blueScore = 0;
-let gameRunning = false;
-let questionVisible = false;
-let answeredThisQuestion = false;
+let currentIndex = 0;
+let running = false;
 let timerId = null;
-let nextQuestionId = null;
-let gameToken = 0;
+let gameId = 0;
 
-// 7〜9の段から問題を作る。
-// 7×8と8×7のような逆の組み合わせは片方だけにする。
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// 7・8・9の段から重複しない問題を作成
 function makeQuestions() {
   const pool = [];
 
   for (let a = 7; a <= 9; a++) {
     for (let b = 1; b <= 9; b++) {
-      if (b >= 7 && a > b) {
-        continue;
-      }
+      // 7×8と8×7などの逆順を除外
+      if (b >= 7 && a > b) continue;
 
       pool.push({ a, b });
     }
   }
 
-  // Fisher–Yates シャッフル
+  // ランダムにシャッフル
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  // 24種類の候補から10問を選ぶ。
-  // pool自体に重複がないので、この10問にも重複はない。
-  return pool.slice(0, TOTAL);
+  // 重複なしで10問選択
+  return pool.slice(0, TOTAL_QUESTIONS);
 }
 
-function randomBetween(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function clearTimers() {
+function clearTimer() {
   if (timerId !== null) {
     clearTimeout(timerId);
     timerId = null;
   }
-
-  if (nextQuestionId !== null) {
-    clearTimeout(nextQuestionId);
-    nextQuestionId = null;
-  }
 }
 
-function setTapEnabled(enabled) {
-  redTap.disabled = !enabled;
-  blueTap.disabled = !enabled;
-}
-
-function updateCounts() {
-  redCount.textContent = redScore;
-  blueCount.textContent = blueScore;
-}
-
-function resetDisplay() {
-  equationEl.textContent = "";
+function hideEquation() {
   equationEl.classList.remove("show");
-  questionVisible = false;
-  answeredThisQuestion = false;
+  equationEl.textContent = "";
 }
 
 function startGame() {
-  clearTimers();
+  clearTimer();
 
-  gameToken++;
-  const token = gameToken;
+  gameId++;
+  const thisGame = gameId;
 
   questions = makeQuestions();
-  questionIndex = 0;
-  redScore = 0;
-  blueScore = 0;
-  gameRunning = true;
-
-  updateCounts();
-  resetDisplay();
+  currentIndex = 0;
+  running = true;
 
   startScreen.classList.add("hidden");
   resultScreen.classList.add("hidden");
 
-  statusEl.textContent = "よく見て！";
-  progressEl.textContent = `全${TOTAL}問`;
-  noticeEl.textContent = "式が出るまで待とう！";
+  hideEquation();
+  progressEl.textContent = `全${TOTAL_QUESTIONS}問`;
 
-  setTapEnabled(false);
-
-  // 最初の問題もランダムな待ち時間のあとに表示
-  scheduleNextQuestion(token);
+  scheduleQuestion(thisGame);
 }
 
-function scheduleNextQuestion(token) {
-  if (!gameRunning || token !== gameToken) return;
+function scheduleQuestion(thisGame) {
+  if (!running || thisGame !== gameId) return;
 
-  resetDisplay();
+  hideEquation();
 
-  if (questionIndex >= TOTAL) {
+  if (currentIndex >= TOTAL_QUESTIONS) {
     finishGame();
     return;
   }
 
-  statusEl.textContent = "次の式を待て！";
-  progressEl.textContent = `${questionIndex + 1} / ${TOTAL} 問`;
-  noticeEl.textContent = "まだタップしないで！";
-  setTapEnabled(false);
-
-  const waitTime = randomBetween(WAIT_MIN, WAIT_MAX);
-
-  nextQuestionId = setTimeout(() => {
-    nextQuestionId = null;
-    showQuestion(token);
-  }, waitTime);
-}
-
-function showQuestion(token) {
-  if (!gameRunning || token !== gameToken) return;
-  if (questionIndex >= TOTAL) {
-    finishGame();
-    return;
-  }
-
-  const q = questions[questionIndex];
-
-  questionVisible = true;
-  answeredThisQuestion = false;
-
-  equationEl.textContent = `${q.a} × ${q.b} = ?`;
-  equationEl.classList.remove("show");
-
-  // アニメーションを確実に再スタート
-  void equationEl.offsetWidth;
-  equationEl.classList.add("show");
-
-  statusEl.textContent = "今だ！";
-  progressEl.textContent = `${questionIndex + 1} / ${TOTAL} 問`;
-  noticeEl.textContent = "早くタップ！";
-
-  setTapEnabled(true);
-
-  const displayTime = randomBetween(DISPLAY_MIN, DISPLAY_MAX);
+  const wait = randomInt(WAIT_MIN, WAIT_MAX);
 
   timerId = setTimeout(() => {
     timerId = null;
+    if (!running || thisGame !== gameId) return;
 
-    if (!gameRunning || token !== gameToken) return;
+    showQuestion(thisGame);
+  }, wait);
+}
 
-    // 表示時間が終わったら式を消す
-    questionVisible = false;
-    equationEl.classList.remove("show");
-    equationEl.textContent = "";
+function showQuestion(thisGame) {
+  if (!running || thisGame !== gameId) return;
 
-    setTapEnabled(false);
+  if (currentIndex >= TOTAL_QUESTIONS) {
+    finishGame();
+    return;
+  }
 
-    if (!answeredThisQuestion) {
-      statusEl.textContent = "タップなし！";
-      noticeEl.textContent = "次の問題へ！";
+  const q = questions[currentIndex];
+
+  equationEl.textContent = `${q.a} × ${q.b}`;
+  equationEl.classList.remove("show");
+
+  // 毎回アニメーションを再実行
+  void equationEl.offsetWidth;
+  equationEl.classList.add("show");
+
+  progressEl.textContent =
+    `${currentIndex + 1} / ${TOTAL_QUESTIONS} 問`;
+
+  const displayTime = randomInt(DISPLAY_MIN, DISPLAY_MAX);
+
+  timerId = setTimeout(() => {
+    timerId = null;
+    if (!running || thisGame !== gameId) return;
+
+    hideEquation();
+    currentIndex++;
+
+    if (currentIndex >= TOTAL_QUESTIONS) {
+      finishGame();
+    } else {
+      scheduleQuestion(thisGame);
     }
-
-    questionIndex++;
-
-    nextQuestionId = setTimeout(() => {
-      nextQuestionId = null;
-      scheduleNextQuestion(token);
-    }, 500);
-
   }, displayTime);
 }
 
-function playerTap(player) {
-  if (!gameRunning) return;
-  if (!questionVisible) return;
-  if (answeredThisQuestion) return;
-
-  answeredThisQuestion = true;
-  questionVisible = false;
-
-  // 最初にタップしたプレイヤーに1点
-  if (player === "red") {
-    redScore++;
-    statusEl.textContent = "🔴 赤のポイント！";
-    noticeEl.textContent = "赤が先にタップ！";
-  } else {
-    blueScore++;
-    statusEl.textContent = "🔵 青のポイント！";
-    noticeEl.textContent = "青が先にタップ！";
-  }
-
-  updateCounts();
-  setTapEnabled(false);
-
-  // その問題の表示を終わらせる
-  if (timerId !== null) {
-    clearTimeout(timerId);
-    timerId = null;
-  }
-
-  equationEl.classList.remove("show");
-  equationEl.textContent = "";
-
-  const token = gameToken;
-  questionIndex++;
-
-  nextQuestionId = setTimeout(() => {
-    nextQuestionId = null;
-    scheduleNextQuestion(token);
-  }, 500);
-}
-
 function finishGame() {
-  clearTimers();
-  gameRunning = false;
-  questionVisible = false;
+  clearTimer();
+  running = false;
+  hideEquation();
 
-  resetDisplay();
-  setTapEnabled(false);
+  progressEl.textContent = `${TOTAL_QUESTIONS} / ${TOTAL_QUESTIONS} 問`;
+  resultText.textContent = `全${TOTAL_QUESTIONS}問終了！`;
 
   resultScreen.classList.remove("hidden");
-
-  if (redScore > blueScore) {
-    resultTitle.textContent = "🔴 赤の勝ち！";
-  } else if (blueScore > redScore) {
-    resultTitle.textContent = "🔵 青の勝ち！";
-  } else {
-    resultTitle.textContent = "🤝 引き分け！";
-  }
-
-  resultText.textContent =
-    `🔴 赤：${redScore} 点\n🔵 青：${blueScore} 点\n\n全${TOTAL}問終了！`;
 }
 
-redTap.addEventListener("click", () => playerTap("red"));
-blueTap.addEventListener("click", () => playerTap("blue"));
-
-startButton.addEventListener("click", startGame);
+beginButton.addEventListener("click", startGame);
 retryButton.addEventListener("click", startGame);
-
-// 初期状態
-updateCounts();
-setTapEnabled(false);
 </script>
 </body>
 </html>
