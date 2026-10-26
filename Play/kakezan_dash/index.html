@@ -69,6 +69,11 @@ h1 {
   cursor: pointer;
 }
 
+#startBtn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #17658e;
+}
+
 #startBtn:disabled {
   opacity: 0.6;
 }
@@ -112,12 +117,12 @@ h1 {
   white-space: nowrap;
 }
 
-/* 対面する人側の数字は180度反転 */
+/* 対面する人側 */
 .player.top .display {
   transform: rotate(180deg);
 }
 
-/* 画面中央に式を1個だけ表示 */
+/* 中央の問題表示 */
 .arrow-overlay {
   position: absolute;
   inset: 0;
@@ -189,19 +194,16 @@ h1 {
 
     <div class="game">
 
-      <!-- 対面する人側 -->
       <div class="player top">
         <div class="display" id="topDisplay">3</div>
       </div>
 
-      <!-- 自分側 -->
       <div class="player bottom">
         <div class="display" id="bottomDisplay">3</div>
       </div>
 
     </div>
 
-    <!-- 中央に式を1個だけ表示 -->
     <div class="arrow-overlay">
       <div id="equationDisplay" class="blank"></div>
     </div>
@@ -211,14 +213,14 @@ h1 {
 
 <script>
 (() => {
-  // 問題数：10問
+  // 1ゲーム10問
   const TOTAL = 10;
 
-  // 式の表示時間：1〜3秒でランダム
+  // 式の表示時間：1〜3秒
   const MIN_SHOW = 1000;
   const MAX_SHOW = 3000;
 
-  // 式が消えている時間：1〜3秒でランダム
+  // 式が消えている時間：1〜3秒
   const MIN_WAIT = 1000;
   const MAX_WAIT = 3000;
 
@@ -230,8 +232,8 @@ h1 {
   let timers = [];
   let running = false;
   let index = 0;
+  let questions = [];
 
-  // タイマー管理
   function clearTimers() {
     timers.forEach(clearTimeout);
     timers = [];
@@ -241,7 +243,7 @@ h1 {
     timers.push(setTimeout(fn, ms));
   }
 
-  // カウントダウンを上下に表示
+  // 上下にカウントダウンを表示
   function showCountdown(value) {
     topDisplay.textContent = value;
     bottomDisplay.textContent = value;
@@ -253,19 +255,17 @@ h1 {
     equationDisplay.textContent = "";
   }
 
-  // 7〜9の段からランダムに式を作る
-  function showEquation() {
+  // 問題を中央に1つだけ表示
+  function showEquation(question) {
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
 
-    const a = Math.floor(Math.random() * 3) + 7;
-    const b = Math.floor(Math.random() * 3) + 7;
-
     equationDisplay.className = "";
-    equationDisplay.textContent = `${a} × ${b}`;
+    equationDisplay.textContent =
+      `${question.a} × ${question.b}`;
   }
 
-  // 式を消す
+  // 問題を消す
   function showBlank() {
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
@@ -274,7 +274,32 @@ h1 {
     equationDisplay.textContent = "";
   }
 
-  // 10問終了
+  // 7・8・9の段から候補を作成
+  // a <= b に統一し、7×8と8×7などの重複を防ぐ
+  function makeQuestions() {
+    const pool = [];
+
+    for (let a = 1; a <= 9; a++) {
+      for (let b = a; b <= 9; b++) {
+
+        // 少なくとも一方の数字が7・8・9
+        if (a >= 7 || b >= 7) {
+          pool.push({ a, b });
+        }
+      }
+    }
+
+    // 候補をランダムにシャッフル
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    // 重複なしで10問選ぶ
+    return pool.slice(0, TOTAL);
+  }
+
+  // 終了
   function finish() {
     running = false;
 
@@ -288,7 +313,7 @@ h1 {
     startBtn.textContent = "もう一度スタート";
   }
 
-  // 次の問題を表示
+  // 次の問題
   function next() {
     if (!running) return;
 
@@ -297,11 +322,12 @@ h1 {
       return;
     }
 
+    const question = questions[index];
     index++;
 
-    showEquation();
+    showEquation(question);
 
-    // 式を1〜3秒ランダムに表示
+    // 問題の表示時間をランダムに決定
     const showTime =
       MIN_SHOW + Math.random() * (MAX_SHOW - MIN_SHOW);
 
@@ -313,10 +339,10 @@ h1 {
         return;
       }
 
-      // 式を消す
+      // 問題を消す
       showBlank();
 
-      // 次の式まで1〜3秒ランダムに待つ
+      // 次の問題までの待ち時間をランダムに決定
       const waitTime =
         MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
 
@@ -325,17 +351,19 @@ h1 {
     }, showTime);
   }
 
-  // ゲーム開始
+  // スタート
   function start() {
     clearTimers();
 
     running = true;
     index = 0;
 
+    // 毎回、新しい10問を選ぶ
+    questions = makeQuestions();
+
     startBtn.disabled = true;
     startBtn.textContent = "プレイ中…";
 
-    // 3 → 2 → 1
     showCountdown("3");
 
     later(() => {
@@ -346,7 +374,7 @@ h1 {
       if (running) showCountdown("1");
     }, 1400);
 
-    // カウントダウン終了後、最初の式まで1〜3秒待つ
+    // カウントダウン終了後、最初の問題まで1〜3秒待つ
     later(() => {
       if (!running) return;
 
@@ -362,11 +390,9 @@ h1 {
 
   startBtn.addEventListener("click", start);
 
-  // 初期表示
   showCountdown("3");
 
 })();
 </script>
-
 </body>
 </html>
