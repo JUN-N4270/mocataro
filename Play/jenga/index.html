@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -5,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#EAF6FC">
 <title>ジェンガ・ダッシュ | mocataro</title>
+
 <style>
 :root {
   --bg: #EAF6FC;
@@ -13,20 +15,26 @@
   --blue: #2689BD;
   --red: #E76F8A;
 }
+
 * { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
-body {
+
+html, body {
   margin: 0;
+  min-height: 100%;
+}
+
+body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px;
-  -webkit-tap-highlight-color: transparent;
 }
+
 .app {
   width: min(100%, 520px);
   height: calc(100dvh - 20px);
@@ -38,9 +46,14 @@ body {
   border: 2px solid var(--border);
   border-radius: 20px;
 }
-h1 { margin: 0; font-size: 20px; text-align: center; }
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  text-align: center;
+}
+
 #startBtn {
-  flex: 0 0 auto;
   width: 100%;
   border: 0;
   border-radius: 12px;
@@ -52,16 +65,25 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
   box-shadow: 0 4px 0 #17658e;
   cursor: pointer;
 }
-#startBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 #17658e; }
-#startBtn:disabled { opacity: 0.6; }
-.game {
-  width: 100%;
+
+#startBtn:disabled {
+  opacity: 0.6;
+}
+
+.stage {
+  position: relative;
   flex: 1;
   min-height: 0;
+}
+
+.game {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .player {
   flex: 1;
   min-height: 0;
@@ -73,20 +95,23 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
   border: 1px solid var(--border);
   overflow: hidden;
 }
+
 .display {
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   font-weight: 1000;
   font-size: clamp(80px, 24vw, 150px);
   line-height: 1;
   color: var(--text);
-  user-select: none;
 }
-.player.top .display { transform: rotate(180deg); }
 
-/* 矢印は中央の共通エリアに1個だけ表示 */
+.player.top .display {
+  transform: rotate(180deg);
+}
+
+/* 中央に矢印を1個だけ表示 */
 .arrow-overlay {
   position: absolute;
   inset: 0;
@@ -95,70 +120,104 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
   justify-content: center;
   pointer-events: none;
 }
+
 #arrowDisplay {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(58vw, 280px);
-  height: min(58vw, 280px);
+  width: min(65vw, 300px);
+  height: min(65vw, 300px);
   font-size: clamp(150px, 42vw, 250px);
   font-weight: 1000;
   line-height: 1;
   color: white;
   border-radius: 26px;
-  text-shadow: 0 3px 0 #00000012;
   user-select: none;
 }
-#arrowDisplay.left { background: var(--red); }
-#arrowDisplay.right { background: var(--blue); }
-#arrowDisplay.count {
-  background: #FFE99A;
-  color: var(--text);
-  font-size: clamp(100px, 30vw, 170px);
+
+#arrowDisplay.left {
+  background: var(--red);
 }
+
+#arrowDisplay.right {
+  background: var(--blue);
+}
+
 #arrowDisplay.blank {
   background: transparent;
   color: transparent;
 }
+
 #arrowDisplay.done {
   background: #fff;
   color: var(--text);
   border: 2px solid var(--border);
   font-size: 80px;
 }
-.stage { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+
 @media (max-height: 650px) {
-  .app { gap: 8px; padding: 10px; }
-  h1 { font-size: 17px; }
-  #startBtn { padding: 10px; }
-  #arrowDisplay { width: min(48vw, 210px); height: min(48vw, 210px); font-size: clamp(120px, 34vw, 190px); }
+  .app {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 17px;
+  }
+
+  #startBtn {
+    padding: 10px;
+  }
+
+  #arrowDisplay {
+    width: min(48vw, 220px);
+    height: min(48vw, 220px);
+    font-size: clamp(120px, 34vw, 190px);
+  }
 }
 </style>
 </head>
+
 <body>
 <main class="app">
+
   <h1>ジェンガ・ダッシュ</h1>
+
   <button id="startBtn">スタート</button>
 
   <section class="stage">
+
     <div class="game">
+
+      <!-- 対面する人側 -->
       <div class="player top">
         <div class="display" id="topDisplay">3</div>
       </div>
+
+      <!-- 自分側 -->
       <div class="player bottom">
         <div class="display" id="bottomDisplay">3</div>
       </div>
+
     </div>
 
+    <!-- 矢印は中央に1個だけ -->
     <div class="arrow-overlay">
-      <div id="arrowDisplay" class="blank"> </div>
+      <div id="arrowDisplay" class="blank"></div>
     </div>
+
   </section>
 </main>
 
 <script>
 (() => {
   const TOTAL = 20;
+
+  // ★ 時間設定
+  const ARROW_DISPLAY_TIME = 2000; // 矢印表示：2秒
+  const MIN_WAIT = 2000;           // 待ち時間：最短2秒
+  const MAX_WAIT = 7000;           // 待ち時間：最長7秒
+
   const startBtn = document.getElementById("startBtn");
   const topDisplay = document.getElementById("topDisplay");
   const bottomDisplay = document.getElementById("bottomDisplay");
@@ -178,77 +237,107 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
     timers.push(setTimeout(fn, ms));
   }
 
-  // カウントダウンだけは上下それぞれに表示
+  // カウントダウンは上下2か所
   function showCountdown(value) {
     topDisplay.textContent = value;
     bottomDisplay.textContent = value;
+
     topDisplay.style.visibility = "visible";
     bottomDisplay.style.visibility = "visible";
+
     arrowDisplay.className = "blank";
     arrowDisplay.textContent = "";
   }
 
-  // 矢印は中央に1つだけ。上下の数字は隠す。
+  // 矢印は中央に1個だけ
   function showArrow(direction) {
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
+
     arrowDisplay.className = direction;
-    arrowDisplay.textContent = direction === "left" ? "⬅" : "➡";
+    arrowDisplay.textContent =
+      direction === "left" ? "⬅" : "➡";
   }
 
+  // 矢印を消す
   function showBlank() {
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
+
     arrowDisplay.className = "blank";
     arrowDisplay.textContent = "";
   }
 
+  // 左右10回ずつ、順番はランダム
   function makeSequence() {
     const arr = [
       ...Array(TOTAL / 2).fill("left"),
       ...Array(TOTAL / 2).fill("right")
     ];
+
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
+
     return arr;
   }
 
+  // 20回終了
   function finish() {
     running = false;
+
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
+
     arrowDisplay.className = "done";
     arrowDisplay.textContent = "✓";
+
     startBtn.disabled = false;
     startBtn.textContent = "もう一度スタート";
   }
 
+  // 矢印を1回表示
   function next() {
     if (!running) return;
+
     if (index >= TOTAL) {
       finish();
       return;
     }
 
-    const direction = sequence[index++];
+    const direction = sequence[index];
+    index++;
+
+    // 矢印を表示
     showArrow(direction);
 
-    // 矢印を表示してから、次の指示まで間を空ける
+    // 2秒後に矢印を消す
     later(() => {
       if (!running) return;
+
+      // 最後の矢印なら終了
       if (index >= TOTAL) {
         finish();
         return;
       }
+
       showBlank();
-      later(next, 500);
-    }, 850);
+
+      // ★ 消えている時間を2〜7秒からランダムに決める
+      const waitTime =
+        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+
+      // 待ち時間終了後、次の矢印
+      later(next, waitTime);
+
+    }, ARROW_DISPLAY_TIME);
   }
 
+  // ゲーム開始
   function start() {
     clearTimers();
+
     running = true;
     index = 0;
     sequence = makeSequence();
@@ -256,22 +345,39 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
     startBtn.disabled = true;
     startBtn.textContent = "プレイ中…";
 
+    // 3 → 2 → 1
     showCountdown("3");
-    later(() => { if (running) showCountdown("2"); }, 700);
-    later(() => { if (running) showCountdown("1"); }, 1400);
 
     later(() => {
+      if (running) showCountdown("2");
+    }, 700);
+
+    later(() => {
+      if (running) showCountdown("1");
+    }, 1400);
+
+    // カウントダウン終了
+    later(() => {
       if (!running) return;
+
       showBlank();
-      // カウントダウン後、2〜3秒待って最初の矢印
-      later(next, 2000 + Math.random() * 1000);
+
+      // 最初の矢印も2〜7秒ランダムに待つ
+      const waitTime =
+        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+
+      later(next, waitTime);
+
     }, 2100);
   }
 
   startBtn.addEventListener("click", start);
 
+  // 初期画面
   showCountdown("3");
+
 })();
 </script>
+
 </body>
 </html>
