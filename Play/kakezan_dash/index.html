@@ -293,7 +293,7 @@ button:active {
       <div id="equation"></div>
     </div>
 
-    <div id="progress">全10問</div>
+    <div id="progress">全24問</div>
   </main>
 
   <div class="instagram">
@@ -318,9 +318,9 @@ button:active {
   <div class="modal">
     <h2>⚡ かけ算ダッシュ！</h2>
     <p>
-      7・8・9の段から全10問！<br>
+      7・8・9の段から全24問！<br>
       式がランダムに出現して、ランダムに消える。<br>
-      同じ問題や逆順の問題は出ないよ。
+      同じ答えになる逆順の式は出ないよ。
     </p>
     <button id="beginButton">スタート！</button>
   </div>
@@ -328,8 +328,8 @@ button:active {
 
 <div id="resultScreen" class="hidden">
   <div class="modal">
-    <h2>🎉 10問終了！</h2>
-    <div id="resultText">全10問終了！</div>
+    <h2>🎉 全問終了！</h2>
+    <div id="resultText">全24問終了！</div>
     <button id="retryButton">もう一度遊ぶ</button>
   </div>
 </div>
@@ -337,7 +337,7 @@ button:active {
 <script>
 "use strict";
 
-const TOTAL_QUESTIONS = 10;
+const TOTAL_QUESTIONS = 24;
 
 // 式の表示時間：1〜3秒
 const DISPLAY_MIN = 1000;
@@ -360,32 +360,89 @@ let currentIndex = 0;
 let running = false;
 let timerId = null;
 let gameId = 0;
+let audioContext = null;
+
+// ピローン♪ 音をブラウザ内で生成
+function playPiroon() {
+  try {
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    if (!audioContext) {
+      audioContext = new AudioContextClass();
+    }
+
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+
+    const now = audioContext.currentTime;
+
+    // 2つの音をつなげて、明るい「ピローン♪」
+    const notes = [
+      { frequency: 880, start: 0, duration: 0.13 },
+      { frequency: 1320, start: 0.12, duration: 0.32 }
+    ];
+
+    notes.forEach(note => {
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(
+        note.frequency,
+        now + note.start
+      );
+
+      gain.gain.setValueAtTime(0.0001, now + note.start);
+      gain.gain.exponentialRampToValueAtTime(
+        0.22,
+        now + note.start + 0.025
+      );
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + note.start + note.duration
+      );
+
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+
+      oscillator.start(now + note.start);
+      oscillator.stop(now + note.start + note.duration + 0.02);
+    });
+  } catch (error) {
+    // 音声が利用できない環境でもゲームは続行
+    console.warn("音声を再生できませんでした。", error);
+  }
+}
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// 7・8・9の段から重複しない問題を作成
+// 7・8・9の段から、逆順重複を除いた24問を作る
 function makeQuestions() {
   const pool = [];
 
   for (let a = 7; a <= 9; a++) {
     for (let b = 1; b <= 9; b++) {
-      // 7×8と8×7などの逆順を除外
+      // 7×8と8×7、7×9と9×7、8×9と9×8を除外
       if (b >= 7 && a > b) continue;
 
       pool.push({ a, b });
     }
   }
 
-  // ランダムにシャッフル
+  // Fisher–Yates シャッフル
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  // 重複なしで10問選択
-  return pool.slice(0, TOTAL_QUESTIONS);
+  // 24問すべて出題
+  return pool;
 }
 
 function clearTimer() {
@@ -433,6 +490,7 @@ function scheduleQuestion(thisGame) {
 
   timerId = setTimeout(() => {
     timerId = null;
+
     if (!running || thisGame !== gameId) return;
 
     showQuestion(thisGame);
@@ -459,10 +517,14 @@ function showQuestion(thisGame) {
   progressEl.textContent =
     `${currentIndex + 1} / ${TOTAL_QUESTIONS} 問`;
 
+  // 式が表示された瞬間に音を鳴らす
+  playPiroon();
+
   const displayTime = randomInt(DISPLAY_MIN, DISPLAY_MAX);
 
   timerId = setTimeout(() => {
     timerId = null;
+
     if (!running || thisGame !== gameId) return;
 
     hideEquation();
@@ -481,9 +543,10 @@ function finishGame() {
   running = false;
   hideEquation();
 
-  progressEl.textContent = `${TOTAL_QUESTIONS} / ${TOTAL_QUESTIONS} 問`;
-  resultText.textContent = `全${TOTAL_QUESTIONS}問終了！`;
+  progressEl.textContent =
+    `${TOTAL_QUESTIONS} / ${TOTAL_QUESTIONS} 問`;
 
+  resultText.textContent = `全${TOTAL_QUESTIONS}問終了！`;
   resultScreen.classList.remove("hidden");
 }
 
