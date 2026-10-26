@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -5,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#EAF6FC">
 <title>かけ算ダッシュ | mocataro</title>
+
 <style>
 :root {
   --bg: #EAF6FC;
@@ -13,12 +15,21 @@
   --blue: #2689BD;
   --red: #E76F8A;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   min-height: 100dvh;
   display: flex;
   justify-content: center;
@@ -26,6 +37,7 @@ body {
   padding: 10px;
   -webkit-tap-highlight-color: transparent;
 }
+
 .app {
   width: min(100%, 520px);
   height: calc(100dvh - 20px);
@@ -37,7 +49,13 @@ body {
   border: 2px solid var(--border);
   border-radius: 20px;
 }
-h1 { margin: 0; font-size: 20px; text-align: center; }
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  text-align: center;
+}
+
 #startBtn {
   width: 100%;
   border: 0;
@@ -50,66 +68,157 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
   box-shadow: 0 4px 0 #17658e;
   cursor: pointer;
 }
-#startBtn:disabled { opacity: 0.6; }
-.stage { position: relative; flex: 1; min-height: 0; }
-.game { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+
+#startBtn:disabled {
+  opacity: 0.6;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.game {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .player {
-  flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
-  border-radius: 14px; background: #F2F9FD; border: 1px solid var(--border); overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: #F2F9FD;
+  border: 1px solid var(--border);
+  overflow: hidden;
 }
+
 .display {
-  display: flex; align-items: center; justify-content: center; width: 100%;
-  font-weight: 1000; font-size: clamp(80px, 24vw, 150px); line-height: 1;
-  color: var(--text); text-align: center; white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-weight: 1000;
+  font-size: clamp(80px, 24vw, 150px);
+  line-height: 1;
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
 }
-.player.top .display { transform: rotate(180deg); }
+
+/* 対面する人側の数字は180度反転 */
+.player.top .display {
+  transform: rotate(180deg);
+}
+
+/* 画面中央に式を1個だけ表示 */
 .arrow-overlay {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
 }
+
 #equationDisplay {
-  display: flex; align-items: center; justify-content: center;
-  width: min(88vw, 430px); min-height: 150px; padding: 16px 8px;
-  font-size: clamp(48px, 12vw, 76px); font-weight: 1000; line-height: 1.1;
-  color: white; background: var(--blue); border-radius: 26px;
-  user-select: none; white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(88vw, 430px);
+  min-height: 150px;
+  padding: 16px 8px;
+  font-size: clamp(48px, 12vw, 76px);
+  font-weight: 1000;
+  line-height: 1.1;
+  color: white;
+  background: var(--blue);
+  border-radius: 26px;
+  user-select: none;
+  white-space: nowrap;
 }
-#equationDisplay.blank { background: transparent; color: transparent; }
+
+#equationDisplay.blank {
+  background: transparent;
+  color: transparent;
+}
+
 #equationDisplay.done {
-  background: #fff; color: var(--text); border: 2px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border: 2px solid var(--border);
   font-size: 72px;
 }
+
 @media (max-height: 650px) {
-  .app { gap: 8px; padding: 10px; }
-  h1 { font-size: 17px; }
-  #startBtn { padding: 10px; }
-  #equationDisplay { min-height: 110px; font-size: clamp(40px, 10vw, 60px); }
+  .app {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 17px;
+  }
+
+  #startBtn {
+    padding: 10px;
+  }
+
+  #equationDisplay {
+    min-height: 110px;
+    font-size: clamp(40px, 10vw, 60px);
+  }
 }
 </style>
 </head>
+
 <body>
 <main class="app">
+
   <h1>かけ算ダッシュ</h1>
+
   <button id="startBtn">スタート</button>
+
   <section class="stage">
+
     <div class="game">
-      <div class="player top"><div class="display" id="topDisplay">3</div></div>
-      <div class="player bottom"><div class="display" id="bottomDisplay">3</div></div>
+
+      <!-- 対面する人側 -->
+      <div class="player top">
+        <div class="display" id="topDisplay">3</div>
+      </div>
+
+      <!-- 自分側 -->
+      <div class="player bottom">
+        <div class="display" id="bottomDisplay">3</div>
+      </div>
+
     </div>
+
+    <!-- 中央に式を1個だけ表示 -->
     <div class="arrow-overlay">
       <div id="equationDisplay" class="blank"></div>
     </div>
+
   </section>
 </main>
+
 <script>
 (() => {
-  const TOTAL = 20;
+  // 問題数：10問
+  const TOTAL = 10;
 
-  // 表示時間をランダムにする（1〜3秒）
+  // 式の表示時間：1〜3秒でランダム
   const MIN_SHOW = 1000;
   const MAX_SHOW = 3000;
 
-  // 問題が消えている待ち時間（1-3秒）
+  // 式が消えている時間：1〜3秒でランダム
   const MIN_WAIT = 1000;
   const MAX_WAIT = 3000;
 
@@ -122,6 +231,7 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
   let running = false;
   let index = 0;
 
+  // タイマー管理
   function clearTimers() {
     timers.forEach(clearTimeout);
     timers = [];
@@ -131,44 +241,54 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
     timers.push(setTimeout(fn, ms));
   }
 
+  // カウントダウンを上下に表示
   function showCountdown(value) {
     topDisplay.textContent = value;
     bottomDisplay.textContent = value;
+
     topDisplay.style.visibility = "visible";
     bottomDisplay.style.visibility = "visible";
+
     equationDisplay.className = "blank";
     equationDisplay.textContent = "";
   }
 
+  // 7〜9の段からランダムに式を作る
   function showEquation() {
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
 
-    // 1〜9のかけ算問題をランダムに作る
-    const a = Math.floor(Math.random() * 9) + 1;
-    const b = Math.floor(Math.random() * 9) + 1;
+    const a = Math.floor(Math.random() * 3) + 7;
+    const b = Math.floor(Math.random() * 3) + 7;
 
     equationDisplay.className = "";
     equationDisplay.textContent = `${a} × ${b}`;
   }
 
+  // 式を消す
   function showBlank() {
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
+
     equationDisplay.className = "blank";
     equationDisplay.textContent = "";
   }
 
+  // 10問終了
   function finish() {
     running = false;
+
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
+
     equationDisplay.className = "done";
     equationDisplay.textContent = "✓";
+
     startBtn.disabled = false;
     startBtn.textContent = "もう一度スタート";
   }
 
+  // 次の問題を表示
   function next() {
     if (!running) return;
 
@@ -178,10 +298,13 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
     }
 
     index++;
+
     showEquation();
 
-    // 式をランダムな時間だけ表示（1〜3秒）
-    const showTime = MIN_SHOW + Math.random() * (MAX_SHOW - MIN_SHOW);
+    // 式を1〜3秒ランダムに表示
+    const showTime =
+      MIN_SHOW + Math.random() * (MAX_SHOW - MIN_SHOW);
+
     later(() => {
       if (!running) return;
 
@@ -190,37 +313,60 @@ h1 { margin: 0; font-size: 20px; text-align: center; }
         return;
       }
 
-      // 式を消して2〜7秒ランダムに待つ
+      // 式を消す
       showBlank();
-      const waitTime = MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+
+      // 次の式まで1〜3秒ランダムに待つ
+      const waitTime =
+        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+
       later(next, waitTime);
+
     }, showTime);
   }
 
+  // ゲーム開始
   function start() {
     clearTimers();
+
     running = true;
     index = 0;
 
     startBtn.disabled = true;
     startBtn.textContent = "プレイ中…";
 
+    // 3 → 2 → 1
     showCountdown("3");
-    later(() => { if (running) showCountdown("2"); }, 700);
-    later(() => { if (running) showCountdown("1"); }, 1400);
 
-    // カウントダウン後、最初の式まで2〜7秒待つ
+    later(() => {
+      if (running) showCountdown("2");
+    }, 700);
+
+    later(() => {
+      if (running) showCountdown("1");
+    }, 1400);
+
+    // カウントダウン終了後、最初の式まで1〜3秒待つ
     later(() => {
       if (!running) return;
+
       showBlank();
-      const waitTime = MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+
+      const waitTime =
+        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+
       later(next, waitTime);
+
     }, 2100);
   }
 
   startBtn.addEventListener("click", start);
+
+  // 初期表示
   showCountdown("3");
+
 })();
 </script>
+
 </body>
 </html>
