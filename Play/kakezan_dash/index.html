@@ -173,10 +173,24 @@ button:active {
   line-height: 1.8;
 }
 
+.instagram {
+  flex: 0 0 auto;
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+.instagram-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
 #instagramLink {
   display: block;
   width: min(260px, 85%);
-  margin: 8px auto 2px;
+  margin: 0 auto;
   text-align: center;
   text-decoration: none;
 }
@@ -210,9 +224,17 @@ button:active {
     min-height: 18px;
   }
 
+  .instagram {
+    margin-top: 2px;
+  }
+
   #instagramLink {
     width: 150px;
-    margin: 2px auto 0;
+  }
+
+  .instagram-text {
+    font-size: 12px;
+    margin-bottom: 0;
   }
 }
 
@@ -239,9 +261,16 @@ button:active {
     font-size: 12px;
   }
 
+  .instagram {
+    margin: 0;
+  }
+
   #instagramLink {
     width: 110px;
-    margin: 0 auto;
+  }
+
+  .instagram-text {
+    font-size: 10px;
   }
 
   button {
@@ -265,22 +294,23 @@ button:active {
     </div>
 
     <div id="progress">全10問</div>
-
-    <button id="startButton" class="hidden">スタート</button>
   </main>
 
-  <a
-    id="instagramLink"
-    href="https://www.instagram.com/mocataro_asobo/"
-    target="_blank"
-    rel="noopener"
-    aria-label="mocataro Instagram"
-  >
-    <img
-      src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
-      alt="TAP HERE"
+  <div class="instagram">
+    <div class="instagram-text">モカタロのインスタはこちら↓</div>
+    <a
+      id="instagramLink"
+      href="https://www.instagram.com/mocataro_asobo/"
+      target="_blank"
+      rel="noopener"
+      aria-label="mocataro Instagram"
     >
-  </a>
+      <img
+        src="https://jun-n4270.github.io/mocataro/images/Taphere.PNG"
+        alt="TAP HERE"
+      >
+    </a>
+  </div>
 
 </div>
 
