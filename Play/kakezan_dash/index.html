@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#EAF6FC">
 <title>かけ算ダッシュ | mocataro</title>
 
@@ -14,385 +14,657 @@
   --border: #9CCFE8;
   --blue: #2689BD;
   --red: #E76F8A;
+  --white: #FFFFFF;
 }
 
 * {
   box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  min-height: 100%;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont,
-    "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-  min-height: 100dvh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
   -webkit-tap-highlight-color: transparent;
 }
 
-.app {
-  width: min(100%, 520px);
-  height: calc(100dvh - 20px);
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px;
-  background: #fff;
-  border: 2px solid var(--border);
-  border-radius: 20px;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#app {
+  width: 100%;
+  max-width: 520px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+header {
+  text-align: center;
+  padding: 8px 0 2px;
 }
 
 h1 {
   margin: 0;
-  font-size: 20px;
-  text-align: center;
-}
-
-#startBtn {
-  width: 100%;
-  border: 0;
-  border-radius: 12px;
-  padding: 14px;
-  font-size: 20px;
+  font-size: clamp(25px, 7vw, 34px);
   font-weight: 900;
-  color: #fff;
-  background: var(--blue);
-  box-shadow: 0 4px 0 #17658e;
-  cursor: pointer;
+  letter-spacing: 1px;
 }
 
-#startBtn:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #17658e;
-}
-
-#startBtn:disabled {
-  opacity: 0.6;
-}
-
-.stage {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-}
-
-.game {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: .8;
 }
 
 .player {
   flex: 1;
-  min-height: 0;
+  min-height: 105px;
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255,255,255,.72);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  background: #F2F9FD;
-  border: 1px solid var(--border);
+  gap: 8px;
+  position: relative;
   overflow: hidden;
+  padding: 12px;
 }
 
-.display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.player.red {
+  border-color: #F0A0B1;
+}
+
+.player.blue {
+  border-color: #82C5E5;
+}
+
+.player-content {
   width: 100%;
-  font-weight: 1000;
-  font-size: clamp(80px, 24vw, 150px);
-  line-height: 1;
-  color: var(--text);
-  text-align: center;
-  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-/* 対面する人側 */
-.player.top .display {
+.player.red .player-content {
   transform: rotate(180deg);
 }
 
-/* 中央の問題表示 */
-.arrow-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+.player-name {
+  font-size: 18px;
+  font-weight: 900;
 }
 
-#equationDisplay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: min(88vw, 430px);
-  min-height: 150px;
-  padding: 16px 8px;
-  font-size: clamp(48px, 12vw, 76px);
-  font-weight: 1000;
-  line-height: 1.1;
+.red .player-name {
+  color: var(--red);
+}
+
+.blue .player-name {
+  color: var(--blue);
+}
+
+.countdown {
+  font-size: clamp(30px, 9vw, 48px);
+  line-height: 1;
+  font-weight: 900;
+  min-height: 48px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tap-button {
+  width: 100%;
+  max-width: 310px;
+  min-height: 55px;
+  border: 0;
+  border-radius: 15px;
   color: white;
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: 0 4px 0 rgba(52,80,95,.12);
+  transition: transform .08s, opacity .15s;
+}
+
+.tap-button:active {
+  transform: scale(.97);
+}
+
+.red .tap-button {
+  background: var(--red);
+}
+
+.blue .tap-button {
   background: var(--blue);
-  border-radius: 26px;
-  user-select: none;
-  white-space: nowrap;
 }
 
-#equationDisplay.blank {
-  background: transparent;
-  color: transparent;
+.tap-button:disabled {
+  opacity: .45;
+  cursor: default;
 }
 
-#equationDisplay.done {
-  background: #fff;
-  color: var(--text);
+#center {
+  flex: 0 0 auto;
+  min-height: 170px;
   border: 2px solid var(--border);
-  font-size: 72px;
+  border-radius: 22px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  text-align: center;
 }
 
-@media (max-height: 650px) {
-  .app {
-    gap: 8px;
-    padding: 10px;
+#status {
+  font-size: 14px;
+  font-weight: 800;
+  min-height: 22px;
+}
+
+#equation {
+  font-size: clamp(42px, 13vw, 66px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1.2;
+  margin: 7px 0;
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+}
+
+#equation.show {
+  visibility: visible;
+  animation: pop .16s ease-out;
+}
+
+@keyframes pop {
+  from { transform: scale(.8); opacity: .3; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+#progress {
+  font-size: 13px;
+  opacity: .75;
+  min-height: 18px;
+}
+
+#startScreen,
+#resultScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(234,246,252,.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 400px;
+  border: 2px solid var(--border);
+  border-radius: 25px;
+  background: white;
+  padding: 25px 18px;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(52,80,95,.12);
+}
+
+.modal h2 {
+  font-size: 27px;
+  margin: 0 0 12px;
+}
+
+.modal p {
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.primary-button {
+  border: 0;
+  border-radius: 16px;
+  background: var(--blue);
+  color: white;
+  font-size: 21px;
+  font-weight: 900;
+  padding: 15px 25px;
+  width: 100%;
+  margin-top: 12px;
+  box-shadow: 0 4px 0 #1E6E98;
+}
+
+.primary-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #1E6E98;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#resultTitle {
+  font-size: 28px;
+  font-weight: 900;
+}
+
+#resultText {
+  font-size: 18px;
+  font-weight: 800;
+  white-space: pre-line;
+}
+
+#notice {
+  min-height: 22px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.instagram {
+  text-align: center;
+  padding: 3px 0 8px;
+  font-size: 13px;
+}
+
+.instagram a {
+  color: var(--blue);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-height: 700px) {
+  #app {
+    gap: 6px;
+    padding: 8px;
   }
 
-  h1 {
+  header {
+    padding: 2px 0;
+  }
+
+  .player {
+    min-height: 85px;
+    padding: 7px;
+    gap: 5px;
+  }
+
+  .tap-button {
+    min-height: 43px;
     font-size: 17px;
   }
 
-  #startBtn {
-    padding: 10px;
+  #center {
+    min-height: 130px;
+    padding: 8px;
   }
 
-  #equationDisplay {
-    min-height: 110px;
-    font-size: clamp(40px, 10vw, 60px);
+  #equation {
+    min-height: 58px;
+    margin: 3px 0;
+  }
+
+  .instagram {
+    padding-bottom: 2px;
   }
 }
 </style>
 </head>
 
 <body>
-<main class="app">
+<div id="app">
 
-  <h1>かけ算ダッシュ</h1>
+  <header>
+    <h1>⚡ かけ算ダッシュ！</h1>
+    <div class="subtitle">見えたらタップ！反射神経バトル</div>
+  </header>
 
-  <button id="startBtn">スタート</button>
-
-  <section class="stage">
-
-    <div class="game">
-
-      <div class="player top">
-        <div class="display" id="topDisplay">3</div>
-      </div>
-
-      <div class="player bottom">
-        <div class="display" id="bottomDisplay">3</div>
-      </div>
-
+  <section class="player red">
+    <div class="player-content">
+      <div class="player-name">🔴 赤のプレイヤー</div>
+      <div class="countdown" id="redCount">0</div>
+      <button class="tap-button" id="redTap">赤！ タップ</button>
     </div>
-
-    <div class="arrow-overlay">
-      <div id="equationDisplay" class="blank"></div>
-    </div>
-
   </section>
-</main>
+
+  <section id="center">
+    <div id="status">スタートを押そう！</div>
+    <div id="equation"></div>
+    <div id="progress">全10問</div>
+  </section>
+
+  <section class="player blue">
+    <div class="player-content">
+      <div class="player-name">🔵 青のプレイヤー</div>
+      <div class="countdown" id="blueCount">0</div>
+      <button class="tap-button" id="blueTap">青！ タップ</button>
+    </div>
+  </section>
+
+  <div id="notice">式が出るまで待とう！</div>
+
+  <div class="instagram">
+    <a href="https://www.instagram.com/mocataro_asobo/" target="_blank" rel="noopener">
+      📷 mocataro Instagram
+    </a>
+  </div>
+
+</div>
+
+<div id="startScreen">
+  <div class="modal">
+    <h2>⚡ かけ算ダッシュ！</h2>
+    <p>
+      かけ算の式が出たら、すばやくタップ！<br>
+      赤と青、どちらが速い？<br><br>
+      <strong>7・8・9の段から全10問！</strong><br>
+      同じ答えになる逆の組み合わせは出ないよ。
+    </p>
+    <button class="primary-button" id="startButton">ゲームスタート！</button>
+  </div>
+</div>
+
+<div id="resultScreen" class="hidden">
+  <div class="modal">
+    <div id="resultTitle">🏁 結果発表</div>
+    <p id="resultText"></p>
+    <button class="primary-button" id="retryButton">もう一度遊ぶ</button>
+  </div>
+</div>
 
 <script>
-(() => {
-  // 1ゲーム10問
-  const TOTAL = 10;
+"use strict";
 
-  // 式の表示時間：1〜3秒
-  const MIN_SHOW = 1000;
-  const MAX_SHOW = 3000;
+const TOTAL = 10;
 
-  // 式が消えている時間：1〜3秒
-  const MIN_WAIT = 1000;
-  const MAX_WAIT = 3000;
+// 問題が表示される時間（ミリ秒）
+const DISPLAY_MIN = 1000;
+const DISPLAY_MAX = 3000;
 
-  const startBtn = document.getElementById("startBtn");
-  const topDisplay = document.getElementById("topDisplay");
-  const bottomDisplay = document.getElementById("bottomDisplay");
-  const equationDisplay = document.getElementById("equationDisplay");
+// 次の問題が出るまでの待ち時間（ミリ秒）
+const WAIT_MIN = 1000;
+const WAIT_MAX = 3000;
 
-  let timers = [];
-  let running = false;
-  let index = 0;
-  let questions = [];
+const redCount = document.getElementById("redCount");
+const blueCount = document.getElementById("blueCount");
+const redTap = document.getElementById("redTap");
+const blueTap = document.getElementById("blueTap");
+const statusEl = document.getElementById("status");
+const equationEl = document.getElementById("equation");
+const progressEl = document.getElementById("progress");
+const noticeEl = document.getElementById("notice");
+const startScreen = document.getElementById("startScreen");
+const resultScreen = document.getElementById("resultScreen");
+const startButton = document.getElementById("startButton");
+const retryButton = document.getElementById("retryButton");
+const resultTitle = document.getElementById("resultTitle");
+const resultText = document.getElementById("resultText");
 
-  function clearTimers() {
-    timers.forEach(clearTimeout);
-    timers = [];
-  }
+let questions = [];
+let questionIndex = 0;
+let redScore = 0;
+let blueScore = 0;
+let gameRunning = false;
+let questionVisible = false;
+let answeredThisQuestion = false;
+let timerId = null;
+let nextQuestionId = null;
+let gameToken = 0;
 
-  function later(fn, ms) {
-    timers.push(setTimeout(fn, ms));
-  }
+// 7〜9の段から問題を作る。
+// 7×8と8×7のような逆の組み合わせは片方だけにする。
+function makeQuestions() {
+  const pool = [];
 
-  // 上下にカウントダウンを表示
-  function showCountdown(value) {
-    topDisplay.textContent = value;
-    bottomDisplay.textContent = value;
-
-    topDisplay.style.visibility = "visible";
-    bottomDisplay.style.visibility = "visible";
-
-    equationDisplay.className = "blank";
-    equationDisplay.textContent = "";
-  }
-
-  // 問題を中央に1つだけ表示
-  function showEquation(question) {
-    topDisplay.style.visibility = "hidden";
-    bottomDisplay.style.visibility = "hidden";
-
-    equationDisplay.className = "";
-    equationDisplay.textContent =
-      `${question.a} × ${question.b}`;
-  }
-
-  // 問題を消す
-  function showBlank() {
-    topDisplay.style.visibility = "hidden";
-    bottomDisplay.style.visibility = "hidden";
-
-    equationDisplay.className = "blank";
-    equationDisplay.textContent = "";
-  }
-
-  // 7・8・9の段から候補を作成
-  // a <= b に統一し、7×8と8×7などの重複を防ぐ
-  function makeQuestions() {
-    const pool = [];
-
-    for (let a = 1; a <= 9; a++) {
-      for (let b = a; b <= 9; b++) {
-
-        // 少なくとも一方の数字が7・8・9
-        if (a >= 7 || b >= 7) {
-          pool.push({ a, b });
-        }
-      }
-    }
-
-    // 候補をランダムにシャッフル
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-
-    // 重複なしで10問選ぶ
-    return pool.slice(0, TOTAL);
-  }
-
-  // 終了
-  function finish() {
-    running = false;
-
-    topDisplay.style.visibility = "hidden";
-    bottomDisplay.style.visibility = "hidden";
-
-    equationDisplay.className = "done";
-    equationDisplay.textContent = "✓";
-
-    startBtn.disabled = false;
-    startBtn.textContent = "もう一度スタート";
-  }
-
-  // 次の問題
-  function next() {
-    if (!running) return;
-
-    if (index >= TOTAL) {
-      finish();
-      return;
-    }
-
-    const question = questions[index];
-    index++;
-
-    showEquation(question);
-
-    // 問題の表示時間をランダムに決定
-    const showTime =
-      MIN_SHOW + Math.random() * (MAX_SHOW - MIN_SHOW);
-
-    later(() => {
-      if (!running) return;
-
-      if (index >= TOTAL) {
-        finish();
-        return;
+  for (let a = 7; a <= 9; a++) {
+    for (let b = 1; b <= 9; b++) {
+      if (b >= 7 && a > b) {
+        continue;
       }
 
-      // 問題を消す
-      showBlank();
-
-      // 次の問題までの待ち時間をランダムに決定
-      const waitTime =
-        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
-
-      later(next, waitTime);
-
-    }, showTime);
+      pool.push({ a, b });
+    }
   }
 
-  // スタート
-  function start() {
-    clearTimers();
-
-    running = true;
-    index = 0;
-
-    // 毎回、新しい10問を選ぶ
-    questions = makeQuestions();
-
-    startBtn.disabled = true;
-    startBtn.textContent = "プレイ中…";
-
-    showCountdown("3");
-
-    later(() => {
-      if (running) showCountdown("2");
-    }, 700);
-
-    later(() => {
-      if (running) showCountdown("1");
-    }, 1400);
-
-    // カウントダウン終了後、最初の問題まで1〜3秒待つ
-    later(() => {
-      if (!running) return;
-
-      showBlank();
-
-      const waitTime =
-        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
-
-      later(next, waitTime);
-
-    }, 2100);
+  // Fisher–Yates シャッフル
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  startBtn.addEventListener("click", start);
+  // 24種類の候補から10問を選ぶ。
+  // pool自体に重複がないので、この10問にも重複はない。
+  return pool.slice(0, TOTAL);
+}
 
-  showCountdown("3");
+function randomBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-})();
+function clearTimers() {
+  if (timerId !== null) {
+    clearTimeout(timerId);
+    timerId = null;
+  }
+
+  if (nextQuestionId !== null) {
+    clearTimeout(nextQuestionId);
+    nextQuestionId = null;
+  }
+}
+
+function setTapEnabled(enabled) {
+  redTap.disabled = !enabled;
+  blueTap.disabled = !enabled;
+}
+
+function updateCounts() {
+  redCount.textContent = redScore;
+  blueCount.textContent = blueScore;
+}
+
+function resetDisplay() {
+  equationEl.textContent = "";
+  equationEl.classList.remove("show");
+  questionVisible = false;
+  answeredThisQuestion = false;
+}
+
+function startGame() {
+  clearTimers();
+
+  gameToken++;
+  const token = gameToken;
+
+  questions = makeQuestions();
+  questionIndex = 0;
+  redScore = 0;
+  blueScore = 0;
+  gameRunning = true;
+
+  updateCounts();
+  resetDisplay();
+
+  startScreen.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+
+  statusEl.textContent = "よく見て！";
+  progressEl.textContent = `全${TOTAL}問`;
+  noticeEl.textContent = "式が出るまで待とう！";
+
+  setTapEnabled(false);
+
+  // 最初の問題もランダムな待ち時間のあとに表示
+  scheduleNextQuestion(token);
+}
+
+function scheduleNextQuestion(token) {
+  if (!gameRunning || token !== gameToken) return;
+
+  resetDisplay();
+
+  if (questionIndex >= TOTAL) {
+    finishGame();
+    return;
+  }
+
+  statusEl.textContent = "次の式を待て！";
+  progressEl.textContent = `${questionIndex + 1} / ${TOTAL} 問`;
+  noticeEl.textContent = "まだタップしないで！";
+  setTapEnabled(false);
+
+  const waitTime = randomBetween(WAIT_MIN, WAIT_MAX);
+
+  nextQuestionId = setTimeout(() => {
+    nextQuestionId = null;
+    showQuestion(token);
+  }, waitTime);
+}
+
+function showQuestion(token) {
+  if (!gameRunning || token !== gameToken) return;
+  if (questionIndex >= TOTAL) {
+    finishGame();
+    return;
+  }
+
+  const q = questions[questionIndex];
+
+  questionVisible = true;
+  answeredThisQuestion = false;
+
+  equationEl.textContent = `${q.a} × ${q.b} = ?`;
+  equationEl.classList.remove("show");
+
+  // アニメーションを確実に再スタート
+  void equationEl.offsetWidth;
+  equationEl.classList.add("show");
+
+  statusEl.textContent = "今だ！";
+  progressEl.textContent = `${questionIndex + 1} / ${TOTAL} 問`;
+  noticeEl.textContent = "早くタップ！";
+
+  setTapEnabled(true);
+
+  const displayTime = randomBetween(DISPLAY_MIN, DISPLAY_MAX);
+
+  timerId = setTimeout(() => {
+    timerId = null;
+
+    if (!gameRunning || token !== gameToken) return;
+
+    // 表示時間が終わったら式を消す
+    questionVisible = false;
+    equationEl.classList.remove("show");
+    equationEl.textContent = "";
+
+    setTapEnabled(false);
+
+    if (!answeredThisQuestion) {
+      statusEl.textContent = "タップなし！";
+      noticeEl.textContent = "次の問題へ！";
+    }
+
+    questionIndex++;
+
+    nextQuestionId = setTimeout(() => {
+      nextQuestionId = null;
+      scheduleNextQuestion(token);
+    }, 500);
+
+  }, displayTime);
+}
+
+function playerTap(player) {
+  if (!gameRunning) return;
+  if (!questionVisible) return;
+  if (answeredThisQuestion) return;
+
+  answeredThisQuestion = true;
+  questionVisible = false;
+
+  // 最初にタップしたプレイヤーに1点
+  if (player === "red") {
+    redScore++;
+    statusEl.textContent = "🔴 赤のポイント！";
+    noticeEl.textContent = "赤が先にタップ！";
+  } else {
+    blueScore++;
+    statusEl.textContent = "🔵 青のポイント！";
+    noticeEl.textContent = "青が先にタップ！";
+  }
+
+  updateCounts();
+  setTapEnabled(false);
+
+  // その問題の表示を終わらせる
+  if (timerId !== null) {
+    clearTimeout(timerId);
+    timerId = null;
+  }
+
+  equationEl.classList.remove("show");
+  equationEl.textContent = "";
+
+  const token = gameToken;
+  questionIndex++;
+
+  nextQuestionId = setTimeout(() => {
+    nextQuestionId = null;
+    scheduleNextQuestion(token);
+  }, 500);
+}
+
+function finishGame() {
+  clearTimers();
+  gameRunning = false;
+  questionVisible = false;
+
+  resetDisplay();
+  setTapEnabled(false);
+
+  resultScreen.classList.remove("hidden");
+
+  if (redScore > blueScore) {
+    resultTitle.textContent = "🔴 赤の勝ち！";
+  } else if (blueScore > redScore) {
+    resultTitle.textContent = "🔵 青の勝ち！";
+  } else {
+    resultTitle.textContent = "🤝 引き分け！";
+  }
+
+  resultText.textContent =
+    `🔴 赤：${redScore} 点\n🔵 青：${blueScore} 点\n\n全${TOTAL}問終了！`;
+}
+
+redTap.addEventListener("click", () => playerTap("red"));
+blueTap.addEventListener("click", () => playerTap("blue"));
+
+startButton.addEventListener("click", startGame);
+retryButton.addEventListener("click", startGame);
+
+// 初期状態
+updateCounts();
+setTapEnabled(false);
 </script>
 </body>
 </html>
