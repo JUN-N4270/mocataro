@@ -1,12 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#EAF6FC">
 <title>矢印ゲーム | mocataro</title>
-
 <style>
 :root {
   --bg: #EAF6FC;
@@ -14,433 +12,341 @@
   --border: #9CCFE8;
   --blue: #2689BD;
   --red: #E76F8A;
+  --white: #FFFFFF;
 }
-
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  min-height: 100%;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
-
 body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 16px;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont,
-    "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-  min-height: 100dvh;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
 }
-
-.app {
-  width: min(100%, 520px);
-  height: calc(100dvh - 20px);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 14px;
-  background: #fff;
-  border: 2px solid var(--border);
-  border-radius: 20px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 20px;
+.container {
+  width: 100%;
+  max-width: 520px;
   text-align: center;
 }
-
-#startBtn {
-  width: 100%;
-  border: 0;
-  border-radius: 12px;
-  padding: 14px;
-  font-size: 20px;
+h1 {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 7vw, 36px);
   font-weight: 900;
-  color: #fff;
-  background: var(--blue);
-  box-shadow: 0 4px 0 #17658e;
-  cursor: pointer;
+  letter-spacing: 0.06em;
 }
-
-#startBtn:disabled {
-  opacity: 0.6;
+.description {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.7;
 }
-
-.stage {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-}
-
 .game {
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: min(68vh, 520px);
+  min-height: 300px;
+  overflow: hidden;
+  background: #F2F9FD;
+  border: 3px solid var(--border);
+  border-radius: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.center-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.player {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  background: #F2F9FD;
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-.display {
-  display: flex;
   align-items: center;
-  justify-content: center;
   width: 100%;
-  font-weight: 1000;
-  font-size: clamp(80px, 24vw, 150px);
+  height: 100%;
+}
+.countdown {
+  font-size: clamp(90px, 24vw, 150px);
+  font-weight: 900;
   line-height: 1;
   color: var(--text);
+  animation: pop 0.25s ease-out;
 }
-
-.player.top .display {
-  transform: rotate(180deg);
-}
-
-/* 中央に表示する数字・矢印 */
-.arrow-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-#arrowDisplay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: min(65vw, 300px);
-  height: min(65vw, 300px);
-  font-size: clamp(150px, 42vw, 250px);
-  font-weight: 1000;
+.arrow {
+  font-size: clamp(150px, 45vw, 250px);
   line-height: 1;
-  color: white;
-  border-radius: 26px;
+  font-weight: 900;
+  animation: pop 0.12s ease-out;
   user-select: none;
 }
-
-#arrowDisplay.left {
-  background: var(--red);
+.arrow.left {
+  color: var(--blue);
 }
-
-#arrowDisplay.right {
+.arrow.right {
+  color: var(--red);
+}
+.status {
+  min-height: 34px;
+  margin-top: 12px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.controls {
+  margin-top: 18px;
+}
+button {
+  width: 100%;
+  max-width: 320px;
+  padding: 17px 24px;
+  border: 0;
+  border-radius: 16px;
   background: var(--blue);
+  color: white;
+  font-size: 21px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #17678F;
+  touch-action: manipulation;
 }
-
-#arrowDisplay.blank {
-  background: transparent;
-  color: transparent;
+button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #17678F;
 }
-
-#arrowDisplay.countdown {
-  background: white;
-  color: var(--text);
-  border: 2px solid var(--border);
-  font-size: clamp(100px, 28vw, 180px);
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
-
-#arrowDisplay.done {
-  background: #fff;
-  color: var(--text);
-  border: 2px solid var(--border);
-  font-size: 80px;
+.result {
+  margin-top: 14px;
+  font-size: 20px;
+  font-weight: 900;
 }
-
-@media (max-height: 650px) {
-  .app {
-    gap: 8px;
+@keyframes pop {
+  from {
+    transform: scale(0.75);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@media (max-height: 600px) {
+  body {
     padding: 10px;
   }
-
-  h1 {
-    font-size: 17px;
+  .description {
+    margin-bottom: 10px;
   }
-
-  #startBtn {
-    padding: 10px;
+  .game {
+    height: 55vh;
+    min-height: 220px;
   }
-
-  #arrowDisplay {
-    width: min(48vw, 220px);
-    height: min(48vw, 220px);
-    font-size: clamp(120px, 34vw, 190px);
+  .controls {
+    margin-top: 12px;
+  }
+  button {
+    padding: 13px;
   }
 }
 </style>
 </head>
-
 <body>
-<main class="app">
-
+<main class="container">
   <h1>矢印ゲーム</h1>
-
-  <button id="startBtn">スタート</button>
-
-  <section class="stage">
-
-    <div class="game">
-
-      <!-- 対面する人側 -->
-      <div class="player top">
-        <div class="display" id="topDisplay">3</div>
-      </div>
-
-      <!-- 自分側 -->
-      <div class="player bottom">
-        <div class="display" id="bottomDisplay">3</div>
-      </div>
-
+  <p class="description">
+    矢印が出たら、すばやく反応！<br>
+    左右の矢印が合計14回出るぞ。
+  </p>
+  <section class="game" aria-label="矢印ゲーム画面">
+    <div class="center-content" id="display">
+      <div class="countdown" id="countdown">READY</div>
     </div>
-
-    <!-- カウントダウンも矢印も中央に1個だけ表示 -->
-    <div class="arrow-overlay">
-      <div id="arrowDisplay" class="countdown">3</div>
-    </div>
-
   </section>
+  <div class="status" id="status">準備ができたらスタート！</div>
+  <div class="controls">
+    <button id="startButton">スタート！</button>
+  </div>
+  <div class="result" id="result"></div>
 </main>
-
 <script>
-(() => {
-  const TOTAL = 14;
-
-  // 時間設定
-  const ARROW_DISPLAY_TIME = 2000; // 矢印表示：2秒
-  const MIN_WAIT = 1000;           // 次の矢印まで最短1秒
-  const MAX_WAIT = 3000;           // 次の矢印まで最長3秒
-
-  const startBtn = document.getElementById("startBtn");
-  const topDisplay = document.getElementById("topDisplay");
-  const bottomDisplay = document.getElementById("bottomDisplay");
-  const arrowDisplay = document.getElementById("arrowDisplay");
-
-  let timers = [];
-  let running = false;
-  let index = 0;
-  let sequence = [];
-  let audioContext = null;
-
-  function clearTimers() {
-    timers.forEach(clearTimeout);
-    timers = [];
+"use strict";
+// ===== ゲーム設定 =====
+const TOTAL = 14;
+const ARROW_DISPLAY_TIME = 500; // 矢印表示：0.5秒
+const MIN_WAIT = 500;           // 次の矢印まで：最短0.5秒
+const MAX_WAIT = 2000;          // 次の矢印まで：最長2秒
+const display = document.getElementById("display");
+const statusText = document.getElementById("status");
+const startButton = document.getElementById("startButton");
+const resultText = document.getElementById("result");
+let sequence = [];
+let currentIndex = 0;
+let running = false;
+let timerId = null;
+let audioContext = null;
+// 左右を7回ずつ用意し、順番をランダムにする
+function makeSequence() {
+  const arrows = [
+    ...Array(7).fill("left"),
+    ...Array(7).fill("right")
+  ];
+  for (let i = arrows.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arrows[i], arrows[j]] = [arrows[j], arrows[i]];
   }
-
-  function later(fn, ms) {
-    timers.push(setTimeout(fn, ms));
-  }
-
-  // ピコーン♪ 音を生成
-  function playPicoon() {
-    try {
+  return arrows;
+}
+// 効果音「ピコーン」
+function playPicoon() {
+  try {
+    if (!audioContext) {
       const AudioContextClass =
         window.AudioContext || window.webkitAudioContext;
-
       if (!AudioContextClass) return;
-
-      if (!audioContext) {
-        audioContext = new AudioContextClass();
-      }
-
-      if (audioContext.state === "suspended") {
-        audioContext.resume();
-      }
-
-      const now = audioContext.currentTime;
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-
-      oscillator.type = "sine";
-
-      // 少し高くなる、明るい電子音
-      oscillator.frequency.setValueAtTime(880, now);
-      oscillator.frequency.exponentialRampToValueAtTime(
-        1320, now + 0.18
-      );
-
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.3, now + 0.025);
-      gain.gain.setValueAtTime(0.22, now + 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
-
-      oscillator.connect(gain);
-      gain.connect(audioContext.destination);
-
-      oscillator.start(now);
-      oscillator.stop(now + 0.4);
-    } catch (error) {
-      console.warn("音声を再生できませんでした。", error);
+      audioContext = new AudioContextClass();
     }
-  }
-
-  // カウントダウンは中央に1個だけ表示
-  function showCountdown(value) {
-    topDisplay.style.visibility = "hidden";
-    bottomDisplay.style.visibility = "hidden";
-
-    arrowDisplay.className = "countdown";
-    arrowDisplay.textContent = value;
-  }
-
-  // 矢印は中央に1個だけ表示
-  function showArrow(direction) {
-    topDisplay.style.visibility = "hidden";
-    bottomDisplay.style.visibility = "hidden";
-
-    arrowDisplay.className = direction;
-    arrowDisplay.textContent =
-      direction === "left" ? "⬅" : "➡";
-
-    // 矢印が出た瞬間に音を鳴らす
-    playPicoon();
-  }
-
-  // 矢印を消す
-  function showBlank() {
-    topDisplay.style.visibility = "hidden";
-    bottomDisplay.style.visibility = "hidden";
-
-    arrowDisplay.className = "blank";
-    arrowDisplay.textContent = "";
-  }
-
-  // 左右7回ずつ、順番はランダム
-  function makeSequence() {
-    const arr = [
-      ...Array(TOTAL / 2).fill("left"),
-      ...Array(TOTAL / 2).fill("right")
-    ];
-
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
     }
-
-    return arr;
+    const now = audioContext.currentTime;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(880, now);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      1320,
+      now + 0.13
+    );
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.25, now + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.4);
+  } catch (error) {
+    // 音声が利用できない環境でもゲームは続行する
   }
-
-  // 20回終了
-  function finish() {
-    running = false;
-
-    topDisplay.style.visibility = "hidden";
-    bottomDisplay.style.visibility = "hidden";
-
-    arrowDisplay.className = "done";
-    arrowDisplay.textContent = "✓";
-
-    startBtn.disabled = false;
-    startBtn.textContent = "もう一度スタート";
+}
+// 表示を切り替える
+function showCountdown(value) {
+  display.innerHTML = "";
+  const element = document.createElement("div");
+  element.className = "countdown";
+  element.textContent = value;
+  display.appendChild(element);
+}
+// 矢印を表示
+function showArrow(direction) {
+  display.innerHTML = "";
+  const arrow = document.createElement("div");
+  arrow.className = "arrow " + direction;
+  arrow.textContent = direction === "left" ? "←" : "→";
+  arrow.setAttribute(
+    "aria-label",
+    direction === "left" ? "左" : "右"
+  );
+  display.appendChild(arrow);
+  // 矢印が現れた瞬間に音を鳴らす
+  playPicoon();
+}
+// ゲーム終了
+function finishGame() {
+  running = false;
+  if (timerId !== null) {
+    clearTimeout(timerId);
+    timerId = null;
   }
-
-  // 矢印を1回表示
-  function next() {
+  display.innerHTML = "";
+  const message = document.createElement("div");
+  message.className = "countdown";
+  message.style.fontSize = "clamp(42px, 10vw, 64px)";
+  message.textContent = "終了！";
+  display.appendChild(message);
+  statusText.textContent = "14回の矢印が終了！";
+  resultText.textContent = "おつかれさま！";
+  startButton.textContent = "もう一度プレイ";
+  startButton.disabled = false;
+}
+// 次の矢印を表示
+function nextArrow() {
+  if (!running) return;
+  if (currentIndex >= TOTAL) {
+    finishGame();
+    return;
+  }
+  const direction = sequence[currentIndex];
+  currentIndex++;
+  showArrow(direction);
+  statusText.textContent =
+    currentIndex + " / " + TOTAL + " 回目";
+  // 矢印を0.5秒表示
+  timerId = setTimeout(() => {
     if (!running) return;
-
-    if (index >= TOTAL) {
-      finish();
-      return;
+    display.innerHTML = "";
+    // 次の矢印まで0.5〜2秒ランダムに待つ
+    const waitTime =
+      MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+    timerId = setTimeout(() => {
+      nextArrow();
+    }, waitTime);
+  }, ARROW_DISPLAY_TIME);
+}
+// カウントダウン後にゲーム開始
+function startCountdown() {
+  let count = 3;
+  showCountdown(count);
+  statusText.textContent = "準備して！";
+  resultText.textContent = "";
+  startButton.disabled = true;
+  function countDownStep() {
+    if (!running) return;
+    count--;
+    if (count > 0) {
+      showCountdown(count);
+      timerId = setTimeout(countDownStep, 1000);
+    } else {
+      showCountdown("GO!");
+      statusText.textContent = "スタート！";
+      timerId = setTimeout(() => {
+        if (!running) return;
+        nextArrow();
+      }, 500);
     }
-
-    const direction = sequence[index];
-    index++;
-
-    showArrow(direction);
-
-    // 2秒後に矢印を消す
-    later(() => {
-      if (!running) return;
-
-      if (index >= TOTAL) {
-        finish();
-        return;
-      }
-
-      showBlank();
-
-      // 次の矢印まで1〜3秒ランダムに待つ
-      const waitTime =
-        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
-
-      later(next, waitTime);
-
-    }, ARROW_DISPLAY_TIME);
   }
-
-  // ゲーム開始
-  function start() {
-    clearTimers();
-
-    running = true;
-    index = 0;
-    sequence = makeSequence();
-
-    startBtn.disabled = true;
-    startBtn.textContent = "プレイ中…";
-
-    // iPhoneなどで音を再生できるよう、操作直後に準備
-    try {
-      const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
-
-      if (AudioContextClass && !audioContext) {
-        audioContext = new AudioContextClass();
-      }
-
-      if (audioContext && audioContext.state === "suspended") {
-        audioContext.resume();
-      }
-    } catch (error) {
-      console.warn("音声を初期化できませんでした。", error);
+  timerId = setTimeout(countDownStep, 1000);
+}
+// スタート・リスタート
+function startGame() {
+  if (timerId !== null) {
+    clearTimeout(timerId);
+    timerId = null;
+  }
+  running = true;
+  currentIndex = 0;
+  sequence = makeSequence();
+  resultText.textContent = "";
+  startButton.disabled = true;
+  startButton.textContent = "プレイ中…";
+  // iPhoneなどで音声を再生できるよう、操作時に準備
+  try {
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass && !audioContext) {
+      audioContext = new AudioContextClass();
     }
-
-    // 3 → 2 → 1（中央に1個）
-    showCountdown("3");
-
-    later(() => {
-      if (running) showCountdown("2");
-    }, 700);
-
-    later(() => {
-      if (running) showCountdown("1");
-    }, 1400);
-
-    // カウントダウン終了後、最初の矢印まで1〜3秒待つ
-    later(() => {
-      if (!running) return;
-
-      showBlank();
-
-      const waitTime =
-        MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
-
-      later(next, waitTime);
-
-    }, 2100);
+    if (audioContext && audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+  } catch (error) {
+    // 音声が利用できなくてもゲームは続行する
   }
-
-  startBtn.addEventListener("click", start);
-
-  // 初期画面
-  showCountdown("3");
-
-})();
+  startCountdown();
+}
+startButton.addEventListener("click", startGame);
 </script>
-
 </body>
 </html>
