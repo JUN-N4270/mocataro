@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#EAF6FC">
-<title>ジェンガ・ダッシュ | mocataro</title>
+<title>矢印ゲーム | mocataro</title>
 
 <style>
 :root {
@@ -111,7 +111,7 @@ h1 {
   transform: rotate(180deg);
 }
 
-/* 中央に矢印を1個だけ表示 */
+/* 中央に表示する数字・矢印 */
 .arrow-overlay {
   position: absolute;
   inset: 0;
@@ -148,6 +148,13 @@ h1 {
   color: transparent;
 }
 
+#arrowDisplay.countdown {
+  background: white;
+  color: var(--text);
+  border: 2px solid var(--border);
+  font-size: clamp(100px, 28vw, 180px);
+}
+
 #arrowDisplay.done {
   background: #fff;
   color: var(--text);
@@ -181,7 +188,7 @@ h1 {
 <body>
 <main class="app">
 
-  <h1>ジェンガ・ダッシュ</h1>
+  <h1>矢印ゲーム</h1>
 
   <button id="startBtn">スタート</button>
 
@@ -201,9 +208,9 @@ h1 {
 
     </div>
 
-    <!-- 矢印は中央に1個だけ -->
+    <!-- カウントダウンも矢印も中央に1個だけ表示 -->
     <div class="arrow-overlay">
-      <div id="arrowDisplay" class="blank"></div>
+      <div id="arrowDisplay" class="countdown">3</div>
     </div>
 
   </section>
@@ -211,12 +218,12 @@ h1 {
 
 <script>
 (() => {
-  const TOTAL = 20;
+  const TOTAL = 14;
 
-  // ★ 時間設定
+  // 時間設定
   const ARROW_DISPLAY_TIME = 2000; // 矢印表示：2秒
-  const MIN_WAIT = 1000;           // 待ち時間：最短1秒
-  const MAX_WAIT = 7000;           // 待ち時間：最長7秒
+  const MIN_WAIT = 1000;           // 次の矢印まで最短1秒
+  const MAX_WAIT = 3000;           // 次の矢印まで最長3秒
 
   const startBtn = document.getElementById("startBtn");
   const topDisplay = document.getElementById("topDisplay");
@@ -227,6 +234,7 @@ h1 {
   let running = false;
   let index = 0;
   let sequence = [];
+  let audioContext = null;
 
   function clearTimers() {
     timers.forEach(clearTimeout);
@@ -237,19 +245,59 @@ h1 {
     timers.push(setTimeout(fn, ms));
   }
 
-  // カウントダウンは上下2か所
-  function showCountdown(value) {
-    topDisplay.textContent = value;
-    bottomDisplay.textContent = value;
+  // ピコーン♪ 音を生成
+  function playPicoon() {
+    try {
+      const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
 
-    topDisplay.style.visibility = "visible";
-    bottomDisplay.style.visibility = "visible";
+      if (!AudioContextClass) return;
 
-    arrowDisplay.className = "blank";
-    arrowDisplay.textContent = "";
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      const now = audioContext.currentTime;
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      oscillator.type = "sine";
+
+      // 少し高くなる、明るい電子音
+      oscillator.frequency.setValueAtTime(880, now);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        1320, now + 0.18
+      );
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.3, now + 0.025);
+      gain.gain.setValueAtTime(0.22, now + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+
+      oscillator.start(now);
+      oscillator.stop(now + 0.4);
+    } catch (error) {
+      console.warn("音声を再生できませんでした。", error);
+    }
   }
 
-  // 矢印は中央に1個だけ
+  // カウントダウンは中央に1個だけ表示
+  function showCountdown(value) {
+    topDisplay.style.visibility = "hidden";
+    bottomDisplay.style.visibility = "hidden";
+
+    arrowDisplay.className = "countdown";
+    arrowDisplay.textContent = value;
+  }
+
+  // 矢印は中央に1個だけ表示
   function showArrow(direction) {
     topDisplay.style.visibility = "hidden";
     bottomDisplay.style.visibility = "hidden";
@@ -257,6 +305,9 @@ h1 {
     arrowDisplay.className = direction;
     arrowDisplay.textContent =
       direction === "left" ? "⬅" : "➡";
+
+    // 矢印が出た瞬間に音を鳴らす
+    playPicoon();
   }
 
   // 矢印を消す
@@ -268,7 +319,7 @@ h1 {
     arrowDisplay.textContent = "";
   }
 
-  // 左右10回ずつ、順番はランダム
+  // 左右7回ずつ、順番はランダム
   function makeSequence() {
     const arr = [
       ...Array(TOTAL / 2).fill("left"),
@@ -309,14 +360,12 @@ h1 {
     const direction = sequence[index];
     index++;
 
-    // 矢印を表示
     showArrow(direction);
 
     // 2秒後に矢印を消す
     later(() => {
       if (!running) return;
 
-      // 最後の矢印なら終了
       if (index >= TOTAL) {
         finish();
         return;
@@ -324,11 +373,10 @@ h1 {
 
       showBlank();
 
-      // ★ 消えている時間を2〜7秒からランダムに決める
+      // 次の矢印まで1〜3秒ランダムに待つ
       const waitTime =
         MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
 
-      // 待ち時間終了後、次の矢印
       later(next, waitTime);
 
     }, ARROW_DISPLAY_TIME);
@@ -345,7 +393,23 @@ h1 {
     startBtn.disabled = true;
     startBtn.textContent = "プレイ中…";
 
-    // 3 → 2 → 1
+    // iPhoneなどで音を再生できるよう、操作直後に準備
+    try {
+      const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+      if (AudioContextClass && !audioContext) {
+        audioContext = new AudioContextClass();
+      }
+
+      if (audioContext && audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+    } catch (error) {
+      console.warn("音声を初期化できませんでした。", error);
+    }
+
+    // 3 → 2 → 1（中央に1個）
     showCountdown("3");
 
     later(() => {
@@ -356,13 +420,12 @@ h1 {
       if (running) showCountdown("1");
     }, 1400);
 
-    // カウントダウン終了
+    // カウントダウン終了後、最初の矢印まで1〜3秒待つ
     later(() => {
       if (!running) return;
 
       showBlank();
 
-      // 最初の矢印も2〜7秒ランダムに待つ
       const waitTime =
         MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
 
