@@ -12,7 +12,6 @@
   --border: #9CCFE8;
   --blue: #2689BD;
   --red: #E76F8A;
-  --white: #FFFFFF;
 }
 * {
   box-sizing: border-box;
@@ -231,11 +230,11 @@ function playPicoon() {
     // 音声が利用できない環境でもゲームは続行する
   }
 }
-// 表示を切り替える
-function showCountdown(value) {
+// 画面中央に表示する
+function showMessage(value, className = "countdown") {
   display.innerHTML = "";
   const element = document.createElement("div");
-  element.className = "countdown";
+  element.className = className;
   element.textContent = value;
   display.appendChild(element);
 }
@@ -256,18 +255,10 @@ function showArrow(direction) {
 // ゲーム終了
 function finishGame() {
   running = false;
-  if (timerId !== null) {
-    clearTimeout(timerId);
-    timerId = null;
-  }
-  display.innerHTML = "";
-  const message = document.createElement("div");
-  message.className = "countdown";
-  message.style.fontSize = "clamp(42px, 10vw, 64px)";
-  resultText.textContent = "FINISH!! おつかれさま！";
-  display.appendChild(message);
+  timerId = null;
+  showMessage("FINISH!");
   statusText.textContent = "14回の矢印が終了！";
-  resultText.textContent = "おつかれさま！";
+  resultText.textContent = "FINISH!! おつかれさま！";
   startButton.textContent = "もう一度プレイ";
   startButton.disabled = false;
 }
@@ -295,21 +286,19 @@ function nextArrow() {
     }, waitTime);
   }, ARROW_DISPLAY_TIME);
 }
-// カウントダウン後にゲーム開始
+// カウントダウン
 function startCountdown() {
   let count = 3;
-  showCountdown(count);
+  showMessage("READY");
   statusText.textContent = "準備して！";
-  resultText.textContent = "";
-  startButton.disabled = true;
   function countDownStep() {
     if (!running) return;
-    count--;
     if (count > 0) {
-      showCountdown(count);
+      showMessage(String(count));
+      count--;
       timerId = setTimeout(countDownStep, 1000);
     } else {
-      showCountdown("GO!");
+      showMessage("GO!");
       statusText.textContent = "スタート！";
       timerId = setTimeout(() => {
         if (!running) return;
@@ -331,7 +320,7 @@ function startGame() {
   resultText.textContent = "";
   startButton.disabled = true;
   startButton.textContent = "プレイ中…";
-  // iPhoneなどで音声を再生できるよう、操作時に準備
+  // iPhoneなどで音声を再生できるように準備
   try {
     const AudioContextClass =
       window.AudioContext || window.webkitAudioContext;
