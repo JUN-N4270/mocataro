@@ -288,3 +288,248 @@ function randInt(min,max){
 function pick(arr){
   return arr[randInt(0,arr.length-1)];
 }
+
+
+ function makeQuestion(mode,max){
+  let a,b,ans,op;
+
+  for(let k=0;k<1200;k++){
+
+    if(mode==="one_add_carry" || (mode==="mix" && Math.random()<.16)){
+      a=randInt(1,9);
+      b=randInt(1,9);
+      ans=a+b;
+      op="+";
+      if(a+b<10)continue;
+
+    }else if(mode==="one_add_no_carry"){
+      a=randInt(1,8);
+      b=randInt(1,9-a);
+      ans=a+b;
+      op="+";
+
+    }else if(mode==="one_sub"){
+      a=randInt(2,9);
+      b=randInt(1,a-1);
+      ans=a-b;
+      op="-";
+
+    }else if(mode==="two_one_add" || (mode==="mix" && Math.random()<.16)){
+      a=randInt(11,98);
+      b=randInt(1,9);
+      ans=a+b;
+      op="+";
+      if(a%10+b<10)continue;
+
+    }else if(mode==="two_one_sub" || (mode==="mix" && Math.random()<.16)){
+      a=randInt(20,99);
+      b=randInt(1,9);
+      ans=a-b;
+      op="-";
+      if(a%10>=b)continue;
+
+    }else if(mode==="two_add_carry" || (mode==="mix" && Math.random()<.16)){
+      a=randInt(10,99);
+      b=randInt(10,99);
+      ans=a+b;
+      op="+";
+      if(Math.floor(a/10)+Math.floor(b/10)+Math.floor((a%10+b%10)/10)>19){}
+      if(a%10+b%10<10)continue;
+
+    }else if(mode==="two_sub_borrow"){
+      a=randInt(20,99);
+      b=randInt(10,a-1);
+      ans=a-b;
+      op="-";
+      if(a%10>=b%10)continue;
+
+    }else if(mode==="multiply" || mode==="mix"){
+      a=randInt(1,9);
+      b=randInt(1,9);
+      ans=a*b;
+      op="×";
+
+    }else {
+      a=randInt(1,9);
+      b=randInt(1,9);
+      ans=a+b;
+      op="+";
+    }
+
+    if(ans>=0 && ans<=max){
+      return {q:`${a}${op}${b}`,a:ans};
+    }
+  }
+
+  /* 条件に合う問題が作れない場合の予備 */
+  if(mode==="multiply" || mode==="mix") return {q:"2×5",a:10};
+  if(mode==="two_add_carry") return {q:"19+11",a:30};
+  if(mode==="two_sub_borrow") return {q:"32-15",a:17};
+  if(mode==="two_one_add") return {q:"15+5",a:20};
+  if(mode==="two_one_sub") return {q:"32-5",a:27};
+  if(mode==="one_add_no_carry") return {q:"3+4",a:7};
+  if(mode==="one_sub") return {q:"8-3",a:5};
+
+  return {q:"6+7",a:13};
+}
+
+function tenQuestion(mode,max){
+  const options={
+    mix:["5+5","12-2","2×5"],
+    one_add_carry:["1+9","2+8","3+7","4+6","5+5","6+4","7+3","8+2","9+1"],
+    one_add_no_carry:[],
+    one_sub:["9-?"],
+    two_one_add:["15-5"],
+    two_one_sub:[],
+    two_add_carry:[],
+    two_sub_borrow:[],
+    multiply:["2×5"]
+  };
+
+  if(mode==="one_sub") return {q:"9-?",a:10};
+  if(mode==="two_one_add") return {q:"15+?",a:20};
+
+  const q=options[mode]||[];
+  if(!q.length)return null;
+
+  const expr=pick(q);
+  const parts=expr.split(/([+×-])/);
+  const a=Number(parts[0]);
+  const op=parts[1];
+  const b=Number(parts[2]);
+
+  return {
+    q:expr,
+    a:op==="-"?a-b:op==="×"?a*b:a+b
+  };
+}
+
+function generate(){
+
+  const mode=$("level").value;
+  let max=Number($("maxAnswer").value);
+  const minTen=Number($("tenCount").value);
+
+  if((mode==="two_add_carry" || mode==="mix") && max<30){
+    max=30;
+    $("maxAnswer").value="30";
+  }
+
+  const tenModes=["mix","one_add_carry","multiply"];
+  const canMakeTen=tenModes.includes(mode) || mode==="one_sub";
+
+  const items=[];
+  let tenTarget=canMakeTen?Math.min(minTen,36):0;
+
+  if(mode==="one_sub") tenTarget=0;
+
+  if(mode==="one_add_carry" || mode==="multiply" || mode==="mix"){
+
+    const tenQs=mode==="multiply"
+      ?["2×5","5×2"]
+      :mode==="one_add_carry"
+      ?["1+9","2+8","3+7","4+6","5+5","6+4","7+3","8+2","9+1"]
+      :["5+5","12-2","2×5"];
+
+    for(let i=0;i<tenTarget && max>=10;i++){
+      items.push({q:pick(tenQs),a:10});
+    }
+  }
+
+  while(items.length<36){
+    items.push(makeQuestion(mode,max));
+  }
+
+  /* シャッフル */
+  for(let i=items.length-1;i>0;i--){
+    const j=randInt(0,i);
+    [items[i],items[j]]=[items[j],items[i]];
+  }
+
+  problems=items.map(x=>x.q);
+  answers=items.map(x=>x.a);
+
+  render();
+
+  const actual=answers.filter(x=>x===10).length;
+
+  $("status").textContent=
+    `新しい36問を作成！ 答え「10」は${actual}個。最大の答えは${Math.max(...answers)}。`;
+}
+
+/* PNGデータを作成 */
+function makeHighResPNG(drawFn){
+
+  const out=document.createElement("canvas");
+
+  out.width=W*2;
+  out.height=H*2;
+
+  const ctx=out.getContext("2d");
+
+  ctx.scale(2,2);
+
+  drawFn(out);
+
+  return out.toDataURL("image/png");
+}
+
+/* 写真選択 */
+$("photoInput").addEventListener("change",async e=>{
+
+  const file=e.target.files&&e.target.files[0];
+
+  if(!file)return;
+
+  try{
+
+    background=await loadImage(file);
+
+    $("photoPreview").src=URL.createObjectURL(file);
+    $("photoPreview").hidden=false;
+
+    render();
+
+    $("status").textContent="背景写真を読み込みました。";
+
+  }catch(err){
+
+    $("status").textContent=err.message;
+
+  }
+
+});
+
+/* 背景リセット */
+$("resetPhoto").addEventListener("click",()=>{
+
+  background=null;
+
+  $("photoPreview").hidden=true;
+  $("photoPreview").removeAttribute("src");
+
+  render();
+
+  $("status").textContent="背景をリセットしました。";
+
+});
+
+/* 問題変更 */
+$("newSet").addEventListener("click",generate);
+
+/* 印刷：今回は従来の処理を維持 */
+$("printBoth").addEventListener("click",()=>{
+
+  render();
+
+  window.print();
+
+});
+
+/* 初期表示 */
+generate();
+
+})();
+</script>
+</body>
+</html>
