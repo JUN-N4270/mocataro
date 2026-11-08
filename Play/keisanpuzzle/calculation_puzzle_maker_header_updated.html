@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EAF6FC">
+<title>計算ピースパズルメーカー</title>
+<style>
+:root{--bg:#EAF6FC;--ink:#34505F;--line:#9CCFE8;--blue:#D8EFF9;--navy:#122241}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+main{max-width:920px;margin:auto;padding:16px}
+h1{font-size:1.45rem;margin:8px 0 4px}
+.sub{font-size:.9rem;color:#607987;margin:0 0 16px}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.settingRow{display:flex;align-items:center;gap:12px;margin:14px 0;flex-wrap:wrap}
+.settingRow label{font-weight:700;font-size:1rem;white-space:nowrap}
+.settingRow select{flex:1;min-width:0;width:100%}
+button,.fileLabel{border:0;border-radius:12px;background:#34505F;color:white;padding:12px 16px;font-size:1rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+button.secondary{background:#DCEEF7;color:#34505F;border:1px solid #9CCFE8}
+button:active,.fileLabel:active{opacity:.8}
+input[type=file]{display:none}
+select{padding:11px;border:1px solid #9CCFE8;border-radius:10px;background:white;color:#34505F;font-size:1rem}
+.hint{font-size:.82rem;color:#6A818D;line-height:1.5}
+#photoPreview{width:100%;max-height:230px;object-fit:contain;background:#F5FAFC;border:1px dashed #9CCFE8;border-radius:12px;margin-top:10px}
+.previewGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.previewCard{background:#F7FBFD;border:1px solid #D2E8F3;border-radius:12px;padding:10px;min-width:0}
+.previewCard strong{display:block;margin-bottom:8px}
+.previewImage{width:100%;height:auto;display:block;background:white;border:1px solid #D5E0E6;-webkit-touch-callout:default;user-select:auto}
+.status{font-size:.9rem;font-weight:700;margin-top:8px;min-height:1.3em}
+@media(max-width:560px){main{padding:10px}.previewGrid{grid-template-columns:1fr}.panel{padding:12px}.settingRow{display:block}.settingRow label{display:block;margin-bottom:8px}.settingRow select{display:block;width:100%}}
+#printArea{display:none}
+@page{size:A4 portrait;margin:0}
+@media print{
+ html,body{margin:0!important;padding:0!important;background:white!important}
+ main{display:none!important}
+ #printArea{display:block!important}
+ .printPage{display:block;width:210mm;height:297mm;margin:0;padding:0;overflow:hidden;page-break-after:always;break-after:page}
+ .printPage:last-child{page-break-after:auto;break-after:auto}
+ #printArea canvas{display:block;width:210mm;height:297mm;border:none}
+}
+</style>
+</head>
+<body>
+<main>
+<section class="noPrint">
+<h1>🐾 計算ピースパズルメーカー</h1>
+<p class="sub">写真を選んで、問題シートと答えシートをまとめて作成。</p>
+<div class="panel">
+<div class="row">
+<label class="fileLabel" for="photoInput">📷 写真フォルダから背景を選ぶ</label>
+<input type="file" id="photoInput" accept="image/*">
+<button id="resetPhoto" class="secondary" type="button">背景をリセット</button>
+</div>
+<img id="photoPreview" alt="選択した背景のプレビュー" hidden>
+<p class="hint">写真はこの端末内で処理します。サーバーへのアップロードはしません。横長・縦長どちらの写真も選べます。</p>
+</div>
+<div class="panel">
+<div class="settingRow">
+<label for="level">計算の種類</label>
+<select id="level">
+<option value="mix" selected>いろいろミックス</option>
+<option value="one_add_carry">1桁＋1桁（繰り上がりあり）</option>
+<option value="one_add_no_carry">1桁＋1桁（繰り上がりなし）</option>
+<option value="one_sub">1桁−1桁</option>
+<option value="two_one_add">2桁＋1桁（繰り上がりあり）</option>
+<option value="two_one_sub">2桁−1桁（繰り下がりあり）</option>
+<option value="two_add_carry">2桁＋2桁（繰り上がりあり）</option>
+<option value="two_sub_borrow">2桁−2桁（繰り下がりあり）</option>
+<option value="multiply">掛け算（九九）</option>
+</select>
+</div>
+<div class="settingRow">
+<label for="maxAnswer">答えの上限</label>
+<select id="maxAnswer">
+<option value="20">20</option><option value="30">30</option><option value="100" selected>100</option><option value="150">150</option><option value="200">200</option>
+</select>
+</div>
+<div class="row">
+<button id="newSet" type="button">🔄 問題を変更する</button>
+</div>
+<p class="hint">36マスを自動作成。イラストシートの数字は各問題の答えと連動します。答えの重複もOK。</p>
+<div class="row">
+<button id="printBoth" type="button" style="width:100%">🖨 2枚を印刷</button>
+</div>
+<p class="hint">下のプレビュー画像を長押しして保存できます。</p>
+<div id="status" class="status" aria-live="polite"></div>
+</div>
+</section>
+<section class="previewGrid">
+<div class="previewCard"><strong>問題シート</strong><img id="problemCanvas" class="previewImage" alt="問題シート。長押しして保存できます。"></div>
+<div class="previewCard"><strong>イラストシート（答え）</strong><img id="answerCanvas" class="previewImage" alt="イラストシート。長押しして保存できます。"></div>
+</section>
+<p class="hint noPrint">※ A4縦サイズで作成します。印刷時は「A4」「倍率100%」を推奨。</p>
+</main>
+<div id="printArea">
+<div class="printPage"><canvas id="printProblem" width="1240" height="1754"></canvas></div>
+<div class="printPage"><canvas id="printAnswer" width="1240" height="1754"></canvas></div>
+</div>
+<script>
+"use strict";
+(() => {
+const W=1240,H=1754,navy="#122241";
+const grid={x:26,y:301,w:1188,h:1414};
+const cellW=grid.w/6,cellH=grid.h/6;
+let background=null,problems=[],answers=[];
+const $=id=>document.getElementById(id);
+
+/* タイトル帯画像：HTMLと同じフォルダに puzzle_header.webp を置く */
+const headerImage=new Image();
+headerImage.onload=()=>render();
+headerImage.onerror=()=>{$("status").textContent="タイトル画像 puzzle_header.webp を読み込めません。HTMLと同じフォルダに置いてください。";render();};
+headerImage.src="puzzle_header.webp";
+
+function loadImage(file){
+ return new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{URL.revokeObjectURL(url);resolve(img);};
+  img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("画像を読み込めませんでした。"));};
+  img.src=url;
+ });
+}
+function fitCover(ctx,img,x,y,w,h){
+ const scale=Math.max(w/img.width,h/img.height);
+ const sw=w/scale,sh=h/scale;
+ const sx=(img.width-sw)/2,sy=(img.height-sh)/2;
+ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);
+}
+function drawHeader(ctx){
+ if(headerImage.complete&&headerImage.naturalWidth){
+  ctx.drawImage(headerImage,0,0,W,250);
+ }else{
+  ctx.fillStyle="#BCEBFA";ctx.fillRect(0,0,W,250);
+  ctx.fillStyle=navy;ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.font="bold 66px sans-serif";ctx.fillText("計算ピースパズル",W/2,85);
+  ctx.font="bold 48px sans-serif";ctx.fillText("問題シート",W/2,180);
+ }
+}
+function drawGrid(ctx){
+ ctx.strokeStyle=navy;ctx.lineWidth=5;ctx.beginPath();
+ for(let i=0;i<=6;i++){
+  const x=grid.x+i*cellW,y=grid.y+i*cellH;
+  ctx.moveTo(x,grid.y);ctx.lineTo(x,grid.y+grid.h);
+  ctx.moveTo(grid.x,y);ctx.lineTo(grid.x+grid.w,y);
+ }
+ ctx.stroke();
+}
+function drawProblem(canvas){
+ const ctx=canvas.getContext("2d");
+ ctx.fillStyle="white";ctx.fillRect(0,0,W,H);drawHeader(ctx);
+ ctx.textAlign="center";ctx.textBaseline="top";ctx.fillStyle=navy;
+ for(let i=0;i<36;i++){
+  const row=Math.floor(i/6),col=i%6;
+  const x=grid.x+(col+.5)*cellW,y=grid.y+row*cellH+30;
+  const value=problems[i]||"";
+  let fs=52;ctx.font=`bold ${fs}px Arial,sans-serif`;
+  while(ctx.measureText(value).width>cellW-25&&fs>30){fs-=2;ctx.font=`bold ${fs}px Arial,sans-serif`;}
+  ctx.fillText(value,x,y);
+ }
+ drawGrid(ctx);
+}
+function drawAnswer(canvas){
+ const ctx=canvas.getContext("2d");
+ ctx.fillStyle="white";ctx.fillRect(0,0,W,H);
+ if(background){fitCover(ctx,background,grid.x,grid.y,grid.w,grid.h);}
+ else{
+  ctx.fillStyle="#EAF6FC";ctx.fillRect(grid.x,grid.y,grid.w,grid.h);
+  ctx.fillStyle="#7893A0";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.font="bold 30px sans-serif";ctx.fillText("写真を選ぶと、ここに背景が表示されます",W/2,grid.y+grid.h/2);
+ }
+ ctx.textAlign="center";ctx.textBaseline="top";
+ for(let i=0;i<36;i++){
+  const row=Math.floor(i/6),col=i%6;
+  const x=grid.x+(col+.5)*cellW,y=grid.y+row*cellH+20;
+  const value=String(answers[i]??"");
+  ctx.font="bold 58px Arial,sans-serif";ctx.lineJoin="round";
+  ctx.lineWidth=7;ctx.strokeStyle="white";ctx.strokeText(value,x,y);
+  ctx.fillStyle=navy;ctx.fillText(value,x,y);
+ }
+ drawGrid(ctx);
+}
+function makeHighResPNG(drawFunction){
+ const output=document.createElement("canvas");
+ output.width=W*2;output.height=H*2;
+ const ctx=output.getContext("2d");ctx.scale(2,2);
+ drawFunction(output);
+ return output.toDataURL("image/png");
+}
+function render(){
+ $("problemCanvas").src=makeHighResPNG(drawProblem);
+ $("answerCanvas").src=makeHighResPNG(drawAnswer);
+ drawProblem($("printProblem"));drawAnswer($("printAnswer"));
+}
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(array){return array[randInt(0,array.length-1)];}
+function makeQuestion(mode,max){
+ let a,b,ans,op;
+ for(let k=0;k<3000;k++){
+  switch(mode){
+   case "one_add_carry":
+    a=randInt(1,9);b=randInt(1,9);if(a+b<10)continue;ans=a+b;op="+";break;
+   case "one_add_no_carry":
+    a=randInt(1,8);b=randInt(1,9-a);ans=a+b;op="+";break;
+   case "one_sub":
+    a=randInt(2,9);b=randInt(1,a-1);ans=a-b;op="-";break;
+   case "two_one_add":
+    a=randInt(11,98);b=randInt(1,9);if(a%10+b<10)continue;ans=a+b;op="+";break;
+   case "two_one_sub":
+    a=randInt(20,99);b=randInt(1,9);if(a%10>=b)continue;ans=a-b;op="-";break;
+   case "two_add_carry":
+    a=randInt(10,99);b=randInt(10,99);if(a%10+b%10<10)continue;ans=a+b;op="+";break;
+   case "two_sub_borrow":
+    a=randInt(20,99);b=randInt(10,a-1);if(a%10>=b%10)continue;ans=a-b;op="-";break;
+   case "multiply":
+    a=randInt(1,9);b=randInt(1,9);ans=a*b;op="×";break;
+  }
+  if(ans>=0&&ans<=max)return{q:`${a}${op}${b}`,a:ans};
+ }
+ return null;
+}
+const MIX_MODES=["one_add_carry","one_add_no_carry","one_sub","two_one_add","two_one_sub","two_add_carry","two_sub_borrow","multiply"];
+function generate(){
+ const selectedMode=$("level").value;
+ let max=Number($("maxAnswer").value);
+ if((selectedMode==="two_add_carry"||selectedMode==="mix")&&max<30){max=30;$("maxAnswer").value="30";}
+ const items=[];
+ let attempts=0;
+ while(items.length<36&&attempts<10000){
+  attempts++;
+  let mode=selectedMode;
+  if(mode==="mix")mode=pick(MIX_MODES);
+  const question=makeQuestion(mode,max);
+  if(question)items.push(question);
+ }
+ if(items.length!==36){
+  $("status").textContent="この条件では36問を作成できません。答えの上限を上げてください。";
+  return;
+ }
+ for(let i=items.length-1;i>0;i--){
+  const j=randInt(0,i);[items[i],items[j]]=[items[j],items[i]];
+ }
+ problems=items.map(x=>x.q);answers=items.map(x=>x.a);
+ render();
+ $("status").textContent=`新しい36問を作成しました！ 最大の答えは${Math.max(...answers)}です。`;
+}
+$("photoInput").addEventListener("change",async event=>{
+ const file=event.target.files&&event.target.files[0];if(!file)return;
+ try{
+  background=await loadImage(file);
+  const previewURL=URL.createObjectURL(file);
+  $("photoPreview").src=previewURL;$("photoPreview").hidden=false;
+  render();$("status").textContent="背景写真を読み込みました。";
+ }catch(error){$("status").textContent=error.message;}
+});
+window.setBackgroundDataURL=function(dataURL){
+ const img=new Image();
+ img.onload=()=>{background=img;$("photoPreview").src=dataURL;$("photoPreview").hidden=false;render();$("status").textContent="背景写真を読み込みました。";};
+ img.onerror=()=>{$("status").textContent="写真を読み込めませんでした。";};
+ img.src=dataURL;
+};
+$("resetPhoto").addEventListener("click",()=>{
+ background=null;$("photoPreview").hidden=true;$("photoPreview").removeAttribute("src");$("photoInput").value="";
+ render();$("status").textContent="背景をリセットしました。";
+});
+$("newSet").addEventListener("click",generate);
+$("printBoth").addEventListener("click",()=>{render();window.print();});
+generate();
+})();
+</script>
+</body>
+</html>
