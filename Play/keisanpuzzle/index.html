@@ -242,7 +242,7 @@ function generate(){
  }
  problems=items.map(x=>x.q);answers=items.map(x=>x.a);
  render();
- $("status").textContent=`新しい36問を作成しました！ 最大の答えは${Math.max(...answers)}です。`;
+ $("status").textContent=`新しい問題を作成しました！`;
 }
 $("photoInput").addEventListener("change",async event=>{
  const file=event.target.files&&event.target.files[0];if(!file)return;
