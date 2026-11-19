@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#EAF6FC">
+
+<title>かけ算プリント | mocataro</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px 14px 40px;
+  background: #EAF6FC;
+  color: #34505F;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    "Yu Gothic",
+    "Meiryo",
+    sans-serif;
+}
+
+.container {
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  padding: 28px 15px;
+  margin-bottom: 28px;
+}
+
+.logo {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+header h1 {
+  font-size: 23px;
+  margin: 10px 0 6px;
+}
+
+header p {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.section-title {
+  font-size: 19px;
+  margin: 0 0 15px;
+  font-weight: 700;
+}
+
+.paper-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.paper-item {
+  background: #FFFFFF;
+  border: 1px solid #9CCFE8;
+  border-radius: 14px;
+  padding: 17px 8px;
+  text-align: center;
+  box-shadow: 0 3px 7px rgba(52, 80, 95, 0.06);
+}
+
+.paper-name {
+  font-size: 21px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.download-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 10px 4px;
+  border-radius: 9px;
+  background: #DDF1FC;
+  color: #34505F;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.download-button:active {
+  background: #BDE2F5;
+}
+
+.download-icon {
+  font-size: 17px;
+}
+
+footer {
+  text-align: center;
+  margin-top: 35px;
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+@media (max-width: 380px) {
+  .paper-list {
+    gap: 8px;
+  }
+
+  .paper-item {
+    padding: 14px 5px;
+  }
+
+  .paper-name {
+    font-size: 18px;
+  }
+
+  .download-button {
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo">mocataro</div>
+    <h1>かけ算プリント</h1>
+    <p>1の段から9の段まで</p>
+  </header>
+
+  <main>
+    <h2 class="section-title">📚 学習プリント</h2>
+
+    <div class="paper-list">
+
+      <script>
+        for (let i = 1; i <= 9; i++) {
+          document.write(`
+            <div class="paper-item">
+              <div class="paper-name">${i}の段</div>
+              <a
+                class="download-button"
+                href="paper/${i}dan.png"
+                download="${i}dan.png"
+              >
+                <span class="download-icon">↓</span>
+                ダウンロード
+              </a>
+            </div>
+          `);
+        }
+      </script>
+
+    </div>
+  </main>
+
+  <footer>
+    © mocataro
+  </footer>
+
+</div>
+
+</body>
+</html>
