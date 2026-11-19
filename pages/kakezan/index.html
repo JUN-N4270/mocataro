@@ -90,25 +90,17 @@ header p {
   gap: 5px;
   width: 100%;
   padding: 10px 4px;
-  border: none;
   border-radius: 9px;
   background: #DDF1FC;
   color: #34505F;
   text-decoration: none;
   font-size: 13px;
   font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
   transition: background 0.2s;
 }
 
 .download-button:active {
   background: #BDE2F5;
-}
-
-.download-button:disabled {
-  opacity: 0.5;
-  cursor: wait;
 }
 
 .download-icon {
@@ -139,29 +131,6 @@ header p {
   height: auto;
   display: block;
   margin: 0 auto;
-}
-
-/* トップページリンク */
-
-.home-link {
-  text-align: center;
-  margin-top: 30px;
-}
-
-.home-link a {
-  display: inline-block;
-  padding: 12px 24px;
-  border: 1px solid #9CCFE8;
-  border-radius: 25px;
-  background: #FFFFFF;
-  color: #34505F;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.home-link a:active {
-  background: #DDF1FC;
 }
 
 footer {
@@ -213,14 +182,15 @@ footer {
             <div class="paper-item">
               <div class="paper-name">${i}の段</div>
 
-              <button
+              <a
                 class="download-button"
-                type="button"
-                onclick="saveImage(${i}, this)"
+                href="paper/${i}dan.png"
+                target="_blank"
+                rel="noopener"
               >
                 <span class="download-icon">↓</span>
-                画像を保存
-              </button>
+                画像を開く
+              </a>
             </div>
           `);
         }
@@ -249,84 +219,11 @@ footer {
 
   </div>
 
-
   <footer>
     © mocataro
   </footer>
 
 </div>
-
-<script>
-
-/* PNG画像を共有・保存する処理 */
-
-async function saveImage(number, button) {
-
-  const imagePath = `paper/${number}dan.png`;
-
-  const fileName = `${number}dan.png`;
-
-  button.disabled = true;
-
-  try {
-
-    const response = await fetch(imagePath);
-
-    if (!response.ok) {
-      throw new Error("画像を読み込めませんでした");
-    }
-
-    const blob = await response.blob();
-
-    const file = new File(
-      [blob],
-      fileName,
-      { type: "image/png" }
-    );
-
-    // ファイル共有に対応している場合
-
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({ files: [file] })
-    ) {
-
-      await navigator.share({
-        files: [file],
-        title: `かけ算 ${number}の段`
-      });
-
-    } else {
-
-      // 共有に対応していない場合は画像を開く
-
-      window.open(imagePath, "_blank");
-
-    }
-
-  } catch (error) {
-
-    if (error.name !== "AbortError") {
-
-      alert(
-        "画像を保存できませんでした。\n" +
-        "もう一度お試しください。"
-      );
-
-      console.error(error);
-
-    }
-
-  } finally {
-
-    button.disabled = false;
-
-  }
-
-}
-
-</script>
 
 </body>
 </html>
