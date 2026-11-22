@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#EAF6FC">
+<title>でんき実験室</title>
+<style>
+:root{--bg:#EAF6FC;--ink:#34505F;--line:#9CCFE8;--blue:#4D91B8;--red:#E45B5B;--green:#27966A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:pan-y}
+header{position:sticky;top:0;z-index:5;background:rgba(234,246,252,.96);backdrop-filter:blur(10px);padding:12px 14px 9px;border-bottom:1px solid var(--line)}
+h1{font-size:20px;margin:0;font-weight:800}
+.sub{font-size:11px;color:#66808d;margin-top:3px}
+.toolbar{display:flex;gap:7px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+button,select,input{font:inherit;color:var(--ink)}
+button{border:1px solid var(--line);background:white;border-radius:11px;padding:9px 11px;font-weight:650;white-space:nowrap}
+button.primary{background:var(--ink);color:white;border-color:var(--ink)}
+button.active{background:#D5ECF8;border-color:var(--blue)}
+button.danger{color:#b33;border-color:#e7b4b4}
+main{padding:12px;max-width:760px;margin:auto}
+.status{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px}
+.stat{background:white;border:1px solid var(--line);border-radius:12px;padding:9px}
+.stat small{display:block;font-size:10px;color:#718995}
+.stat strong{font-size:16px}
+.workspace{background:white;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.workspaceHead{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border-bottom:1px solid #e4eef3;font-weight:750}
+.workspaceHead small{font-weight:500;color:#718995}
+#board{position:relative;height:430px;overflow:hidden;background-color:#f8fbfd;background-image:radial-gradient(#c8dce6 1px,transparent 1px);background-size:18px 18px;touch-action:pan-y}
+#board.schematic{background-image:linear-gradient(#eef4f7 1px,transparent 1px),linear-gradient(90deg,#eef4f7 1px,transparent 1px);background-size:22px 22px}
+#wireSvg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.wireHit{stroke:transparent;stroke-width:18;fill:none;pointer-events:stroke}
+.wireLine{stroke:#DC5555;stroke-width:3.5;fill:none;stroke-linecap:round}
+.part{position:absolute;min-width:72px;min-height:62px;background:#fff;border:1.5px solid #9bb9c8;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 2px 5px #34505f18;touch-action:none;user-select:none;z-index:2}
+.part.selected{outline:3px solid #8bc5e2}
+.part .symbol{font-size:25px;line-height:28px;font-weight:800}
+.part .name{font-size:10px;font-weight:700}
+.part .value{font-size:9px;color:#6d8794}
+.term{position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;border:3px solid #6d91a3;z-index:4;touch-action: manipulation}
+.term.pos{border-color:#dc5555}.term.neg{border-color:#477eaf}
+.term.pending{background:#ffe6a8;transform:scale(1.22)}
+.part.battery{border-color:#8aaec4}.part.led.lit{box-shadow:0 0 22px 7px #ff686866;border-color:#e45b5b}
+#hint{padding:9px 12px;background:#f2f9fc;font-size:12px;color:#58717e;min-height:36px}
+.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:11px}
+.panel h2{font-size:14px;margin:0 0 9px}
+.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.palette button{padding:9px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px}
+.palette .ico{font-size:22px}
+.settingRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:9px 0;font-size:13px}
+input[type=number]{width:115px;border:1px solid var(--line);border-radius:9px;padding:8px;background:#fafdff}
+input[type=range]{width:100%}
+.muted{font-size:11px;color:#718995;line-height:1.5}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+#message{font-size:13px;line-height:1.5}
+footer{text-align:center;font-size:10px;color:#79909c;padding:18px}
+@media(min-width:650px){#board{height:520px}.palette{grid-template-columns:repeat(8,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚡ でんき実験室</h1><div class="sub">部品を置いて、端子をつないで、電気の流れを観察しよう！</div>
+  <div class="toolbar">
+    <button id="breadBtn" class="active">ブレッドボード</button>
+    <button id="schemBtn">回路図</button>
+    <button id="runBtn" class="primary">▶ シミュレーション</button>
+    <button id="stopBtn">停止</button>
+    <button id="resetBtn">全消去</button>
+  </div>
+</header>
+<main>
+  <div class="status">
+    <div class="stat"><small>電源電圧</small><strong id="voltage">5.0 V</strong></div>
+    <div class="stat"><small>回路電流</small><strong id="current">-- mA</strong></div>
+    <div class="stat"><small>状態</small><strong id="state">停止中</strong></div>
+  </div>
+  <section class="workspace">
+    <div class="workspaceHead"><span id="modeTitle">実験スペース</span><small>端子 ● をタップして接続</small></div>
+    <div id="board">
+      <svg id="wireSvg"></svg>
+    </div>
+    <div id="hint">部品を追加して、端子を2か所タップすると配線できます。</div>
+  </section>
+  <section class="panel">
+    <h2>＋ 部品を追加</h2>
+    <div class="palette">
+      <button data-add="battery"><span class="ico">🔋</span>電池</button>
+      <button data-add="resistor"><span class="ico">▰</span>抵抗</button>
+      <button data-add="led"><span class="ico">🔴</span>LED</button>
+      <button data-add="switch"><span class="ico">⏻</span>スイッチ</button>
+      <button data-add="capacitor"><span class="ico">║</span>コンデンサ</button>
+      <button data-add="npn"><span class="ico">⑂</span>NPN</button>
+      <button data-add="diode"><span class="ico">▷</span>ダイオード</button>
+      <button data-add="ground"><span class="ico">⏚</span>GND</button>
+    </div>
+    <p class="muted">追加した部品は実験スペース内でドラッグして移動できます。部品をタップすると設定・削除ができます。</p>
+  </section>
+  <section class="panel" id="settings">
+    <h2>部品の設定</h2><div id="settingContent" class="muted">部品をタップすると、ここに設定が表示されます。</div>
+  </section>
+  <section class="panel">
+    <h2>回路の保存・読み込み</h2>
+    <div class="actions">
+      <button id="saveBtn">この回路を保存</button>
+      <button id="loadBtn">保存した回路を読み込む</button>
+      <button id="exportBtn">回路データを書き出す</button>
+    </div>
+    <p class="muted">保存データはこのiPhoneのブラウザ内に保存されます。</p>
+  </section>
+  <section class="panel">
+    <h2>実験メモ</h2><div id="message">電池・抵抗・LEDをつないで、LEDを点灯させてみよう。</div>
+  </section>
+</main>
+<footer>でんき実験室 試作版 0.1 ／ 学習用の簡易シミュレーションです</footer>
+<script>
+(()=>{
+const board=document.getElementById('board'),svg=document.getElementById('wireSvg');
+const $=id=>document.getElementById(id);
+let parts=[],wires=[],selected=null,pending=null,routePoints=[],running=false,mode='bread',seq=1;
+const defs={
+ battery:{name:'電池',symbol:'🔋',terminals:[['p','pos'],['n','neg']],value:'5 V'},
+ resistor:{name:'抵抗',symbol:'▰',terminals:[['a',''],['b','']],value:'220 Ω'},
+ led:{name:'LED',symbol:'🔴',terminals:[['a','pos'],['k','neg']],value:'赤色'},
+ switch:{name:'スイッチ',symbol:'⏻',terminals:[['a',''],['b','']],value:'OFF'},
+ capacitor:{name:'コンデンサ',symbol:'║',terminals:[['p','pos'],['n','neg']],value:'100 μF'},
+ npn:{name:'NPNトランジスタ',symbol:'⑂',terminals:[['b',''],['c',''],['e','']],value:'汎用NPN'},
+ diode:{name:'ダイオード',symbol:'▷',terminals:[['a','pos'],['k','neg']],value:'順方向'},
+ ground:{name:'GND',symbol:'⏚',terminals:[['g','']],value:'基準点'}
+};
+function makePart(type,x,y){
+ const d=defs[type],p={id:'p'+seq++,type,x,y,rotation:0,value:type==='resistor'?220:type==='battery'?5:type==='capacitor'?100:0,on:false};
+ parts.push(p);render();select(p.id);return p;
+}
+function termPos(p,key){
+ const idx=defs[p.type].terminals.findIndex(t=>t[0]===key);
+ const offsets=defs[p.type].terminals.length===3?[[0,0],[62,0],[31,55]]:[[-37,0],[37,0]];
+ const o=offsets[idx]||[0,0];
+ return {x:p.x+36+o[0],y:p.y+31+o[1]};
+}
+function render(){
+ board.querySelectorAll('.part,.term').forEach(e=>e.remove());
+ board.classList.toggle('schematic',mode==='schematic');
+ $('modeTitle').textContent=mode==='bread'?'ブレッドボード実験スペース':'回路図実験スペース';
+ for(const p of parts){
+  const d=defs[p.type],el=document.createElement('div');el.className='part '+p.type+(selected===p.id?' selected':'')+(p.type==='led'&&running&&ledLit?' lit':'');
+  el.style.left=p.x+'px';el.style.top=p.y+'px';el.dataset.id=p.id;
+  let val=p.type==='resistor'?p.value+' Ω':p.type==='battery'?p.value+' V':p.type==='capacitor'?p.value+' μF':p.type==='switch'?(p.on?'ON':'OFF'):d.value;
+  el.innerHTML=`<div class="symbol">${d.symbol}</div><div class="name">${d.name}</div><div class="value">${val}</div>`;
+  board.appendChild(el);attachDrag(el,p);
+  d.terminals.forEach(([key,cls])=>{
+   const pos=termPos(p,key),t=document.createElement('button');t.className='term '+cls;t.style.left=(pos.x-8.5)+'px';t.style.top=(pos.y-8.5)+'px';t.setAttribute('aria-label',d.name+' '+key+'端子');t.addEventListener('pointerdown',e=>e.stopPropagation());t.addEventListener('click',e=>{e.stopPropagation();tapTerminal(p.id,key)});board.appendChild(t);
+  });
+ }
+ drawWires();updateStats();
+}
+function attachDrag(el,p){
+ let start=null,moved=false;
+ el.addEventListener('pointerdown',e=>{if(e.target.closest('.term'))return;start={x:e.clientX,y:e.clientY,px:p.x,py:p.y};moved=false;el.setPointerCapture(e.pointerId);});
+ el.addEventListener('pointermove',e=>{if(!start)return;let dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.abs(dx)+Math.abs(dy)>4)moved=true;if(moved){const r=board.getBoundingClientRect();p.x=Math.max(0,Math.min(r.width-75,start.px+dx));p.y=Math.max(0,Math.min(r.height-70,start.py+dy));el.style.left=p.x+'px';el.style.top=p.y+'px';drawWires();}});
+ el.addEventListener('pointerup',()=>{if(start){if(!moved)select(p.id);else render();start=null;}});
+}
+function tapTerminal(pid,key){
+ const ref={pid,key};
+ if(!pending){pending=ref;routePoints=[];$('hint').textContent='配線開始！ 途中で曲げたい場所をタップして、最後に接続先の端子をタップ。';highlightPending();return;}
+ if(pending.pid===pid&&pending.key===key){pending=null;routePoints=[];$('hint').textContent='配線をキャンセルしました。';render();return;}
+ const exists=wires.some(w=>(w.a.pid===pending.pid&&w.a.key===pending.key&&w.b.pid===pid&&w.b.key===key)||(w.b.pid===pending.pid&&w.b.key===pending.key&&w.a.pid===pid&&w.a.key===key));
+ if(!exists)wires.push({id:'w'+seq++,a:pending,b:ref,points:routePoints.slice()});
+ pending=null;routePoints=[];$('hint').textContent=exists?'すでに接続されています。':'配線しました。途中の曲がり角も反映しました。';render();
+}
+function highlightPending(){render();const p=parts.find(x=>x.id===pending.pid);if(!p)return;const pos=termPos(p,pending.key);const t=[...board.querySelectorAll('.term')].find(el=>Math.abs(parseFloat(el.style.left)+8.5-pos.x)<1&&Math.abs(parseFloat(el.style.top)+8.5-pos.y)<1);if(t)t.classList.add('pending');}
+board.addEventListener('click',e=>{
+ if(!pending||e.target.closest('.part')||e.target.closest('.term'))return;
+ const r=board.getBoundingClientRect(),pt={x:Math.round(e.clientX-r.left),y:Math.round(e.clientY-r.top)};
+ routePoints.push(pt);drawWires();
+ $('hint').textContent=`曲がり角を ${routePoints.length} か所追加しました。続けて空白をタップするか、接続先の端子をタップして配線を完成させてください。`;
+});
+function drawWires(){
+ svg.setAttribute('viewBox',`0 0 ${board.clientWidth} ${board.clientHeight}`);svg.innerHTML='';
+ const makePath=(pts)=>pts.map((pt,i)=>(i?'L':'M')+' '+pt.x+' '+pt.y).join(' ');
+ wires.forEach(w=>{
+  const a=parts.find(p=>p.id===w.a.pid),b=parts.find(p=>p.id===w.b.pid);if(!a||!b)return;
+  const A=termPos(a,w.a.key),B=termPos(b,w.b.key),pts=[A,...(w.points||[]),B],path=makePath(pts);
+  const hit=document.createElementNS('http://www.w3.org/2000/svg','path');hit.setAttribute('d',path);hit.setAttribute('class','wireHit');hit.style.pointerEvents='stroke';hit.addEventListener('click',()=>{wires=wires.filter(x=>x.id!==w.id);render();$('hint').textContent='配線を削除しました。'});svg.appendChild(hit);
+  const line=document.createElementNS('http://www.w3.org/2000/svg','path');line.setAttribute('d',path);line.setAttribute('class','wireLine');svg.appendChild(line);
+  (w.points||[]).forEach(pt=>{const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('cx',pt.x);dot.setAttribute('cy',pt.y);dot.setAttribute('r','3.5');dot.setAttribute('fill','#DC5555');dot.setAttribute('stroke','#fff');dot.setAttribute('stroke-width','1.5');svg.appendChild(dot);});
+ });
+ if(pending){
+  const p=parts.find(x=>x.id===pending.pid);
+  if(p){const A=termPos(p,pending.key),pts=[A,...routePoints];if(routePoints.length){const preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('d',makePath(pts));preview.setAttribute('class','wireLine');preview.setAttribute('stroke-dasharray','5 5');preview.setAttribute('opacity','.65');svg.appendChild(preview);}}
+ }
+}
+function select(id){selected=id;const p=parts.find(x=>x.id===id);renderSettings(p);render();}
+function renderSettings(p){
+ const box=$('settingContent');if(!p){box.textContent='部品をタップすると、ここに設定が表示されます。';return;}
+ let html=`<div><strong>${defs[p.type].name}</strong></div>`;
+ if(p.type==='resistor')html+=`<div class="settingRow"><label for="resVal">抵抗値（Ω）</label><input id="resVal" type="number" min="1" max="10000000" value="${p.value}"></div>`;
+ if(p.type==='battery')html+=`<div class="settingRow"><label for="batVal">電圧（V）</label><input id="batVal" type="number" min="0" max="24" step=".1" value="${p.value}"></div>`;
+ if(p.type==='capacitor')html+=`<div class="settingRow"><label for="capVal">容量（μF）</label><input id="capVal" type="number" min=".001" max="1000000" step="1" value="${p.value}"></div>`;
+ if(p.type==='switch')html+=`<div class="settingRow"><span>スイッチ</span><button id="switchToggle" class="${p.on?'active':''}">${p.on?'ON':'OFF'}</button></div>`;
+ if(p.type==='led')html+=`<div class="settingRow"><span>色</span><select id="ledColor"><option>赤色</option><option>緑色</option><option>青色</option><option>黄色</option></select></div>`;
+ html+=`<div class="actions"><button id="rotateBtn">回転</button><button id="deleteBtn" class="danger">部品を削除</button></div><p class="muted">端子をタップして配線します。</p>`;
+ box.innerHTML=html;
+ ['resVal','batVal','capVal'].forEach(id=>{const el=$(id);if(el)el.addEventListener('change',()=>{p.value=Math.max(Number(el.min),Number(el.value)||1);render();renderSettings(p);});});
+ if($('switchToggle'))$('switchToggle').onclick=()=>{p.on=!p.on;render();renderSettings(p);simulate();};
+ if($('rotateBtn'))$('rotateBtn').onclick=()=>{p.rotation=(p.rotation+90)%360;render();};
+ if($('deleteBtn'))$('deleteBtn').onclick=()=>{parts=parts.filter(x=>x.id!==p.id);wires=wires.filter(w=>w.a.pid!==p.id&&w.b.pid!==p.id);selected=null;render();renderSettings(null);};
+}
+let ledLit=false;
+function terminalNode(ref){return ref.pid+':'+ref.key}
+function connected(a,b){return wires.some(w=>(terminalNode(w.a)===a&&terminalNode(w.b)===b)||(terminalNode(w.b)===a&&terminalNode(w.a)===b))}
+function simulate(){
+ running=true;
+ const bat=parts.find(p=>p.type==='battery'),res=parts.find(p=>p.type==='resistor'),led=parts.find(p=>p.type==='led'),sw=parts.find(p=>p.type==='switch');
+ let ok=false,I=0;
+ if(bat&&res&&led){
+  const chain=[`${bat.id}:p`,`${res.id}:a`,`${res.id}:b`,`${led.id}:a`,`${led.id}:k`,`${bat.id}:n`];
+  // Check each required connection, accepting reversed resistor orientation.
+  const pairs=[[chain[0],chain[1]],[chain[2],chain[3]],[chain[4],chain[5]]];
+  const resistorJoined=(connected(`${bat.id}:p`,`${res.id}:a`)&&connected(`${res.id}:b`,`${led.id}:a`))||(connected(`${bat.id}:p`,`${res.id}:b`)&&connected(`${res.id}:a`,`${led.id}:a`));
+  const returnJoined=connected(`${led.id}:k`,`${bat.id}:n`);
+  const switchParts=parts.filter(p=>p.type==='switch');
+  const switchOK=switchParts.length===0||switchParts.every(s=>s.on);
+  ok=resistorJoined&&returnJoined&&switchOK;
+  if(ok&&res.value>0)I=Math.max(0,(bat.value-2)/res.value*1000);
+ }
+ ledLit=ok&&I>0;
+ $('current').textContent=ok?I.toFixed(2)+' mA':'0.00 mA';
+ $('state').textContent=ledLit?'点灯中':'回路未成立';
+ $('voltage').textContent=(bat?bat.value:5).toFixed(1)+' V';
+ $('message').textContent=ledLit?`回路がつながりました！ LEDに約${I.toFixed(2)}mA流れています。抵抗値を変えて電流の変化を観察してみよう。`:'まだ電流が流れていません。電池＋ → 抵抗 → LED → 電池− の順につながっているか確認してみよう。スイッチがある場合はONにします。';
+ render();
+}
+function updateStats(){if(!running){$('current').textContent='-- mA';$('state').textContent='停止中';}}
+document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{const r=board.getBoundingClientRect();makePart(b.dataset.add,Math.max(5,Math.min(r.width-85,25+Math.random()*(r.width-110))),35+Math.random()*230);$('hint').textContent=defs[b.dataset.add].name+'を追加しました。ドラッグして配置できます。';}));
+$('breadBtn').onclick=()=>{mode='bread';$('breadBtn').classList.add('active');$('schemBtn').classList.remove('active');render();};
+$('schemBtn').onclick=()=>{mode='schematic';$('schemBtn').classList.add('active');$('breadBtn').classList.remove('active');render();};
+$('runBtn').onclick=simulate;
+$('stopBtn').onclick=()=>{running=false;ledLit=false;$('state').textContent='停止中';$('current').textContent='-- mA';render();};
+$('resetBtn').onclick=()=>{if(confirm('実験スペースの部品と配線をすべて消しますか？')){parts=[];wires=[];selected=null;pending=null;routePoints=[];running=false;ledLit=false;render();renderSettings(null);$('message').textContent='新しい実験を始めましょう。';$('hint').textContent='部品を追加してください。';}};
+$('saveBtn').onclick=()=>{localStorage.setItem('denki-lab-save',JSON.stringify({parts,wires,seq,mode}));alert('この回路を保存しました。');};
+$('loadBtn').onclick=()=>{const s=localStorage.getItem('denki-lab-save');if(!s){alert('保存データがありません。');return;}try{const d=JSON.parse(s);parts=d.parts||[];wires=d.wires||[];seq=d.seq||1;mode=d.mode||'bread';selected=null;render();renderSettings(null);$('breadBtn').classList.toggle('active',mode==='bread');$('schemBtn').classList.toggle('active',mode==='schematic');alert('回路を読み込みました。');}catch(e){alert('保存データを読み込めませんでした。');}};
+$('exportBtn').onclick=()=>{const data=JSON.stringify({parts,wires,mode},null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='denki-circuit.json';a.click();URL.revokeObjectURL(a.href);};
+window.addEventListener('resize',drawWires);
+makePart('battery',18,65);makePart('resistor',130,65);makePart('led',245,65);
+})();
+</script>
+</body>
+</html>
