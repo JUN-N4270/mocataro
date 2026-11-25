@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,10 +7,12 @@
       content="width=device-width, initial-scale=1.0">
 
 <title>mocataro 素材置き場</title>
+
 <style>
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   background: #f4f8fc;
@@ -21,6 +24,7 @@ body {
     "Yu Gothic",
     sans-serif;
 }
+
 /* =========================
    ヘッダー
 ========================= */
@@ -31,50 +35,57 @@ header {
   padding: 28px 15px 24px;
   box-shadow: 0 3px 10px rgba(0,0,0,.15);
 }
+
 header h1 {
   margin: 0;
   font-size: 28px;
   letter-spacing: 1px;
 }
+
 header p {
   margin: 8px 0 0;
   font-size: 14px;
   opacity: .95;
 }
+
 /* =========================
    カテゴリ
 ========================= */
 .category-area {
-  padding: 18px 12px 8px;
+  padding: 18px 8px 8px;
   text-align: center;
 }
+
 .category-buttons {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   justify-content: center;
-  flex-wrap: wrap;
-  width:100%;
+  flex-wrap: nowrap;
+  width: 100%;
 }
+
 .category-btn {
   border: 2px solid #90caf9;
   background: white;
   color: #1976d2;
   border-radius: 999px;
-  padding: 8px 4px;
-  font-size: 14px;
+  padding: 8px 8px;
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
-  white-space:nowrap;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
+
 .category-btn.active {
   background: #1976d2;
   color: white;
   border-color: #1976d2;
 }
+
 /* =========================
    素材一覧
 ========================= */
-
 .materials {
   width: min(1100px, 94%);
   margin: 15px auto 50px;
@@ -83,6 +94,7 @@ header p {
     repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
 }
+
 /* =========================
    カード
 ========================= */
@@ -95,6 +107,7 @@ header p {
     transform .15s ease,
     box-shadow .15s ease;
 }
+
 .card:active {
   transform: scale(.97);
 }
@@ -121,6 +134,7 @@ header p {
   justify-content: center;
   cursor: pointer;
 }
+
 .image-box img {
   width: 100%;
   height: 100%;
@@ -129,21 +143,24 @@ header p {
 }
 
 /* =========================
-      カード情報
+   カード情報
 ========================= */
 .card-info {
   padding: 11px 12px 13px;
 }
+
 .card-title {
   font-weight: bold;
   font-size: 15px;
   margin-bottom: 4px;
 }
+
 .card-description {
   font-size: 12px;
   color: #777;
   margin-bottom: 9px;
 }
+
 /* =========================
    URL
 ========================= */
@@ -153,6 +170,7 @@ header p {
   color: #555;
   margin-bottom: 4px;
 }
+
 .url-box {
   width: 100%;
   background: #f1f3f5;
@@ -166,6 +184,7 @@ header p {
   text-overflow: ellipsis;
   user-select: text;
 }
+
 /* =========================
    URLコピー
 ========================= */
@@ -182,12 +201,15 @@ header p {
   font-weight: bold;
   cursor: pointer;
 }
+
 .copy-btn:active {
   transform: scale(.97);
 }
+
 .copy-btn.copied {
   background: #43a047;
 }
+
 /* =========================
    ゲームを開く
 ========================= */
@@ -206,9 +228,11 @@ header p {
   text-align: center;
   text-decoration: none;
 }
+
 .game-btn:active {
   transform: scale(.97);
 }
+
 /* =========================
    PNG保存
 ========================= */
@@ -227,9 +251,11 @@ header p {
   text-align: center;
   text-decoration: none;
 }
+
 .download-btn:active {
   transform: scale(.97);
 }
+
 /* =========================
    モーダル
 ========================= */
@@ -243,9 +269,11 @@ header p {
   align-items: center;
   justify-content: center;
 }
+
 .modal.show {
   display: flex;
 }
+
 .modal-content {
   width: min(700px, 100%);
   max-height: 95vh;
@@ -254,6 +282,7 @@ header p {
   overflow: hidden;
   position: relative;
 }
+
 .modal-image-area {
   background: #f3f3f3;
   padding: 15px;
@@ -261,23 +290,28 @@ header p {
   align-items: center;
   justify-content: center;
 }
+
 .modal-image {
   max-width: 100%;
   max-height: 65vh;
   object-fit: contain;
 }
+
 .modal-info {
   padding: 15px;
 }
+
 .modal-title {
   font-size: 19px;
   font-weight: bold;
 }
+
 .modal-description {
   font-size: 13px;
   color: #666;
   margin-top: 5px;
 }
+
 /* =========================
    モーダルURL
 ========================= */
@@ -288,6 +322,7 @@ header p {
   margin-top: 12px;
   margin-bottom: 4px;
 }
+
 .modal-url-box {
   background: #f1f3f5;
   border: 1px solid #ddd;
@@ -297,6 +332,7 @@ header p {
   word-break: break-all;
   user-select: text;
 }
+
 /* =========================
    モーダルコピー
 ========================= */
@@ -312,9 +348,11 @@ header p {
   font-weight: bold;
   cursor: pointer;
 }
+
 .modal-copy.copied {
   background: #43a047;
 }
+
 /* =========================
    モーダルゲーム
 ========================= */
@@ -330,6 +368,7 @@ header p {
   text-decoration: none;
   font-weight: bold;
 }
+
 /* =========================
    モーダルPNG
 ========================= */
@@ -344,6 +383,7 @@ header p {
   text-decoration: none;
   font-weight: bold;
 }
+
 /* =========================
    閉じる
 ========================= */
@@ -361,6 +401,7 @@ header p {
   cursor: pointer;
   z-index: 10;
 }
+
 /* =========================
    フッター
 ========================= */
@@ -370,6 +411,7 @@ footer {
   font-size: 12px;
   color: #888;
 }
+
 /* =========================
    PC
 ========================= */
@@ -378,44 +420,53 @@ footer {
     grid-template-columns:
       repeat(auto-fill, minmax(190px, 1fr));
   }
+
   header h1 {
     font-size: 34px;
   }
 }
 </style>
 </head>
+
 <body>
+
 <header>
   <h1>📦 mocataro 素材置き場</h1>
   <p>
     ゲームや印刷に使える素材をまとめています
   </p>
 </header>
+
 <!-- =========================
      カテゴリ
 ========================= -->
 <div class="category-area">
   <div class="category-buttons">
+
     <button
       class="category-btn active"
       data-category="all">
       すべて
     </button>
+
     <button
       class="category-btn"
       data-category="print">
       🖨️ 印刷素材
     </button>
-　　 <button
+
+    <button
       class="category-btn"
       data-category="puzzle">
       🧩 ゲーム
     </button>
-　　　<button
+
+    <button
       class="category-btn"
       data-category="other">
       🎨 その他
     </button>
+
   </div>
 </div>
 
@@ -426,20 +477,25 @@ footer {
   id="materials"
   class="materials">
 </div>
+
 <footer>
   © mocataro
 </footer>
+
 <!-- =========================
      モーダル
 ========================= -->
 <div
   id="modal"
   class="modal">
+
   <div class="modal-content">
+
     <button
       id="closeBtn"
       class="close-btn">
     </button>
+
     <div class="modal-image-area">
       <img
         id="modalImage"
@@ -447,30 +503,37 @@ footer {
         src=""
         alt="">
     </div>
+
     <div class="modal-info">
+
       <div
         id="modalTitle"
         class="modal-title">
       </div>
+
       <div
         id="modalDescription"
         class="modal-description">
       </div>
+
       <!-- URL -->
       <div
         id="modalUrlLabel"
         class="modal-url-label">
         🔗 URL
       </div>
+
       <div
         id="modalUrl"
         class="modal-url-box">
       </div>
+
       <button
         id="modalCopy"
         class="modal-copy">
         📋 URLをコピー
       </button>
+
       <!-- ゲーム -->
       <a
         id="modalGame"
@@ -479,6 +542,7 @@ footer {
         target="_blank">
         🎮 ゲームを開く
       </a>
+
       <!-- PNG -->
       <a
         id="modalDownload"
@@ -487,18 +551,22 @@ footer {
         download>
         📥 PNGをダウンロード
       </a>
+
     </div>
   </div>
 </div>
+
 <script>
 
 /* =====================================================
    素材データ
 ===================================================== */
 const materials = [
+
  /* =========================
      印刷素材
   ========================= */
+
   {
     title: "けいさんぬりえ　ねこ",
     description: "印刷素材",
@@ -506,15 +574,15 @@ const materials = [
     type: "material",
     image: "print/nurie-cat.png"
   },
-      
- {
+
+  {
     title: "けいさんぬりえ　ドラゴン",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/nurie-dragon.png"
   },
-      
+
   {
     title: "アイマスク1",
     description: "印刷素材",
@@ -522,24 +590,24 @@ const materials = [
     type: "material",
     image: "print/eyemask1.png"
   },
-      
- {
+
+  {
     title: "アイマスク2",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/eyemask2.png"
   },
-      
- {
+
+  {
     title: "アイマスク3",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/eyemask3.png"
   },
-      
- {
+
+  {
     title: "時間カード",
     description: "印刷素材",
     category: "print",
@@ -547,15 +615,15 @@ const materials = [
     image: "print/jikan-card.png"
   },
 
- {
+  {
     title: "時間シート",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/jikan-sheet.png"
   },
-      
-{
+
+  {
     title: "漢字ハント①",
     description: "印刷素材",
     category: "print",
@@ -563,7 +631,7 @@ const materials = [
     image: "print/kanjihunt-lv1.png"
   },
 
- {
+  {
     title: "漢字ハント②",
     description: "印刷素材",
     category: "print",
@@ -571,87 +639,87 @@ const materials = [
     image: "print/kanjihunt-lv2.png"
   },
 
- {
+  {
     title: "漢字ハント③",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kanjihunt-lv3.png"
   },
-      
- {
+
+  {
     title: "16ビンゴ",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/16bingo.png"
   },
-      
- {
+
+  {
     title: "25ビンゴ",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/25bingo.png"
   },
-                  
-{
+
+  {
     title: "時計メモリ",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/clock.png"
   },
-      
- {
+
+  {
     title: "かさ換算",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kasa-card.png"
   },
-      
- {
+
+  {
     title: "かさ換算",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kasa_sheet.png"
   },
-            
-{
+
+  {
     title: "単位換算",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/tanni_card.png"
   },
-      
- {
+
+  {
     title: "単位換算",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/tanni_sheet.png"
   },
-      
- {
+
+  {
     title: "お金換算",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/money_card.png"
   },
-      
- {
+
+  {
     title: "お金換算",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/money_sheet.png"
   },
-      
- {
+
+  {
     title: "お弁当計算",
     description: "印刷素材",
     category: "print",
@@ -659,7 +727,7 @@ const materials = [
     image: "print/obento-2.png"
   },
 
- {
+  {
     title: "お弁当計算",
     description: "印刷素材",
     category: "print",
@@ -667,55 +735,55 @@ const materials = [
     image: "print/obento-1.png"
   },
 
- {
+  {
     title: "英単語カード",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/eitango-1.png"
   },
-      
-{
+
+  {
     title: "英単語カード",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/eitango-2.png"
   },
-      
- {
+
+  {
     title: "計算パズルピース",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/keisan-piece.png"
   },
-      
- {
+
+  {
     title: "計算パズルシート",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/keisan-sheet.png"
   },
-      
- {
+
+  {
     title: "漢字パズルピース",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kanjipuzzle-piece.png"
   },
-      
- {
+
+  {
     title: "漢字パズルシート",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kanjipuzzle-sheet.png"
   },
-   
- {
+
+  {
     title: "かけ算パズルイラスト",
     description: "印刷素材",
     category: "print",
@@ -723,38 +791,38 @@ const materials = [
     image: "print/kakezanpuzzle-2.png"
   },
 
- {
+  {
     title: "かけ算パズル問題",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kakezanpuzzle-1.png"
   },
-      
- {
+
+  {
     title: "かけ算ダッシュ",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kakezandash.png"
   },
-      
- {
+
+  {
     title: "矢印ゲーム",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/yajirushi.png"
-  },     
-      
-{
+  },
+
+  {
     title: "うさぎ",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/Usagi.png"
   },
-      
+
   {
     title: "イラスト",
     description: "印刷素材",
@@ -762,7 +830,7 @@ const materials = [
     type: "material",
     image: "print/pictures.png"
   },
-      
+
   {
     title: "九九(動物)",
     description: "印刷素材",
@@ -770,15 +838,15 @@ const materials = [
     type: "material",
     image: "print/kuku_animal.png"
   },
-  
+
   {
     title: "九九(ドラゴン)",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "print/kuku_dragon.png"
-  },    
-      
+  },
+
   {
     title: "絵カード1-6",
     description: "印刷素材",
@@ -803,7 +871,7 @@ const materials = [
     image: "print/num1-9.png"
   },
 
- {
+  {
     title: "さいころ",
     description: "印刷素材",
     category: "print",
@@ -811,24 +879,23 @@ const materials = [
     image: "print/dice1-9.png"
   },
 
- {
+  {
     title: "フルーツ",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "materials/fruits.png"
-  }, 
+  },
 
-      
- {
+  {
     title: "４マス-問題",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "materials/4masu_mondai.png"
-  }, 
-      
- {
+  },
+
+  {
     title: "４マス-ピース",
     description: "印刷素材",
     category: "print",
@@ -836,40 +903,39 @@ const materials = [
     image: "materials/4masu_piece.png"
   },
 
- {
+  {
     title: "〇△□",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "materials/marusannkakusikaku.png"
   },
-      
- {
+
+  {
     title: "指先集中⓵",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "materials/yubisaki_1.png"
-  }, 
+  },
 
- {
+  {
     title: "指先集中⓶",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "materials/yubisaki_2.png"
-  },      
-      
-{
+  },
+
+  {
     title: "指先集中⓷",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "materials/yubisaki_3.png"
-  },      
-      
-      
- {
+  },
+
+  {
     title: "トコトコ",
     description: "印刷素材",
     category: "print",
@@ -892,20 +958,21 @@ const materials = [
     type: "material",
     image: "materials/4piece_puzzle.png"
   },
-      
- {
+
+  {
     title: "ロバパズル",
     description: "印刷素材",
     category: "print",
     type: "material",
     image: "materials/Roba_puzzle.png"
   },
-      
-      
-/* =========================
+
+
+ /* =========================
      ゲーム
   ========================= */
-{
+
+  {
     title: "計算パズルメーカー",
     description: "puzzle",
     category: "puzzle",
@@ -914,8 +981,8 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/keisanpuzzle/index.html"
   },
-     
- {
+
+  {
     title: "かけ算奪取",
     description: "puzzle",
     category: "puzzle",
@@ -934,7 +1001,7 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/yajirushi/index.html"
   },
-      
+
   {
     title: "県庁所在地クイズ",
     description: "puzzle",
@@ -944,6 +1011,7 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/todohuken/index.html"
   },
+
   {
     title: "かけ算(1段ずつ)",
     description: "puzzle",
@@ -953,6 +1021,7 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/kakezan-v1/index.html"
   },
+
   {
     title: "magnet",
     description: "puzzle",
@@ -962,6 +1031,7 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/magnet/index.html"
   },
+
   {
     title: "かけ算",
     description: "puzzle",
@@ -971,19 +1041,17 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/kakezan/index.html"
   },
-      
+
   {
     title: "Ｔパズル",
     description: "puzzle",
     category: "puzzle",
     type: "game",
-
     image: "materials/T_puzzle.png",
-
     url:
       "https://jun-n4270.github.io/mocataro/Play/T_puzzle/index.html"
   },
-      
+
   {
     title: "長方形パズル",
     description: "puzzle",
@@ -993,7 +1061,7 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/4piece_puzzle/index.html"
   },
-      
+
   {
     title: "ロバパズル",
     description: "puzzle",
@@ -1003,7 +1071,7 @@ const materials = [
     url:
       "https://jun-n4270.github.io/mocataro/Play/Roba_pazzle/index.html"
   },
-      
+
   {
     title: "チリトリパズル",
     description: "puzzle",
@@ -1012,36 +1080,44 @@ const materials = [
     image: "materials/chiritori.png",
     url:
       "https://jun-n4270.github.io/mocataro/Play/chiritori/index.html"
-  },
+  }
 
- 
 ];
- 
+
+
 /* =====================================================
    素材一覧
 ===================================================== */
 
 const materialsArea =
   document.getElementById("materials");
+
 function showMaterials(category = "all") {
+
   materialsArea.innerHTML = "";
+
   const filtered =
     category === "all"
       ? materials
       : materials.filter(
           item => item.category === category
         );
+
   filtered.forEach(item => {
+
     const card =
       document.createElement("div");
+
     card.className = "card";
+
     /* =========================
        URLを決定
     ========================= */
+
     let itemUrl;
+
     if (item.type === "game") {
-      itemUrl =
-        item.url;
+      itemUrl = item.url;
     } else {
       itemUrl =
         new URL(
@@ -1049,329 +1125,403 @@ function showMaterials(category = "all") {
           window.location.href
         ).href;
     }
+
     /* =========================
        画像
     ========================= */
+
     const imageBox =
       document.createElement("div");
-    imageBox.className =
-      "image-box";
+
+    imageBox.className = "image-box";
+
     const img =
       document.createElement("img");
-    img.src =
-      item.image;
-    img.alt =
-      item.title;
+
+    img.src = item.image;
+    img.alt = item.title;
+
     imageBox.appendChild(img);
+
     imageBox.addEventListener(
       "click",
       () => openModal(item)
     );
+
     /* =========================
        情報
     ========================= */
+
     const info =
       document.createElement("div");
-    info.className =
-      "card-info";
+
+    info.className = "card-info";
+
     const title =
       document.createElement("div");
-    title.className =
-      "card-title";
-    title.textContent =
-      item.title;
+
+    title.className = "card-title";
+    title.textContent = item.title;
+
     const description =
       document.createElement("div");
-    description.className =
-      "card-description";
-    description.textContent =
-      item.description;
+
+    description.className = "card-description";
+    description.textContent = item.description;
+
     /* =========================
        URLラベル
     ========================= */
+
     const urlLabel =
       document.createElement("div");
-    urlLabel.className =
-      "url-label";
+
+    urlLabel.className = "url-label";
+
     urlLabel.textContent =
       item.type === "game"
         ? "🎮 ゲームURL"
         : "🔗 素材URL";
+
     /* =========================
        URL表示
     ========================= */
+
     const urlBox =
       document.createElement("div");
-    urlBox.className =
-      "url-box";
-    urlBox.textContent =
-      itemUrl;
+
+    urlBox.className = "url-box";
+    urlBox.textContent = itemUrl;
+
     /* =========================
        コピー
     ========================= */
+
     const copyButton =
       document.createElement("button");
-    copyButton.className =
-      "copy-btn";
-    copyButton.textContent =
-      "📋 URLをコピー";
+
+    copyButton.className = "copy-btn";
+    copyButton.textContent = "📋 URLをコピー";
+
     copyButton.addEventListener(
       "click",
       async event => {
+
         event.stopPropagation();
+
         await copyUrl(
           itemUrl,
           copyButton
         );
+
       }
     );
+
     /* =========================
        ゲームボタン
     ========================= */
+
     let gameButton;
+
     if (item.type === "game") {
+
       gameButton =
         document.createElement("a");
-      gameButton.className =
-        "game-btn";
-      gameButton.href =
-        item.url;
-      gameButton.target =
-        "_blank";
-      gameButton.textContent =
-        "🎮 ゲームを開く";
+
+      gameButton.className = "game-btn";
+      gameButton.href = item.url;
+      gameButton.target = "_blank";
+      gameButton.textContent = "🎮 ゲームを開く";
+
     }
+
     /* =========================
        PNG保存
     ========================= */
+
     let download;
+
     if (item.type === "material") {
+
       download =
         document.createElement("a");
-      download.className =
-        "download-btn";
-      download.href =
-        item.image;
-      download.download =
-        "";
-      download.textContent =
-        "📥 PNGを保存";
+
+      download.className = "download-btn";
+      download.href = item.image;
+      download.download = "";
+      download.textContent = "📥 PNGを保存";
+
     }
+
     /* =========================
        組み立て
     ========================= */
+
     info.appendChild(title);
     info.appendChild(description);
     info.appendChild(urlLabel);
     info.appendChild(urlBox);
     info.appendChild(copyButton);
+
     if (gameButton) {
-      info.appendChild(
-        gameButton
-      );
+      info.appendChild(gameButton);
     }
+
     if (download) {
-      info.appendChild(
-        download
-      );
+      info.appendChild(download);
     }
+
     card.appendChild(imageBox);
     card.appendChild(info);
+
     materialsArea.appendChild(card);
+
   });
+
 }
+
+
 /* =====================================================
    URLコピー
 ===================================================== */
+
 async function copyUrl(
   url,
   button
 ) {
+
   try {
-    await navigator.clipboard.writeText(
-      url
-    );
+
+    await navigator.clipboard.writeText(url);
+
   } catch (error) {
+
     const textArea =
       document.createElement("textarea");
-    textArea.value =
-      url;
-    document.body.appendChild(
-      textArea
-    );
+
+    textArea.value = url;
+
+    document.body.appendChild(textArea);
+
     textArea.select();
-    document.execCommand(
-      "copy"
-    );
+
+    document.execCommand("copy");
+
     textArea.remove();
+
   }
-  button.textContent =
-    "✅ コピーしました！";
-  button.classList.add(
-    "copied"
-  );
+
+  button.textContent = "✅ コピーしました！";
+
+  button.classList.add("copied");
+
   setTimeout(() => {
-    button.textContent =
-      "📋 URLをコピー";
-    button.classList.remove(
-      "copied"
-    );
+
+    button.textContent = "📋 URLをコピー";
+
+    button.classList.remove("copied");
+
   }, 1500);
+
 }
+
+
 /* =====================================================
    カテゴリ切り替え
 ===================================================== */
+
 document
   .querySelectorAll(".category-btn")
   .forEach(button => {
+
     button.addEventListener(
       "click",
       () => {
+
         document
           .querySelectorAll(".category-btn")
           .forEach(btn =>
-            btn.classList.remove(
-              "active"
-            )
+            btn.classList.remove("active")
           );
-        button.classList.add(
-          "active"
-        );
+
+        button.classList.add("active");
+
         showMaterials(
           button.dataset.category
         );
+
       }
     );
+
   });
+
+
 /* =====================================================
    モーダル
 ===================================================== */
+
 const modal =
   document.getElementById("modal");
+
 const modalImage =
   document.getElementById("modalImage");
+
 const modalTitle =
   document.getElementById("modalTitle");
+
 const modalDescription =
   document.getElementById("modalDescription");
+
 const modalUrlLabel =
   document.getElementById("modalUrlLabel");
+
 const modalUrl =
   document.getElementById("modalUrl");
+
 const modalCopy =
   document.getElementById("modalCopy");
+
 const modalGame =
   document.getElementById("modalGame");
+
 const modalDownload =
   document.getElementById("modalDownload");
+
 let currentModalUrl = "";
+
+
 /* =========================
    モーダルを開く
 ========================= */
+
 function openModal(item) {
+
   let itemUrl;
+
   if (item.type === "game") {
-    itemUrl =
-      item.url;
+
+    itemUrl = item.url;
+
   } else {
+
     itemUrl =
       new URL(
         item.image,
         window.location.href
       ).href;
+
   }
-  modalImage.src =
-    item.image;
-  modalImage.alt =
-    item.title;
-  modalTitle.textContent =
-    item.title;
-  modalDescription.textContent =
-    item.description;
+
+  modalImage.src = item.image;
+  modalImage.alt = item.title;
+
+  modalTitle.textContent = item.title;
+
+  modalDescription.textContent = item.description;
+
   modalUrlLabel.textContent =
     item.type === "game"
       ? "🎮 ゲームURL"
       : "🔗 素材URL";
-  modalUrl.textContent =
-    itemUrl;
-  currentModalUrl =
-    itemUrl;
-  modalCopy.textContent =
-    "📋 URLをコピー";
-  modalCopy.classList.remove(
-    "copied"
-  );
+
+  modalUrl.textContent = itemUrl;
+
+  currentModalUrl = itemUrl;
+
+  modalCopy.textContent = "📋 URLをコピー";
+
+  modalCopy.classList.remove("copied");
+
   /* =========================
      ゲーム
   ========================= */
+
   if (item.type === "game") {
-    modalGame.style.display =
-      "block";
-    modalGame.href =
-      item.url;
+
+    modalGame.style.display = "block";
+
+    modalGame.href = item.url;
+
   } else {
-    modalGame.style.display =
-      "none";
+
+    modalGame.style.display = "none";
+
   }
+
   /* =========================
      PNG
   ========================= */
+
   if (item.type === "material") {
-    modalDownload.style.display =
-      "block";
-    modalDownload.href =
-      item.image;
+
+    modalDownload.style.display = "block";
+
+    modalDownload.href = item.image;
+
   } else {
-    modalDownload.style.display =
-      "none";
+
+    modalDownload.style.display = "none";
+
   }
-  modal.classList.add(
-    "show"
-  );
+
+  modal.classList.add("show");
+
 }
+
+
 /* =====================================================
    モーダルURLコピー
 ===================================================== */
+
 modalCopy.addEventListener(
   "click",
   async () => {
+
     await copyUrl(
       currentModalUrl,
       modalCopy
     );
+
   }
 );
+
 
 /* =====================================================
    モーダルを閉じる
 ===================================================== */
+
 document
   .getElementById("closeBtn")
   .addEventListener(
     "click",
     closeModal
   );
+
 modal.addEventListener(
   "click",
   event => {
-    if (
-      event.target === modal
-    ) {
+
+    if (event.target === modal) {
       closeModal();
     }
+
   }
 );
+
 function closeModal() {
-  modal.classList.remove(
-    "show"
-  );
+
+  modal.classList.remove("show");
+
 }
+
 
 /* =====================================================
    初期表示
 ===================================================== */
+
 showMaterials();
+
 </script>
+
 </body>
 </html>
-
